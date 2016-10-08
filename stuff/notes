@@ -1,0 +1,143 @@
+./src/sdl_client.py --arrows --lame
+
+
+http://ccodearchive.net/info/json.html
+https://github.com/tobami/codespeed/
+http://www.boost.org/doc/libs/1_55_0/doc/html/property_tree.html
+http://git.ozlabs.org/?p=ccan;a=blob;f=ccan/idtree/idtree.c;h=e8873926a79c07a21b7b843f06b3b4cfaa7078c9;hb=HEAD
+http://www.pjsip.org/pjlib/docs/html/group__PJ__POOL__BUFFER.htm
+http://www.ninebynine.org/RDFNotes/Swish/Intro.html
+http://www.gnu.org/software/libc/manual/html_node/Obstacks.html
+http://ccodearchive.net/info/block_pool.html
+
+
+
+the nodes talk, as long as it is some valid encoding of quads?
+<HMC_A_> json-ld is just an "easy" one
+<HMC_A_> the nodes could talk n3logic at eachother, I guess, but it much harder to work with?
+<HMC_A_> the nodes could even talk raw quads at eachother, but that would carry a ton of redundancy?
+<HMC_A_> binary encoded jsonld seems like the right compromise, but what is your concern(s)?
+
+
+
+
+env CC="clang++-3.6 -Xclang -fcolor-diagnostics" make -e  marpa 2>&1 | less -R
+env LD_PRELOAD=libmarpa/dist/.libs/libmarpa.so ./tau --level 1 load_n3 n3.natural3
+
+
+~/sw/swap/cwm.py  n3-grammar.n3 --triples  > n3-grammar.nt
+~/sw/rdfconvert-0.4/bin/rdfconvert.sh   n3-grammar.nt  n3-grammar.nq
+
+
+
+make clean;env CC="clang++-3.6 -Xclang -fcolor-diagnostics -ferror-limit=10 -fsanitize=address -fsanitize=integer -fsanitize=undefined -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=undefined" make -e  2>&1 | less -R
+env ASAN_OPTIONS="check_initialization_order=1 detect_leaks=0" LD_PRELOAD=libmarpa/dist/.libs/libmarpa.so  ./tau load_n3 short.natural3
+
+
+git commit -a -m "mmm" ; git update-server-info
+
+
+env ASAN_OPTIONS="detect_leaks=0 verbosity=1"
+
+tau --level 100 --nocolor  --silence addrules --silence readcurly --silence quad::ctor   < examples/einstein.n3 
+
+
+"valgrind --tool=lackey --trace-mem=yes --log-fd=1 --log-file=lackey_out ./tau"
+
+env CXX="/usr/local/bin/clang++" ~/llvm/tools/clang/tools/scan-build/scan-build --use-analyzer /usr/local/bin/clang -analyze-headers -o scan -v -V -stats -maxloop 10 -internal-stats -enable-checker security.FloatLoopCounter,alpha.core.CastSize,alpha.core.FixedAddr,alpha.core.IdenticalExpr,alpha.core.PointerArithm,alpha.core.PointerSub,alpha.core.SizeofPtr,alpha.core.TestAfterDivZero,alpha.cplusplus.VirtualCall,alpha.deadcode.UnreachableCode,alpha.security.ArrayBoundV2,alpha.security.MallocOverflow,alpha.security.ReturnPtrRange,alpha.security.taint.TaintPropagation,alpha.unix.SimpleStream,alpha.unix.Stream,alpha.unix.cstring.BufferOverlap,alpha.unix.cstring.NotNullTerminated,alpha.unix.cstring.OutOfBounds,core.CallAndMessage,core.DivideZero,core.DynamicTypePropagation,core.NonNullParamChecker,core.NullDereference,core.StackAddressEscape,core.UndefinedBinaryOperatorResult,core.uninitialized.ArraySubscript,core.uninitialized.Assign,core.uninitialized.Branch,core.builtin.NoReturnFunctions,core.builtin.BuiltinFunctions,core.uninitialized.UndefReturn,cplusplus.NewDelete,debug.ConfigDumper,security.insecureAPI.UncheckedReturn,unix.API,unix.Malloc,unix.MallocSizeof,unix.MismatchedDeallocator,unix.cstring.BadSizeArg,unix.cstring.NullArg  make
+
+valgrind --tool=callgrind  \
+--dump-instr=yes \
+--simulate-cache=yes \
+--collect-jumps=yes 
+
+
+valgrind --tool=callgrind  \
+                                    --dump-instr=yes \
+                                    --dump-line=yes \
+                                    --simulate-cache=yes \
+                                    --collect-jumps=yes \
+                                    --collect-systime=yes \
+                                    --collect-bus=yes \
+                                    --branch-sim=yes \
+                                    --zero-before=cppout_query \
+                                    --cache-sim=yes ./cppout
+
+
+
+  ./tau   --silence addrules --silence readcurly --silence quad::ctor --silence N3  --level 1 --limit 10 < tests/speed/2
+
+
+sudo apt-get install exuberant-ctags 
+ctags --fields=+S -R -e  *h  *cpp
+
+
+
+env ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-3.6  \
+ASAN_OPTIONS="symbolize=1,detect_leaks=0,strict_init_order=1,check_initialization_order=1,verbosity=1"   \
+LD_PRELOAD=libmarpa/dist/.libs/libmarpa.so  \
+./tau --level 1   \
+--silence addrules --silence readcurly --silence quad::ctor --silence N3 \
+run tests/*/*
+
+
+make ; env ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-3.6  \
+                        ASAN_OPTIONS="symbolize=1,detect_leaks=0,strict_init_order=1,check_initialization_order=1,verbosity=1"   \
+                        LD_PRELOAD=libmarpa/dist/.libs/libmarpa.so  \
+                        ./tau --level 1 \
+                        --silence addrules --silence readcurly --silence quad::ctor --silence N3 \
+                        --cppout 1  \
+                        run tests/simple/* | grep test:
+                    
+                                     
+
+env CXX=/usr/bin/clang++ make -e 
+
+
+
+env ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-3.6  \
+                                                            ASAN_OPTIONS="symbolize=1,detect_leaks=0,strict_init_order=1,check_initialization_order=1"   \
+                                                            LD_PRELOAD=libmarpa/dist/.libs/libmarpa.so  \
+                                                            ./tau --level 1 \
+                                                            --silence addrules --silence readcurly --silence quad::ctor --silence N3 \
+                                                            --nocolor --level 111  \
+                                                            --builtins --limit 10 run tests/tbd/equivalence.tau    | vis/chew-it.py > ~/new_shit/kbdbg.json 
+                                                            
+                                                            
+
+objdump -dSC ttt.o
+
+
+
+
+valgrind --tool=callgrind  \
+                                 --dump-instr=yes \
+                                 --dump-line=yes \
+                                 --simulate-cache=yes \
+                                 --collect-jumps=yes \
+                                 --collect-systime=yes \
+                                 --collect-bus=yes \
+                                 --branch-sim=yes  \
+                                 --cache-sim=yes \
+               --zero-before="cppout_query(cpppred_state&)" \
+               --dump-after="main*" \
+                                 ./cppout
+
+
+
+
+cp cppout cppout_(date +"%y%m%d_%H%M%S_%a")
+
+
+ls -trlhs
+         
+         
+while true
+                                           echo "old"
+                                           time ./cppout | grep done
+                                           echo "new"
+                                           time ../univar4-2/cppout | grep done
+                                       end
+
+
+                                                   

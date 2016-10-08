@@ -1,0 +1,8 @@
+[{
+  "@id": "@default",
+  "@graph": [{
+    "@id": "?A",
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": {"@id": "?C"}
+  }]
+}]
+

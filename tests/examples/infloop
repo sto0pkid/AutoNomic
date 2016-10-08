@@ -1,0 +1,8 @@
+{ ?x <eq> ?y } => { ?y <eq> ?x }.
+{ ?x <eq> ?y . ?y <eq> ?z. } => { ?x <eq> ?z }.  
+<X> <eq> <Y>.  
+<Y> <eq> <Z>.  
+<Z> <eq> <T>.  
+fin.
+<?xx> <eq> <Z>. 
+fin.

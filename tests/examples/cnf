@@ -1,0 +1,17 @@
+T not F.
+F not T.
+(T T T) or T.
+(T T F) or T.
+(T F T) or T.
+(T F F) or T.
+(F T T) or T.
+(F T F) or T.
+(F F T) or T.
+#(F F F) or F.
+
+{ (?x ?y ?z) or T. (?x ?ny ?z) or T. ?x not ?nx. ?y not ?ny. ?z not ?nz. } => { (?x ?y ?z) a SAT }.
+
+
+fin.
+?banana a SAT.
+fin.
