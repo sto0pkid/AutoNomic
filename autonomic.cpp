@@ -101,7 +101,7 @@ public:
 //Structure
 	bool interactive = false;
 	bool do_reparse = true;
-	bool do_cppout = false;
+	bool do_cppout = true;
 	bool do_query = true;
 	bool do_test = true;
 	std::string name;
@@ -687,6 +687,7 @@ void cmd_kb(){
 		/*else if(dash_arg(token,"set")){
 			clear_kb();
 		}*/
+		//FIXME: this option doesn't work if you have "kb --add" in a file
 		else if(dash_arg(token,"add")){
 			//dont clear,
 			if (INPUT->end())
@@ -790,17 +791,16 @@ void passthru(string s)
 
 int main ( int argc, char** argv)
 {
-  //This should probably go logically with other initialization stuff.
+	//This should probably go logically with other initialization stuff.
 	//Initialize the prover strings dictionary with hard-coded nodes.
 	dict.init();
 
 
-	//start by processing program arguments
 	inputs.emplace(new ArgsInput(argc, argv));
 
+	//stick the inside of this loop into a function for better readability?
 	while (true) {
-
-		//this can all be stuck into a function
+		//
 		displayPrompt();
 
 		INPUT->readline();
@@ -859,7 +859,7 @@ int main ( int argc, char** argv)
 			}
 		}
 		else if (INPUT->mode == KB || INPUT->mode == QUERY || INPUT->mode == SHOULDBE) {
-			dout << "kb/query/shouldbe" << endl;
+			//dout << "kb/query/shouldbe" << endl;
 			try_to_parse_the_line__if_it_works__add_it_to_qdb_text();
 			int fins = count_fins();
 			if (fins > 0) {
@@ -880,24 +880,28 @@ int main ( int argc, char** argv)
 						if (INPUT->do_cppout) {
 							cppout_results.clear();	
 						
-							anProver->cppout(kb);
-
 							std::string line;
+		
+							passthru("sleep 1; rm cppout out.cpp out.o");
+							//passthru("sleep 1; astyle out.cpp; rm cppout out.o");
 
-							passthru("sleep 1; astyle out.cpp; rm cppout out.o");
-
+							anProver->cppout(kb);
 							stringstream omg;
 							omg << "  || echo  \"test:cppout:make:" << KRED << "FAIL:" << KNRM;
 							string fff=omg.str();
 
+							dout << "Making cppout." << endl;
 							stringstream errss;
-							errss << "make -e cppout" << fff << INPUT->name << "\"";
+							errss << "make -e -f Makefile2 cppout" << fff << INPUT->name << "\"";
 							passthru(errss.str());
 
+							dout << "Make done." << endl;
 							if (INPUT->do_test)
 							{
 
 							stringstream cmdss;
+					
+							dout << "Running cppout." << endl;	
 							cmdss << "./cppout" << fff << INPUT->name << "\"";
 							redi::ipstream p(cmdss.str());
 

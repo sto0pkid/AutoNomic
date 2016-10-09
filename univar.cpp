@@ -215,7 +215,6 @@ public:
 #define get_offset(thing) ((thing).offset)
 
 
-//these make sense
 //Thing::Property -- specifically a unary boolean function Things
 #define is_offset(thing)	(get_type(thing) == OFFSET)
 bool is_unbound(Thing thing)	{return (get_type(thing) == UNBOUND);}
@@ -1014,6 +1013,7 @@ static Thing *getValue (Thing *_x)
 			return result^M
 	*/
 {
+	dout << "Getting value." << endl;
 
 	ASSERT(_x);
 
@@ -1095,6 +1095,7 @@ static Thing *getValue (Thing *_x)
 
 	//Is a bound variable, return the value of it's value.
 	if (is_bound(x)) {
+		//dout << "Is bound." << endl;
 		#ifdef getValue_profile
 		getValue_BOUNDS++;
 		#endif
@@ -1106,6 +1107,7 @@ static Thing *getValue (Thing *_x)
 	}
 	else if (!is_offset(x))
 	{	//Is either an unbound variable or a value.
+		//dout << "Is offset." << endl;
 		#ifdef getValue_profile
 		getValue_OTHERS++;
 		#endif

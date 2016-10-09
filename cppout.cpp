@@ -1,6 +1,10 @@
+#define CPPOUT
+#define simple_cppout
 
-
-
+//simple_cppout is partially working
+//stoopkid doesn't compile
+//unrolled doesn't compile
+//ultimate doesn't compile
 
 
 
@@ -17,6 +21,9 @@
 
 #ifdef CPPOUT
 #define CPPOUT2
+
+fstream out;
+
 #ifdef simple_cppout
 /*
 first, simple and naive cppout.
@@ -31,7 +38,6 @@ i made some things slightly different than how we do them in our lambdas
 	 * callee state obviously has to be kept explicitly, not hidden with a lambda
 	 * instead of while-looping around an unify coro, theres just an if*/
 
-fstream out;
 
 string predname(nodeid x)
 {
@@ -57,7 +63,7 @@ string param(PredParam key, pos_t thing_index, pos_t rule_index)
 
 nodeid ensure_cppdict(nodeid node)
 {
-	cppdict[node] = *dict.at(node).value;
+	cppdict[node] = *dict[node].value;
 	return node;
 }
 
@@ -87,6 +93,7 @@ void cppout_pred(string name, vector<Rule> rs)
 	//query? query is baked in for now
 	if (name != "query") out << ", Thing *s, Thing *o";
 	out << "){\n";
+	//if (name == "query") out << "dout << \"Starting query\" << endl;\n";
 	//for every rule in the kb (not the query) with non-empty body, make an ep-table, static ep_t ep*rule-index*, and for every rule make a const table, Locals const*rule-index*
 	for (pos_t i = 0; i < rs.size(); i++) {
 		if (rs[i].head && rs[i].body && rs[i].body->size())
@@ -121,7 +128,9 @@ void cppout_pred(string name, vector<Rule> rs)
 	}
 
 	out << "state.states.resize(" << max_body_len << ");\n";
-
+	out << "state.entry = 1;\n";
+	out << "return;\n";
+	
 	int i = 0;
 	//loop over all kb rules for the pred
 	for (Rule rule:rs)
@@ -201,7 +210,7 @@ void cppout_pred(string name, vector<Rule> rs)
 		if (name == "query") {
 		//would be nice to also write out the head of the rule, and do this for all rules, not just query
 			//out << "if (!(counter & 0b11111111111))";
-			out << "{dout << \"RESULT \" << counter << \": \";\n";
+			out << "{dout << \"RESULT \" << ++counter << \": \";\n";
 			ASSERT(rule.body);
 			for (pquad bi: *rule.body) {
 				pos_t i1, i2;//s and o positions
@@ -223,10 +232,6 @@ void cppout_pred(string name, vector<Rule> rs)
 			}
 			out << "dout << \"\\n\";}\n";
 		}
-
-
-		if (name == "query")
-			out << "counter++;\n";
 
 
 		if (rule.head && has_body) {

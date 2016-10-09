@@ -1,7 +1,7 @@
 int main ( int argc, char** argv){
 	for (int x = 0; x < argc - 1; x++)
 		if (0==strcmp(argv[x+1], "silent"))
-			silent = true;
+			//silent = true;
 	(void)argv;
 	dict.init();
 	cppdict_init();
@@ -9,8 +9,8 @@ int main ( int argc, char** argv){
 	int entry=0;
 	do
 	{
-		entry=cppout_query(state,entry);
-		if(entry == -1){ dout << "done" << endl; break;}
+		query(state);
+		if(state.entry == -1){ dout << "done" << endl; break;}
 	}
 	while(true);
 	

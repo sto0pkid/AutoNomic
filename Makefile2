@@ -8,7 +8,7 @@ DEBUG=
 DBG= $(ASAN) -g -ggdb $(DEBUG)
 CXXFLAGS= -c -O3 $(DBG) $(NEW) -std=c++1y -W -Wall -Wextra -Wpedantic -I/usr/local/include -I/usr/include -I/usr/local/linuxbrew/include  
 MYLD = 
-LDFLAGS=  $(DBG) -L/usr/local/  $(MYLD) #-ldl -pthread -lrt
+LDFLAGS=  $(DBG) -L/usr/local/ -DCPPOUT $(MYLD) #-ldl -pthread -lrt
 OBJECTS= prover.o unifiers.o univar.o autonomic.o jsonld.o rdf.o misc.o json_object.o jsonld_an.o nquads.o
 
 
@@ -26,8 +26,11 @@ with_marpa: CXXFLAGS += -Dwith_marpa  -I libmarpa/dist #-DNOPARSER -DJSON
 with_marpa: LDFLAGS += -Llibmarpa/dist/.libs -lmarpa  -lboost_regex
 
 
+#this to compile the main program
 autonomic: $(OBJECTS)
 	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
+
+#this is used internally for the compiler prototype
 cppout:  out.o prover.o unifiers.o jsonld.o rdf.o misc.o json_object.o jsonld_an.o nquads.o univar.o
 	$(CXX)   out.o prover.o unifiers.o jsonld.o rdf.o misc.o json_object.o jsonld_an.o nquads.o -o $@ $(LDFLAGS)
 

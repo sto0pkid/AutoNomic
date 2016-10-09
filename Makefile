@@ -29,7 +29,7 @@ with_marpa: LDFLAGS += -Llibmarpa/dist/.libs -lmarpa  -lboost_regex
 autonomic: $(OBJECTS)
 	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 cppout:  out.o prover.o unifiers.o jsonld.o rdf.o misc.o json_object.o jsonld_an.o nquads.o univar.o
-	$(CXX)   out.o prover.o unifiers.o jsonld.o rdf.o misc.o json_object.o jsonld_an.o nquads.o -o $@ $(LDFLAGS)
+	$(CXX)  out.o prover.o unifiers.o jsonld.o rdf.o misc.o json_object.o jsonld_an.o nquads.o -o $@ $(LDFLAGS)
 
 out.cpp: cppmain.cpp globals.cpp
 
