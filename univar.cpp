@@ -34,6 +34,7 @@ intptr_t ofst(pos_t target, pos_t me)
 
 extern int result_limit ;
 
+//might want this to be a macro instead
 bool have_builtins = true;
 
 map<nodeid, string> cppdict;
@@ -541,10 +542,6 @@ typedef std::vector<thingthingpair> ep_t;
 //Functions-types on Things
 typedef function<bool()> coro;
 
-
-//these are the same, why do we differentiate them? because they are logically different
-//i guess we just don't get to say anything more specific in the type
-//ah..yes
 typedef function<bool(Thing*,Thing*)> pred_t;
 typedef function<pred_t()> pred_gen;
 
@@ -554,7 +551,6 @@ typedef function<rule_t()> rule_gen;
 
 typedef function<bool(Thing*,Thing*, Thing*)> join_t;
 typedef function<join_t()> join_gen;
-//btw im using gen in the sense that its a lambda generating another lambda
 typedef function<join_gen(nodeid, join_gen, pos_t , pos_t , Locals&)>  join_gen_gen;
 
 
@@ -867,10 +863,9 @@ coro kbdbg_unify_fail(const Thing *a, const Thing *b)
 
 #else
 
-//Not sure what this function does
 static coro UNIFY_SUCCEED(const Thing *a, const Thing *b)
 {
-	EEE; //case entry = 0;
+	EEE;
 	return [entry, a ,b]() mutable{
 		switch(entry)
 		{
@@ -1013,12 +1008,11 @@ static Thing *getValue (Thing *_x)
 			return result^M
 	*/
 {
-	dout << "Getting value." << endl;
-
 	ASSERT(_x);
 
 	Thing x = *_x;
 
+	dout << "Getting value of thing: " << dict[get_node(x)].tostring() << endl;
 
 /*
 	if (is_unbound(x) || is_node(x))
@@ -1095,7 +1089,7 @@ static Thing *getValue (Thing *_x)
 
 	//Is a bound variable, return the value of it's value.
 	if (is_bound(x)) {
-		//dout << "Is bound." << endl;
+		dout << "Is bound." << endl;
 		#ifdef getValue_profile
 		getValue_BOUNDS++;
 		#endif
@@ -1107,14 +1101,16 @@ static Thing *getValue (Thing *_x)
 	}
 	else if (!is_offset(x))
 	{	//Is either an unbound variable or a value.
-		//dout << "Is offset." << endl;
+		dout << "  Is unboundVar or value." << endl;
 		#ifdef getValue_profile
 		getValue_OTHERS++;
 		#endif
+		dout << "  returning: " << dict[get_node(*_x)].tostring() << endl;
 		return _x;
 	}
 	else
 	{	
+		dout << "Is other." << endl;
 		ASSERT(is_offset(x));
 		#ifdef getValue_profile
 		getValue_OFFSETS++;
@@ -1176,6 +1172,7 @@ coro unboundunifycoro(Thing * me, Thing *arg
 {
 		FUN;
 		TRACE(dout << "!Bound" << endl;)
+		dout << "unboundunifycoro: " << str(me) << ", " << str(arg) << endl;
 		
 		Thing *argv = getValue(arg);
 		//TRACE(dout << "unify with [" << argv << "]" << str(argv) << endl;)
@@ -1778,6 +1775,7 @@ coro listunifycoro2(Thing *a_, Thing *b_)
 
 coro unify(Thing *a_, Thing *b_){
 	FUN;
+	dout << "unifying: " << str(a_) << " with " << str(b_) << endl;
 	unifys++;
 
 	//for logging
@@ -2543,9 +2541,6 @@ bool find_ep(ep_t *ep, /*const*/ Thing *s, /*const*/ Thing *o)
 	//wouldn't this carry on beyond this ep-check though? no
 	//they won't be the same pointers? i.e. s/o here will be different s/o pointer-objects than
 	//those in the rule that called it, just pointing to the same place? yes
-	
-	//if we move getValue() inside of would_unify we don't need to do this though
-	//we should be moving stuff out of inner loops, not into them, fair enough
 	
 	s = getValue(s);
 	o = getValue(o);

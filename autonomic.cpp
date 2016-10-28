@@ -101,9 +101,9 @@ public:
 //Structure
 	bool interactive = false;
 	bool do_reparse = true;
-	bool do_cppout = true;
+	bool do_cppout = false;
 	bool do_query = true;
-	bool do_test = true;
+	bool do_test = false;
 	std::string name;
 	Mode mode = COMMANDS;
 	int limit = 123;//this should be hierarchical tho
@@ -602,7 +602,7 @@ bool read_option(string s){
 		if(_option == x){ \
 			INPUT->y = std::stoi(token); \
 			dout << z << ":" << INPUT->y << std::endl; \
-			return true; \	
+			return true; \
 		} 
 
 		input_option("cppout", do_cppout, "cppout");

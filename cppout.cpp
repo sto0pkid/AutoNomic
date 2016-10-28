@@ -1,5 +1,5 @@
-#define CPPOUT
-#define simple_cppout
+//#define CPPOUT
+//#define simple_cppout
 
 //simple_cppout is partially working
 //stoopkid doesn't compile
