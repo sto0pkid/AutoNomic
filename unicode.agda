@@ -310,6 +310,9 @@ infixr 0 _∧_
 
 syntax Π A (λ x → e) = Π x ∈ A , e
 
+
+
+-- There exists
 data ∃ {α β} (A : ★ α) (B : A → ★ β) : ★ (α ⊔ β) where
  _,_ : (x : A) (y : B x) → ∃ A B
 
@@ -342,18 +345,23 @@ syntax ∃ A (λ x → e) = ∃ x ∈ A , e
 
 -- Basic implications:
 
+-- True implies True
 ⊤→⊤ : ⊤ → ⊤
 ⊤→⊤ = id
 
 ⊤→⊤₂ : ⊤ → ⊤
 ⊤→⊤₂ ● = ●
 
+
+-- False implies False
 ⊥→⊥ : ⊥ → ⊥
 ⊥→⊥ = id
 
+-- False implies True
 ⊥→⊤ : ⊥ → ⊤
 ⊥→⊤ ☢ = ω ☢
 
+-- True doesn't imply False
 ¬[⊤→⊥] : (⊤ → ⊥) → ⊥
 ¬[⊤→⊥] [⊤→⊥] = [⊤→⊥] ●
 
@@ -366,14 +374,17 @@ data 𝔹 : ★₀ where
  𝕗 : 𝔹
 
 
+-- Take a Bool to the corresponding proposition:
 𝔹-★ : 𝔹 → ★₀
 𝔹-★ 𝕥 = ⊤
 𝔹-★ 𝕗 = ⊥
 
+-- Boolean negation
 ! : 𝔹 → 𝔹
 ! 𝕥 = 𝕗
 ! 𝕗 = 𝕥
 
+-- Boolean AND
 _&&_ : 𝔹 → 𝔹 → 𝔹
 _&&_ 𝕥 𝕥 = 𝕥
 _&&_ 𝕥 𝕗 = 𝕗
@@ -381,11 +392,15 @@ _&&_ 𝕗 𝕥 = 𝕗
 _&&_ 𝕗 𝕗 = 𝕗 
 
 
+-- Boolean OR
 _||_ : 𝔹 → 𝔹 → 𝔹
 _||_ 𝕥 𝕥 = 𝕥
 _||_ 𝕥 𝕗 = 𝕥
 _||_ 𝕗 𝕥 = 𝕥
 _||_ 𝕗 𝕗 = 𝕗
+
+
+-- btw this collection of Boolean functions is functionally complete
 
 
 --Identity types
@@ -398,6 +413,7 @@ data _≡_ {α} {A : ★ α} : A → A → ★ α where
  ⟲ : (x : A) → x ≡ x
 infixr 1 _≡_ 
 
+-- Inequality
 _≠_ : ∀ {α} {A : ★ α} (x y : A) → ★ α
 _≠_ x y = ¬ (x ≡ y)
 infixr 1 _≠_
@@ -417,6 +433,7 @@ infixr 1 _≠_
 reflexive : ∀ {α β} {A : ★ α} (P : A → ★ β) → ★ (α ⊔ β)
 reflexive {α} {β} {A} P = Π x ∈ A , P x 
 
+-- Equality is reflexive
 ≡-⟲ : ∀ {α} {A : ★ α} (x : A) → x ≡ x
 ≡-⟲ = ⟲
 
@@ -424,6 +441,7 @@ reflexive {α} {β} {A} P = Π x ∈ A , P x
 symmetric : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
 symmetric {α} {β} {A} P = {x y : A} → P x y → P y x 
 
+-- Equality is symmetric
 ≡-↑↓ : ∀ {α} {A : ★ α} {x y : A} (p : x ≡ y) → y ≡ x
 ≡-↑↓ (⟲ a) = ⟲ a
 
@@ -431,6 +449,7 @@ symmetric {α} {β} {A} P = {x y : A} → P x y → P y x
 transitive : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
 transitive {α} {β} {A} P = {x y z : A} → P x y → P y z → P x z
 
+-- Equality is transitive
 ≡-⇶ : ∀ {α} {A : ★ α} {x y z : A} (p : x ≡ y) (q : y ≡ z) → x ≡ z
 ≡-⇶ (⟲ x) (⟲ .x) = ⟲ x
 
@@ -438,19 +457,23 @@ transitive {α} {β} {A} P = {x y z : A} → P x y → P y z → P x z
 ≡-⇶₂ (⟲ x) e = e
 
 
+-- Path transport
 Δ : ∀ {α β} {A : ★ α} {x y : A} (p : x ≡ y) (P : A → ★ β) → P x → P y
 Δ {α} {β} {A} {a} {.a} (⟲ .a) P pa = pa
 
+-- Propositional transport
 ★-Δ : ∀ {α β} (A : ★ α) (B : ★ α) (p : A ≡ B) (P : A → ★ β) → (B → ★ β)
 ★-Δ A .A (⟲ .A) [A→★] = [A→★]
 
 
+-- Functions preserve equality
 [a≡b]→[fa≡fb] : 
  ∀ {α β} {A : ★ α} {B : ★ β} 
  (f : A → B) (x y : A) (p : x ≡ y) → 
  f x ≡ f y
 [a≡b]→[fa≡fb] f a .a (⟲ .a) = ⟲ (f a) 
 
+-- PI's preserve equality
 [a≡b]→[Pa≡Pb] : 
  ∀ {α β} {A : ★ α} {B : A → ★ β} 
  (f : (a : A) → B a) (x y : A) (p : x ≡ y) → 
@@ -459,12 +482,13 @@ transitive {α} {β} {A} P = {x y z : A} → P x y → P y z → P x z
 
 
 
+-- Isomorphism:
 data _≅_ {α} (A B : ★ α) : ★ α where
     ≅-cons : (f : A → B) → (g : B → A) → ((a : A) → (g ∘ f) a ≡ a) ∧ ((b : B) → (f ∘ g) b ≡ b ) → A ≅ B   
 
 infixr 1 _≅_
 
-
+-- Extract the components of an isomorphism:
 ≅-π₁ : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (A → B)
 ≅-π₁ (≅-cons f g fg-inv) = f
 
@@ -488,13 +512,15 @@ infixr 1 _≅_
 
 
 
+-- Isomorphism is reflexive
 ≅-⟲ : ∀ {α} (A : ★ α) → A ≅ A
 ≅-⟲ A = ≅-cons id id (∧-cons (λ a → ⟲ a) (λ b → ⟲ b))
 
+-- Isomorphism is symmetric
 ≅-↑↓ : ∀ {α} (A B : ★ α) → A ≅ B → B ≅ A
 ≅-↑↓ A B (≅-cons f g fg-inv) = ≅-cons g f (∧-cons (∧-π₂ fg-inv) (∧-π₁ fg-inv))
 
-
+-- Isomorphism is transitive
 ≅-⇶ : ∀ {α} (A B C : ★ α) → A ≅ B → B ≅ C → A ≅ C
 ≅-⇶ A B C [A≅B] [B≅C] = ≅-cons (h ∘ f) (g ∘ i) (∧-cons gi-inv-hf hf-inv-gi)
  where
@@ -541,95 +567,6 @@ infixr 1 _≅_
   hf-inv-gi c = ≡-⇶ ([hfgic≡hic] c) ([hi≡id] c)
 
 
-
-
-≅-★-Δ : ∀ {α β} (A : ★ α) (B : ★ α) (p : A ≅ B) (P : A → ★ β) → (B → ★ β)
-≅-★-Δ A B (≅-cons f g fg-inv) P = λ (b : B) → P (g b)
-
-
-≡-★-Δ : ∀ {α β} (A : ★ α) (B : ★ α) (p : A ≡ B) (P : ★ α → ★ β) → P A → P B
-≡-★-Δ A .A (⟲ .A) P PA = Δ (⟲ A) P PA
-
-data ¬𝔹 : ★₀ where
- ¬𝕥 : ¬𝔹
- ¬𝕗 : ¬𝔹
-
-data 𝔹₂ : ★₀ where
- 𝕥₂ : 𝔹₂
- 𝕗₂ : 𝔹₂
-
-
-id₂ : 𝔹 → 𝔹₂
-id₂ 𝕥 = 𝕥₂
-id₂ 𝕗 = 𝕗₂
-
-id₃ : 𝔹₂ → 𝔹
-id₃ 𝕥₂ = 𝕥
-id₃ 𝕗₂ = 𝕗
-
-!₂ : 𝔹 → 𝔹₂
-!₂ 𝕥 = 𝕗₂
-!₂ 𝕗 = 𝕥₂
-
-!₃ : 𝔹₂ → 𝔹
-!₃ 𝕥₂ = 𝕗
-!₃ 𝕗₂ = 𝕥
-
-
-
-
-
-[𝔹]≅[¬𝔹] : 𝔹 ≅ ¬𝔹
-[𝔹]≅[¬𝔹] = ≅-cons f g fg-inv
- where
-  f : 𝔹 → ¬𝔹
-  f 𝕥 = ¬𝕥
-  f 𝕗 = ¬𝕗
-
-  g : ¬𝔹 → 𝔹
-  g ¬𝕥 = 𝕥
-  g ¬𝕗 = 𝕗
-
-  g-inv-f : (b : 𝔹) → ((g ∘ f) b ≡ b)
-  g-inv-f 𝕥 = (⟲ 𝕥)
-  g-inv-f 𝕗 = (⟲ 𝕗)
-
-  f-inv-g : (¬b : ¬𝔹) → ((f ∘ g) ¬b ≡ ¬b)
-  f-inv-g ¬𝕥 = (⟲ ¬𝕥)
-  f-inv-g ¬𝕗 = (⟲ ¬𝕗)
-
-  fg-inv = ∧-cons g-inv-f f-inv-g
-
-id-inv-id : (b : 𝔹) → id (id b) ≡ b
-id-inv-id b = ⟲ b
-
-!-inv-! : (b : 𝔹) → ! (! b) ≡ b
-!-inv-! 𝕥 = ⟲ 𝕥
-!-inv-! 𝕗 = ⟲ 𝕗 
-
-id₂-inv-id₃ : (b : 𝔹₂) → id₂ (id₃ b) ≡ b
-id₂-inv-id₃ 𝕥₂ = ⟲ 𝕥₂
-id₂-inv-id₃ 𝕗₂ = ⟲ 𝕗₂
-
-id₃-inv-id₂ : (b : 𝔹) → id₃ (id₂ b) ≡ b
-id₃-inv-id₂ 𝕥 = ⟲ 𝕥
-id₃-inv-id₂ 𝕗 = ⟲ 𝕗
-
-!₂-inv-!₃ : (b : 𝔹₂) → !₂ (!₃ b) ≡ b
-!₂-inv-!₃ 𝕥₂ = ⟲ 𝕥₂
-!₂-inv-!₃ 𝕗₂ = ⟲ 𝕗₂
-
-!₃-inv-!₂ : (b : 𝔹) → !₃ (!₂ b) ≡ b
-!₃-inv-!₂ 𝕥 = ⟲ 𝕥
-!₃-inv-!₂ 𝕗 = ⟲ 𝕗
-
-
-
-[𝔹≅𝔹₂]₁ : 𝔹 ≅ 𝔹₂
-[𝔹≅𝔹₂]₁ = ≅-cons !₂ !₃ (∧-cons !₃-inv-!₂ !₂-inv-!₃)
-
-[𝔹≅𝔹₂]₂ : 𝔹 ≅ 𝔹₂
-[𝔹≅𝔹₂]₂ = ≅-cons id₂ id₃ (∧-cons id₃-inv-id₂ id₂-inv-id₃)
 
 
 structural-invariant : ∀ {α β} (P : ★ α → ★ β) → ★ ((lsuc α) ⊔ β)
@@ -685,46 +622,29 @@ UA→FE UA C D f g fg-ext-id =
   
 
 
-
+-- Boolean true is not equal to Boolean false
 𝕥≠𝕗 : 𝕥 ≠ 𝕗
 𝕥≠𝕗 p = ⊤≠⊥ ([a≡b]→[fa≡fb] 𝔹-★ 𝕥 𝕗 p)
 
 
-{-
-   need to figure out the pattern such that we can always use the Pi form
-   instead of the function form, when applicable. this is a situation where
-   it's applicable
--}
 
-
-{- 
-
-   not_true_eq_false2 : Not (Id true false)
-   not_true_eq_false2 p = not_True_eq_False (pis_respect_identity IsTrue true false p)
-
--}
-
-
-
-
+-- No Boolean equals its own negation
 a≠!a : ∀ (a : 𝔹) → a ≠ ! a
 a≠!a 𝕥 p = ⊤≠⊥ ([a≡b]→[fa≡fb] 𝔹-★ 𝕥 𝕗 p)
 a≠!a 𝕗 p = ⊤≠⊥ (≡-↑↓ ([a≡b]→[fa≡fb] 𝔹-★ 𝕗 𝕥 p))
 
 
-
+-- The Peano naturals
 data ℕ : ★₀ where
  𝕫 : ℕ
  𝕤 : ℕ → ℕ
 
 
 
-record Magma : ★₁ where
- field
-  M : ★₀
-  + : M → M → M
+-- Algebraic data-structures:
 
 
+-- uniqueness
 unique : 
  ∀ {α β} {A : ★ α} (P : A → ★ β) (a : A) → 
  ★ (α ⊔ β)
@@ -787,12 +707,6 @@ LatinSquare : ∀ {α} {A : ★ α} (+ : A → A → A) → ★ α
 LatinSquare + = LatinLeft + ∧ LatinRight +
 
 
-record QuasiGroup : ★₁ where
- field
-  M : ★₀
-  + : M -> M -> M
-  +-sq : LatinSquare +
-
 
 is-left-id : ∀ {α} {A : Set α} (+ : A → A → A) (e : A) → ★ α
 is-left-id {α} {A} +' e = ∀ (a : A) → e + a ≡ a
@@ -810,7 +724,7 @@ is-right-id {α} {A} +' e = ∀ (a : A) → a + e ≡ a
   infix 2 _+_
 
 
---is an object a universal identity for a binary operation
+--is a (given) object a universal identity for a binary operation
 is-identity : ∀ {α} {A : ★ α} (+ : A → A → A) (e : A) → ★ α
 is-identity {α} {A} +' e = ∀ (a : A) → e + a ≡ a ∧ a + e ≡ a
  where
@@ -820,9 +734,11 @@ is-identity {α} {A} +' e = ∀ (a : A) → e + a ≡ a ∧ a + e ≡ a
 
 
 
---does a binary operation have a universal identity
+--does a (given) binary operation have a universal identity
 has-identity : ∀ {α} {A : ★ α} (+ : A → A → A) → ★ α
 has-identity {α} {A} + = ∃ e ∈ A , (is-identity + e)
+
+
 
 
 record SemiMonoid : ★₁ where
@@ -831,6 +747,11 @@ record SemiMonoid : ★₁ where
   + : M -> M -> M
   +-id : has-identity +
 
+
+
+
+
+-- is a (given) binary operation associative
 is-associative : ∀ {α} {A : ★ α} (+ : A → A → A) → ★ α
 is-associative {α} {A} +' = ∀ {x y z : A} → (x + y) + z ≡ x + (y + z)
  where
@@ -838,7 +759,7 @@ is-associative {α} {A} +' = ∀ {x y z : A} → (x + y) + z ≡ x + (y + z)
   x + y = +' x y
   infix 2 _+_
 
-
+-- does a (given) SemiMonoid have left inverses
 has-left-inverses : SemiMonoid → ★₀
 has-left-inverses S = (x : M) → ∃ x⁻¹ ∈ M , (x⁻¹ * x ≡ e)
 
@@ -854,7 +775,7 @@ has-left-inverses S = (x : M) → ∃ x⁻¹ ∈ M , (x⁻¹ * x ≡ e)
   e = π₁ (SemiMonoid.+-id S)
   
 
-
+-- does a (given) SemiMonoid have right inverses
 has-right-inverses : SemiMonoid → ★₀
 has-right-inverses S = (x : M) → ∃ x⁻¹ ∈ M , (x * x⁻¹ ≡ e)
  where
@@ -869,13 +790,91 @@ has-right-inverses S = (x : M) → ∃ x⁻¹ ∈ M , (x * x⁻¹ ≡ e)
   e = π₁ (SemiMonoid.+-id S)
 
  
-
+-- does a (given) SemiMonoid have both left & right inverses
 has-inverses : SemiMonoid → ★₀
 has-inverses S = (x : M) → has-left-inverses S ∧ has-right-inverses S
  where
   M : ★₀
   M = SemiMonoid.M S
 
+
+
+
+-- is a (given) binary operation commutative
+is-commutative : ∀ {α} {A : ★ α} (+ : A → A → A) → ★ α
+is-commutative {α} {A} +' = (x y : A) → x + y ≡ y + x
+ where
+  _+_ : A → A → A
+  x + y = +' x y
+  infix 2 _+_
+
+
+
+-- does a given multiplication left-distribute over a given addition
+left-distributive : ∀ {α} {A : ★ α} (* : A → A → A) → (+ : A → A → A) → ★ α
+left-distributive {α} {A} *' +' = (a b c : A) → a * (b + c) ≡ (a * b) + (a * c)
+ where
+  _*_ : A → A → A
+  x * y = *' x y
+  infix 2 _*_
+  
+  _+_ : A → A → A
+  x + y = +' x y
+  infix 2 _+_ 
+
+-- does a given multiplication right-distribute over a given addition
+right-distributive : ∀ {α} {A : ★ α} (* : A → A → A) → (+ : A → A → A) → ★ α
+right-distributive {α} {A} *' +' = (a b c : A) → (b + c) * a ≡ (b * a) + (c * a)
+ where
+  _*_ : A → A → A
+  x * y = *' x y
+  infix 2 _*_
+
+  _+_ : A → A → A
+  x + y = +' x y
+  infix 2 _+_
+
+
+-- does a given multiplication distribute (generally) over a given addition
+is-distributive : ∀ {α} {A : ★ α} (* : A → A → A) → (+ : A → A → A) → ★ α
+is-distributive * + = (left-distributive * +) ∧ (right-distributive * +)
+
+
+-- is a given algebraic structure a semigroup
+is-semigroup : ∀ {α} {M : ★ α} (+ : M → M → M) → ★ α
+is-semigroup + = is-associative +
+
+
+-- is a given algebraic structure a monoid
+is-monoid : ∀ {α} {M : ★ α} (+ : M → M → M) → ★ α
+is-monoid + = (is-semigroup +) ∧ (has-identity +)
+
+
+-- is a given algebraic structure a group
+is-group : {M : ★₀} (+ : M → M → M) → ★₀
+is-group {M} + = ∃ prf ∈ (is-monoid +) , (has-inverses (record {M = M; + = +; +-id = ∧-π₂ prf}))
+
+-- is a given algebraic structure an Abelian group
+is-abgroup : {M : ★₀} (+ : M → M → M) -> ★₀
+is-abgroup + = (is-group +) ∧ (is-commutative +)
+
+
+-- is a given algebraic structure a commutative monoid
+is-commutative-monoid : ∀ {α} {M : ★ α} (+ : M → M → M) → ★ α
+is-commutative-monoid + = (is-monoid +) ∧ (is-commutative +)
+
+
+record Magma : ★₁ where
+ field
+  M : ★₀
+  + : M → M → M
+
+
+record QuasiGroup : ★₁ where
+ field
+  M : ★₀
+  + : M -> M -> M
+  +-sq : LatinSquare +
 
 
 record Loop : ★₁ where
@@ -901,6 +900,7 @@ record Monoid : ★₁ where
   +-id : has-identity +
   +-assoc : is-associative +
 
+
 {-
 record Group : Set ★₁ where
  field
@@ -912,13 +912,6 @@ record Group : Set ★₁ where
 
 -}
 
-is-commutative : ∀ {α} {A : ★ α} (+ : A → A → A) → ★ α
-is-commutative {α} {A} +' = (x y : A) → x + y ≡ y + x
- where
-  _+_ : A → A → A
-  x + y = +' x y
-  infix 2 _+_
-
 
 {-
 record AbelianGroup : ★₁  where
@@ -926,51 +919,6 @@ record AbelianGroup : ★₁  where
   G : Group
   +-comm : is-commutative (Group.+ G) 
 -}
-
-
-
-left-distributive : ∀ {α} {A : ★ α} (* : A → A → A) → (+ : A → A → A) → ★ α
-left-distributive {α} {A} *' +' = (a b c : A) → a * (b + c) ≡ (a * b) + (a * c)
- where
-  _*_ : A → A → A
-  x * y = *' x y
-  infix 2 _*_
-  
-  _+_ : A → A → A
-  x + y = +' x y
-  infix 2 _+_ 
-
-
-right-distributive : ∀ {α} {A : ★ α} (* : A → A → A) → (+ : A → A → A) → ★ α
-right-distributive {α} {A} *' +' = (a b c : A) → (b + c) * a ≡ (b * a) + (c * a)
- where
-  _*_ : A → A → A
-  x * y = *' x y
-  infix 2 _*_
-
-  _+_ : A → A → A
-  x + y = +' x y
-  infix 2 _+_
-
-
-is-distributive : ∀ {α} {A : ★ α} (* : A → A → A) → (+ : A → A → A) → ★ α
-is-distributive * + = (left-distributive * +) ∧ (right-distributive * +)
-
-
-is-semigroup : ∀ {α} {M : ★ α} (+ : M → M → M) → ★ α
-is-semigroup + = is-associative +
-
-
-
-is-monoid : ∀ {α} {M : ★ α} (+ : M → M → M) → ★ α
-is-monoid + = (is-semigroup +) ∧ (has-identity +)
-
-
-is-group : {M : ★₀} (+ : M → M → M) → ★₀
-is-group {M} + = ∃ prf ∈ (is-monoid +) , (has-inverses (record {M = M; + = +; +-id = ∧-π₂ prf}))
-
-is-abgroup : {M : ★₀} (+ : M → M → M) -> ★₀
-is-abgroup + = (is-group +) ∧ (is-commutative +)
 
 
 record rng : ★₁ where
@@ -1002,16 +950,13 @@ record CommutativeMonoid : ★₁ where
   +-comm : is-commutative +
 
 
-is-commutative-monoid : ∀ {α} {M : ★ α} (+ : M → M → M) → ★ α
-is-commutative-monoid + = (is-monoid +) ∧ (is-commutative +)
-
-
-
+-- addition on Nats
 _+_ : ℕ → ℕ → ℕ
 𝕫 + y = y
 (𝕤 x) + y = 𝕤 (x + y)
 infixr 2 _+_
 
+-- multiplication on Nats
 _*_ : ℕ → ℕ → ℕ
 𝕫 * y = 𝕫 
 (𝕤 x) * y = x + (x * y) 
@@ -1258,12 +1203,14 @@ IsPartialOrder {α} {A} R = (IsReflexive R) ∧ (IsAntisymmetric R) ∧ (IsTrans
 IsEquivalence : ∀ {α} {A : ★ α} → relation { α } { A } -> ★ α
 IsEquivalence {α} {A} R = (IsReflexive R) ∧ (IsSymmetric R) ∧ (IsTransitive R)
 
+
+
+
+
 {- 
    obviously equivalences & partial orders are preorders, but let's demonstrate it
    anyway
 -}
-
-
 equivalences-are-preorders : 
   ∀ {α} {A : ★ α} → (R : relation { α } { A }) → 
   IsEquivalence R → IsPreorder R
@@ -1288,10 +1235,12 @@ partialorders-are-preorders {α} {A} R eq = ∧-cons R-⟲ R-⇶
   R-⇶ = ∧-π₂ (∧-π₂ eq)
 
 
+-- extensional equality of functions
 FuncId : ∀ {α β} {A : ★ α} {B : ★ β} (f g : A → B) → ★ (α ⊔ β)
 FuncId {α} {β} {A} {B} f g = (a : A) → f a ≡ g a
 
 
+-- functions are identical to their eta expansions
 eta : ∀ {α β} {A : ★ α} {B : ★ β} → (f : A → B) → FuncId f (λ x → f x)
 eta {α} {β} {A} {B} f a = ⟲ (f a)
 
@@ -1300,6 +1249,8 @@ eta-strong {α} {β} {A} {B} f = ⟲ f
 
 
 
+
+-- function composition is associative:
 ∘-assoc : ∀ {α β γ δ} {A : ★ α} {B : ★ β} {C : ★ γ} {D : ★ δ}
   (f : A → B) → (g : B → C) → (h : C → D) →
   FuncId (h ∘ (g ∘ f)) ((h ∘ g) ∘ f)
@@ -1373,6 +1324,7 @@ only-False-is-not-implied {n} {A} {B} notAB =
 
 -}
 
+-- Booleans satisfy the Law of the Excluded Middle
 𝔹-LEM : (b : 𝔹) → b ≡ 𝕥 ∨ b ≡ 𝕗
 𝔹-LEM 𝕥 = ∨-cons1 (⟲ 𝕥)
 𝔹-LEM 𝕗 = ∨-cons2 (⟲ 𝕗)
@@ -1382,6 +1334,7 @@ only-False-is-not-implied {n} {A} {B} notAB =
   Is there anyway to do this without pattern-matching?
 -}
 
+-- Boolean logic is consistent (as long as the type theory itself is)
 𝔹-consistent : (b : 𝔹) →  (b ≡ 𝕥) ∧ (b ≡ 𝕗) → ⊥
 𝔹-consistent b [b≡𝕥]^[b≡𝕗] = ☢
  where
@@ -1401,6 +1354,7 @@ only-False-is-not-implied {n} {A} {B} notAB =
   ☢ = 𝕥≠𝕗 [𝕥≡𝕗]
 
 
+-- equal functions on equal arguments have equal results:
 [f≡g]→[fa≡ga] : 
   ∀ {α β} {A : ★ α} {B : ★ β} →
   (f g : A → B) → (h : f ≡ g) → (a : A) → 
@@ -1413,6 +1367,7 @@ only-False-is-not-implied {n} {A} {B} notAB =
  f a1 ≡ g a2
 [f≡g]→[fa≡ga]₂ {α} {β} {A} {B} f .f (⟲ .f) a .a (⟲ .a) = ⟲ (f a)
 
+-- equal dep. functions on equal arguments have equal results:
 [P≡Q]→[Pa≡Qa] :
   ∀ {α β} {A : ★ α} {B : A → ★ β} →
   (P Q : Π A B) → (hom : P ≡ Q) → (a : A) →
@@ -1420,7 +1375,7 @@ only-False-is-not-implied {n} {A} {B} notAB =
 [P≡Q]→[Pa≡Qa] {α} {β} {A} {B} f .f (⟲ .f) a = ⟲ (f a)
 
 
-
+-- if g after f is the identity, then g is a surjection
 [id≡g∘f]→[surj-g] :
  ∀ {α β} {A : ★ α} {B : ★ β} →
  (f : A → B) → (g : B → A) →
@@ -1428,6 +1383,7 @@ only-False-is-not-implied {n} {A} {B} notAB =
 [id≡g∘f]→[surj-g] {α} {β} {A} {B} f g p a = (f a , ≡-↑↓ ([f≡g]→[fa≡ga] id (g ∘ f) p a))
 
 
+-- if g after f is the identity, then f is an injection
 [id≡g∘f]→[inj-f] :
  ∀ {α β} {A : ★ α} {B : ★ β} →
  (f : A → B) → (g : B → A) →
@@ -1471,6 +1427,8 @@ unfibrate-is-surjection2 :
 unfibrate-is-surjection2 {α} {β} {A} {B} f =
  [id≡g∘f]→[surj-g] (fibrate f) (unfibrate f) (fib-unfib-is-id-strong f)
 
+
+-- composition of injections is an injection
 inj-⇶ :
  ∀ {α β γ} {A : ★ α} {B : ★ β} {C : ★ γ} →
  (f : A → B) → injection f →
@@ -1479,7 +1437,7 @@ inj-⇶ :
 inj-⇶ {α} {β} {γ} {A} {B} {C} f inj_f g inj_g a1 a2 p = 
  inj_f a1 a2 (inj_g (f a1) (f a2) p)
 
-
+-- injectivity, surjectivity, and bijectivity are all reflexive:
 inj-⟲ :
  ∀ {α} {A : ★ α} → ∃ f ∈ (A → A) , (injection f)
 inj-⟲ {a} {A} = (id , id-is-injection)
@@ -1503,7 +1461,7 @@ f-of-fiber-f-b-is-b :
 f-of-fiber-f-b-is-b {α} {β} {A} {B} f b fib = π₂ fib
 
 
-
+-- composition of surjections is a surjection
 surj-⇶ :
  ∀ {α β γ} {A : ★ α} {B : ★ β} {C : ★ γ} →
  (f : A → B) → surjection f →
@@ -1533,6 +1491,7 @@ surj-⇶ {α} {β} {γ} {A} {B} {C} f surj-f g surj-g c = ( a' , [gfa'≡c])
    [gfa'≡c] = ≡-⇶ [gfa'≡gb'] [gb'≡c]
 
 
+-- composition of bijections is a bijection
 bij-⇶ :
  ∀ {α β γ} {A : ★ α} {B : ★ β} {C : ★ γ} →
  (f : A → B) → bijection f →
@@ -1839,11 +1798,11 @@ inj-antisym2 {m} {n} {A} {B} f inj-f g inj-g =
 -}
 
 
-
+-- two sets are related by injectivity if there is an injection between them
 injective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
 injective {α} {β} A B = ∃ f ∈ (A -> B) , (injection f)
 
-
+-- etc..
 surjective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
 surjective {m} {n} A B = ∃ f ∈ (A -> B) , (surjection f)
 
@@ -1852,6 +1811,7 @@ bijective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
 bijective {α} {β} A B = (injective A B) ∧ (surjective A B)
 
 
+-- fibers of injections are contractible
 fiber-inj-b-is-unique :
  ∀ {α β} {A : ★ α} {B : ★ β} →
  (f : A → B) → injection f → 
@@ -1976,14 +1936,35 @@ bijection-invertible {α} {β} {A} {B} f bij-f = (g , g-left-inv-f)
   surj-f : surjection f
   surj-f = ∧-π₂ bij-f
 
-
   g : B → A
-  g = (λ b → π₁ (π₂ (surjection-fiber-reverse f surj-f b)))
-  
+  g b = a
+   where
+    Fib-b : ∃ b ∈ B , (∃ a ∈ A , (f a ≡ b))
+    Fib-b = surjection-fiber-reverse f surj-f b
+   
+    fib-b : ∃ a ∈ A , (f a ≡ b)
+    fib-b = π₂ Fib-b
+
+    a : A
+    a = π₁ fib-b
 
   g-left-inv-f : left-inv g f
-  g-left-inv-f = (λ a → inj-f a (π₁ (π₂ (surjection-fiber-reverse f surj-f (f a)))) (≡-↑↓ (f-of-fiber-f-b-is-b f (f a) (π₂ (surjection-fiber-reverse f surj-f (f a))))))
+  g-left-inv-f a = inj-f a a' [fa≡fa']
+   where
+    Fib-b : ∃ b ∈ B , (∃ a' ∈ A , (f a' ≡ b))
+    Fib-b = surjection-fiber-reverse f surj-f (f a)
  
+    fib-b : ∃ a' ∈ A , (f a' ≡ f a)
+    fib-b = π₂ Fib-b
+
+    a' = π₁ fib-b
+
+    [fa'≡fa] : f a' ≡ f a
+    [fa'≡fa] = f-of-fiber-f-b-is-b f (f a) fib-b
+
+    [fa≡fa'] : f a ≡ f a'
+    [fa≡fa'] = ≡-↑↓ [fa'≡fa]
+
 
 {-
 bijectivity-symmetric :
@@ -2059,7 +2040,7 @@ surj-antisym2 {m} {n} {A} {B} f surj-f g surj-g =
 
 
 
-
+-- surjectivity is antisymmetric
 surj-antisym3 :
  ∀ {α β} {A : ★ α} {B : ★ β} →
  (f : A → B) → surjection f →
@@ -2080,7 +2061,7 @@ surj-antisym3 {α} {β} {A} {B} f surj-f g surj-g = ∧-cons (injAB) (surjAB)
 
 
 
-
+-- needs more defining axioms in order to actually characterizie it as a Functor
 record Functor {α β} {A : Set α} {B : Set β} : ★ (α ⊔ β) where
  field
   omap : A → B
