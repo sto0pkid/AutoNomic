@@ -1142,6 +1142,22 @@ true-iso {α} {β} A B = ∃ f ∈ (A → B) , (∃ g ∈ (B → A) , ((g ∘ f 
 
 
 
+-- extensional equality of functions
+FuncId : ∀ {α β} {A : ★ α} {B : ★ β} (f g : A → B) → ★ (α ⊔ β)
+FuncId {α} {β} {A} {B} f g = (a : A) → f a ≡ g a
+
+
+-- two sets are related by injectivity if there is an injection between them
+injective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+injective {α} {β} A B = ∃ f ∈ (A -> B) , (injection f)
+
+-- etc..
+surjective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+surjective {m} {n} A B = ∃ f ∈ (A -> B) , (surjection f)
+
+
+bijective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+bijective {α} {β} A B = (injective A B) ∧ (surjective A B)
 
 
 
@@ -2320,11 +2336,6 @@ partialorders-are-preorders {α} {A} R eq = ∧-cons R-⟲ R-⇶
   R-⇶ = ∧-π₂ (∧-π₂ eq)
 
 
--- extensional equality of functions
-FuncId : ∀ {α β} {A : ★ α} {B : ★ β} (f g : A → B) → ★ (α ⊔ β)
-FuncId {α} {β} {A} {B} f g = (a : A) → f a ≡ g a
-
-
 -- functions are identical to their eta expansions
 eta : ∀ {α β} {A : ★ α} {B : ★ β} → (f : A → B) → FuncId f (λ x → f x)
 eta {α} {β} {A} {B} f a = ⟲ (f a)
@@ -2859,19 +2870,6 @@ inj-antisym2 {m} {n} {A} {B} f inj-f g inj-g =
   proj1 = 
  }
 -}
-
-
--- two sets are related by injectivity if there is an injection between them
-injective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-injective {α} {β} A B = ∃ f ∈ (A -> B) , (injection f)
-
--- etc..
-surjective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-surjective {m} {n} A B = ∃ f ∈ (A -> B) , (surjection f)
-
-
-bijective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-bijective {α} {β} A B = (injective A B) ∧ (surjective A B)
 
 
 -- fibers of injections are contractible
