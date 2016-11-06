@@ -1,15 +1,5 @@
-(require 'package) ;; You might already have this line
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/"))
-(when (< emacs-major-version 24)
-  ;; For important compatibility libraries like cl-lib
-  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
-
-(add-hook 'after-init-hook #' global-flycheck-mode)
-(package-initialize) ;; You might already have this line
-
 (load-file (let ((coding-system-for-read 'utf-8))
-                (shell-command-to-string "agda-mode locate")))
+                (shell-command-to-string "~/AgdaSandbox/.cabal-sandbox/bin/agda-mode locate")))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
