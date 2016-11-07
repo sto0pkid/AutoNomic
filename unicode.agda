@@ -306,6 +306,19 @@ Language notes:
 
 -}
 
+
+
+
+
+
+
+
+{-
+
+module : basic defs
+
+-}
+
 ℓ : Set
 ℓ = Level
 
@@ -350,11 +363,6 @@ data ⊥ : ★₀ where
 ω : ∀ {α} {A : ★ α} → ⊥ → A
 ω ()
 
-{-
-data ⊥-level : (α : Level) → ★ α where
-ω-level : {A : ★ α} → ⊥-level → A
-ω-level ()
--}
 --True
 data ⊤ : ★₀ where
  ● : ⊤
@@ -371,8 +379,6 @@ infixr 0 _∨_
 
 _∨'_ : (A : ★₀) (B : ★₀) → ★₁
 A ∨' B = (C : ★₀) → (A → C) → (B → C) → C
-
-
 
 -- And
 data _∧_ {α β} (A : ★ α) (B : ★ β) : ★ (α ⊔ β) where
@@ -408,43 +414,217 @@ syntax ∃ A (λ x → e) = ∃ x ∈ A , e
 
 
 
-{- use ∃ instead of Σ so that propositions can be read purely logically -}
+
+--bi-implication
+_⇆_ : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+A ⇆ B = (A → B) ∧ (B → A)
+infixr 0 _⇆_ 
 
 
--- ¬(A∨B) implies ¬(A∧B)  
-[¬∨]→[¬∧] : ∀ {α β} (A : ★ α) (B : ★ β) → (¬ (A ∨ B) → ¬ (A ∧ B))
-[¬∨]→[¬∧] A B [¬∨] (∧-cons x y) = [¬∨] (∨-cons1 x)
+_↔_ : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+_↔_ A B = (A → B) ∧ (B → A)
+infix 0 _↔_
 
--- (A∧B) implies (A∨B)
-∧→∨ : ∀ {α β} {A : ★ α} {B : ★ β} → (A ∧ B → A ∨ B)
-∧→∨ {A} {B} (∧-cons x y) = ∨-cons1 x  
+--non-existence
+∄ : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
+∄ A P = ¬ ( ∃ x ∈ A , P x ) 
 
-∧→∨₂ : ∀ {α β} {A : ★ α} {B : ★ β} → (A ∧ B → A ∨ B)
-∧→∨₂ {A} {B} (∧-cons x y) = ∨-cons2 y
-
+syntax ∄ A (λ x → e) = ∄ x ∈ A , e
 
 
--- Basic implications:
-
--- True implies True
-⊤→⊤ : ⊤ → ⊤
-⊤→⊤ = id
-
-⊤→⊤₂ : ⊤ → ⊤
-⊤→⊤₂ ● = ●
+--Identity types
 
 
--- False implies False
-⊥→⊥ : ⊥ → ⊥
-⊥→⊥ = id
+--These form propositions out of (typically) objects, so
+--we want them to bind tighter than operators like ∧ and ∨ which
+--connect propositions into larger propositions
+data _≡_ {α} {A : ★ α} : A → A → ★ α where
+ ⟲ : (x : A) → x ≡ x
+infixr 1 _≡_ 
 
--- False implies True
-⊥→⊤ : ⊥ → ⊤
-⊥→⊤ ☢ = ω ☢
+-- Inequality
+_≠_ : ∀ {α} {A : ★ α} (x y : A) → ★ α
+_≠_ x y = ¬ (x ≡ y)
+infixr 1 _≠_
 
--- True doesn't imply False
-¬[⊤→⊥] : (⊤ → ⊥) → ⊥
-¬[⊤→⊥] [⊤→⊥] = [⊤→⊥] ●
+
+
+-- uniqueness
+unique : 
+ ∀ {α β} {A : ★ α} (P : A → ★ β) (a : A) → 
+ ★ (α ⊔ β)
+unique {α} {β} {A} P a = ∀ (a' : A) (p : P a') → a ≡ a'
+
+
+--unique existence
+∃! : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
+∃! A P = ∃ x ∈ A , (Π y ∈ A , (P x ⇆ x ≡ y))
+
+syntax ∃! A (λ x → e) = ∃! x ∈ A , e
+
+∃!₂ : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
+∃!₂ A P = ∃ x ∈ A , (P x ∧ ∄ y ∈ A , (P y ∧ y ≠ x))
+
+∃!₃ : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
+∃!₃ A P = ∃ x ∈ A , (P x ∧ Π y ∈ A , (P y → y ≡ x))
+
+∃!₄ : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
+∃!₄ A P = (∃ x ∈ A , P x) ∧ ((y z : A) → ((P y ∧ P z) → y ≡ z))
+   
+{- prove that these 4 definitions are equivalent -}
+
+
+-- propositions about properties:
+-- reflexivity
+reflexive : ∀ {α β} {A : ★ α} (P : A → ★ β) → ★ (α ⊔ β)
+reflexive {α} {β} {A} P = Π x ∈ A , P x
+
+irreflexive : ∀ {α β} {A : ★ α} (P : A → ★ β) → ★ (α ⊔ β)
+irreflexive {α} {β} {A} P = Π x ∈ A , (P x → ⊥)
+
+
+-- symmetric
+symmetric : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
+symmetric {α} {β} {A} P = {x y : A} → P x y → P y x 
+
+asymmetric : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
+asymmetric {α} {β} {A} P = {x y : A} → P x y → P y x → ⊥
+
+antisymmetric : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
+antisymmetric {α} {β} {A} P = {x y : A} → P x y → P y x → x ≡ y
+
+
+-- transitivity
+transitive : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
+transitive {α} {β} {A} P = {x y z : A} → P x y → P y z → P x z
+
+
+
+-- fibers
+fiber : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → (b : B) → ★ (α ⊔ β)
+fiber {α} {β} {A} {B} f b = ∃ a ∈ A , (f a ≡ b) 
+
+
+Fibers : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
+Fibers {α} {β} {A} {B} f = ∃ b ∈ B , (fiber f b)
+
+
+NoFibers : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
+NoFibers {α} {β} {A} {B} f = ∃ b ∈ B , ((fiber f b) → ⊥)
+
+fibrate : ∀ {α β} {A : ★ α} {B : ★ β} → (f : A → B) → A → Fibers f
+fibrate {α} {β} {A} {B} f a = ( f a , ( a , ⟲ (f a))) 
+
+unfibrate : ∀ {α β} {A : ★ α} {B : ★ β} → (f : A → B) → Fibers f → A
+unfibrate {α} {β} {A} {B} f fib = π₁ (π₂ fib)
+
+
+-- injections, surjections, bijections
+injection : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
+injection {α} {β} {A} {B} f = (a1 a2 : A) → (f a1 ≡ f a2) → (a1 ≡ a2)
+
+surjection : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
+surjection {α} {β} {A} {B} f = (b : B) → fiber f b 
+
+bijection : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
+bijection {α} {β} {A} {B} f = (injection f) ∧ (surjection f) 
+
+
+-- two sets are related by injectivity if there is an injection between them
+injective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+injective {α} {β} A B = ∃ f ∈ (A -> B) , (injection f)
+
+-- etc..
+surjective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+surjective {m} {n} A B = ∃ f ∈ (A -> B) , (surjection f)
+
+
+bijective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+bijective {α} {β} A B = (injective A B) ∧ (surjective A B)
+
+
+
+-- Isomorphism:
+data _≅_ {α} (A B : ★ α) : ★ α where
+    ≅-cons : (f : A → B) → (g : B → A) → ((a : A) → (g ∘ f) a ≡ a) ∧ ((b : B) → (f ∘ g) b ≡ b ) → A ≅ B   
+
+infixr 1 _≅_
+
+-- Extract the components of an isomorphism:
+≅-π₁ : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (A → B)
+≅-π₁ (≅-cons f g fg-inv) = f
+
+[A≅B]→[A→B] : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (A → B)
+[A≅B]→[A→B] (≅-cons f g [g≡f⁻¹]) = f
+
+≅-π₂ : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (B → A)
+≅-π₂ (≅-cons f g fg-inv) = g 
+
+[A≅B]→[B→A] : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (B → A)
+[A≅B]→[B→A] (≅-cons f g fg-inv) = g
+
+≅-π₃ : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → ((a : A) → ((≅-π₂ P) ∘ (≅-π₁ P)) a ≡ a) ∧ ((b : B) → ((≅-π₁ P) ∘ (≅-π₂ P)) b ≡ b )
+≅-π₃ (≅-cons f g fg-inv) = fg-inv
+
+[A≅B]→[gf≡id] : ∀ {α} {A : ★ α} {B : ★ α} ([A≅B] : A ≅ B) → ((a : A) → (([A≅B]→[B→A] [A≅B]) ∘ ([A≅B]→[A→B] [A≅B])) a ≡ a)
+[A≅B]→[gf≡id] (≅-cons f g fg-inv) = ∧-π₁ fg-inv
+
+[A≅B]→[fg≡id] : ∀ {α} {A : ★ α} {B : ★ α} ([A≅B] : A ≅ B) → ((b : B) → (([A≅B]→[A→B] [A≅B]) ∘ ([A≅B]→[B→A] [A≅B])) b ≡ b)
+[A≅B]→[fg≡id] (≅-cons f g fg-inv) = ∧-π₂ fg-inv
+
+
+
+
+
+
+structural-invariant : ∀ {α β} (P : ★ α → ★ β) → ★ ((lsuc α) ⊔ β)
+structural-invariant {α} {β} P = (A B : ★ α) → A ≅ B → P A → P B
+
+-- Is there any property that's not a structural invariant?
+-- https://www.andrew.cmu.edu/user/awodey/preprints/siu.pdf
+-- according to this, every property is structurally invariant
+-- but is this a logical proof or a metalogical proof?
+
+
+
+curry : ∀ {α β γ} {A : ★ α} {B : A → ★ β} {C : ( ∃ a ∈ A , (B a)) → ★ γ} → 
+        ((p : ∃ a ∈ A , (B a)) → C p) →
+        ((x : A) → (y : B x) → C (x , y))
+curry f x y = f (x , y)
+
+uncurry : 
+ ∀ {α β γ} {A : ★ α} {B : A → ★ β} {C : ★ γ} → ((a : A) → (B a) → C) → (∃ a ∈ A , (B a)) → C
+uncurry f (x , y) = f x y
+
+true-iso : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
+true-iso {α} {β} A B = ∃ f ∈ (A → B) , (∃ g ∈ (B → A) , ((g ∘ f ≡ id) ∧ (f ∘ g ≡ id)))
+
+∘' :
+ ∀ {α β γ} {A : ★ α} {B : ★ β} {C : ★ γ} 
+ (f : A → B) → (g : B → C) → A → C
+∘' f g = g ∘ f
+
+
+
+-- extensional equality of functions
+FuncId : ∀ {α β} {A : ★ α} {B : ★ β} (f g : A → B) → ★ (α ⊔ β)
+FuncId {α} {β} {A} {B} f g = (a : A) → f a ≡ g a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -481,271 +661,20 @@ _||_ 𝕗 𝕥 = 𝕥
 _||_ 𝕗 𝕗 = 𝕗
 
 
--- btw this collection of Boolean functions is functionally complete
+-- fun fact: this collection of Boolean functions is functionally complete
+-- https://en.wikipedia.org/wiki/Functional_completeness
 
+-- maybe we'll try to prove that later on
 
---Identity types
 
 
---These form propositions out of (typically) objects, so
---we want them to bind tighter than operators like ∧ and ∨ which
---connect propositions into larger propositions
-data _≡_ {α} {A : ★ α} : A → A → ★ α where
- ⟲ : (x : A) → x ≡ x
-infixr 1 _≡_ 
 
--- Inequality
-_≠_ : ∀ {α} {A : ★ α} (x y : A) → ★ α
-_≠_ x y = ¬ (x ≡ y)
-infixr 1 _≠_
 
--- If A = B then A → B
-[A=B]→[A→B] : ∀ {α} {A B : ★ α} (p : A ≡ B) → (A → B)
-[A=B]→[A→B] {α} {A} {.A} (⟲ .A) x = x
 
 
--- thus, ⊤ is not equal to ⊥ 
-⊤≠⊥ : ⊤ ≠ ⊥
-⊤≠⊥ p = [A=B]→[A→B] p ●
 
 
 
-reflexive : ∀ {α β} {A : ★ α} (P : A → ★ β) → ★ (α ⊔ β)
-reflexive {α} {β} {A} P = Π x ∈ A , P x 
-
--- Equality is reflexive
-≡-⟲ : ∀ {α} {A : ★ α} (x : A) → x ≡ x
-≡-⟲ = ⟲
-
--- but inequality of course is not
-≠-irreflexive : ∀ {α} {A : ★ α} (x : A) → ¬ (x ≠ x)
-≠-irreflexive x [x≠x] = ☢
- where
-  ☢ : ⊥
-  ☢ = [x≠x] (⟲ x)
-
-symmetric : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
-symmetric {α} {β} {A} P = {x y : A} → P x y → P y x 
-
--- Equality is symmetric
-≡-↑↓ : ∀ {α} {A : ★ α} {x y : A} (p : x ≡ y) → y ≡ x
-≡-↑↓ (⟲ a) = ⟲ a
-
--- ... and so is inequality
-≠-↑↓ : ∀ {α} {A : ★ α} {a b : A} → a ≠ b → b ≠ a
-≠-↑↓ [a≠b] [b≡a] = ☢
- where
-  ☢ : ⊥
-  ☢ = [a≠b] (≡-↑↓ [b≡a])
-
-
-transitive : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
-transitive {α} {β} {A} P = {x y z : A} → P x y → P y z → P x z
-
--- Equality is transitive
-≡-⇶ : ∀ {α} {A : ★ α} {x y z : A} (p : x ≡ y) (q : y ≡ z) → x ≡ z
-≡-⇶ (⟲ x) (⟲ .x) = ⟲ x
-
-≡-⇶₂ : ∀ {α} {A : ★ α} {x y z : A} (p : x ≡ y) (q : y ≡ z) → x ≡ z
-≡-⇶₂ (⟲ x) e = e
-
--- we'll prove that inequality is not transitive a bit further down
-
--- Path transport
-Δ : ∀ {α β} {A : ★ α} {x y : A} (p : x ≡ y) (P : A → ★ β) → P x → P y
-Δ {α} {β} {A} {a} {.a} (⟲ .a) P pa = pa
-
--- Propositional transport
-★-Δ : ∀ {α β} (A : ★ α) (B : ★ α) (p : A ≡ B) (P : A → ★ β) → (B → ★ β)
-★-Δ A .A (⟲ .A) [A→★] = [A→★]
-
-
--- Functions preserve equality
-[a≡b]→[fa≡fb] : 
- ∀ {α β} {A : ★ α} {B : ★ β} 
- (f : A → B) (x y : A) (p : x ≡ y) → 
- f x ≡ f y
-[a≡b]→[fa≡fb] f a .a (⟲ .a) = ⟲ (f a) 
-
--- PI's preserve equality
-[a≡b]→[Pa≡Pb] : 
- ∀ {α β} {A : ★ α} {B : A → ★ β} 
- (f : (a : A) → B a) (x y : A) (p : x ≡ y) → 
- Δ p B (f x) ≡ f y
-[a≡b]→[Pa≡Pb] f a .a (⟲ .a) = ⟲ (f a)
-
-
-
--- Isomorphism:
-data _≅_ {α} (A B : ★ α) : ★ α where
-    ≅-cons : (f : A → B) → (g : B → A) → ((a : A) → (g ∘ f) a ≡ a) ∧ ((b : B) → (f ∘ g) b ≡ b ) → A ≅ B   
-
-infixr 1 _≅_
-
--- Extract the components of an isomorphism:
-≅-π₁ : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (A → B)
-≅-π₁ (≅-cons f g fg-inv) = f
-
-[A≅B]→[A→B] : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (A → B)
-[A≅B]→[A→B] (≅-cons f g [g≡f⁻¹]) = f
-
-≅-π₂ : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (B → A)
-≅-π₂ (≅-cons f g fg-inv) = g 
-
-[A≅B]→[B→A] : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → (B → A)
-[A≅B]→[B→A] (≅-cons f g fg-inv) = g
-
-≅-π₃ : ∀ {α} {A : ★ α} {B : ★ α} (P : A ≅ B) → ((a : A) → ((≅-π₂ P) ∘ (≅-π₁ P)) a ≡ a) ∧ ((b : B) → ((≅-π₁ P) ∘ (≅-π₂ P)) b ≡ b )
-≅-π₃ (≅-cons f g fg-inv) = fg-inv
-
-[A≅B]→[gf≡id] : ∀ {α} {A : ★ α} {B : ★ α} ([A≅B] : A ≅ B) → ((a : A) → (([A≅B]→[B→A] [A≅B]) ∘ ([A≅B]→[A→B] [A≅B])) a ≡ a)
-[A≅B]→[gf≡id] (≅-cons f g fg-inv) = ∧-π₁ fg-inv
-
-[A≅B]→[fg≡id] : ∀ {α} {A : ★ α} {B : ★ α} ([A≅B] : A ≅ B) → ((b : B) → (([A≅B]→[A→B] [A≅B]) ∘ ([A≅B]→[B→A] [A≅B])) b ≡ b)
-[A≅B]→[fg≡id] (≅-cons f g fg-inv) = ∧-π₂ fg-inv
-
-
--- Isomorphism is reflexive
-≅-⟲ : ∀ {α} (A : ★ α) → A ≅ A
-≅-⟲ A = ≅-cons id id (∧-cons (λ a → ⟲ a) (λ b → ⟲ b))
-
--- Isomorphism is symmetric
-≅-↑↓ : ∀ {α} (A B : ★ α) → A ≅ B → B ≅ A
-≅-↑↓ A B (≅-cons f g fg-inv) = ≅-cons g f (∧-cons (∧-π₂ fg-inv) (∧-π₁ fg-inv))
-
--- Isomorphism is transitive
-≅-⇶ : ∀ {α} (A B C : ★ α) → A ≅ B → B ≅ C → A ≅ C
-≅-⇶ A B C [A≅B] [B≅C] = ≅-cons (h ∘ f) (g ∘ i) (∧-cons gi-inv-hf hf-inv-gi)
- where
-  f : A → B
-  f = [A≅B]→[A→B] [A≅B]
-
-  g : B → A
-  g = [A≅B]→[B→A] [A≅B]
-
-  h : B → C
-  h = [A≅B]→[A→B] [B≅C]
- 
-  i : C → B
-  i = [A≅B]→[B→A] [B≅C]
-  
-  [ih≡id] : (b : B) → (i ∘ h) b ≡ b
-  [ih≡id] = [A≅B]→[gf≡id] [B≅C]
-
-  [hi≡id] : (c : C) → (h ∘ i) c ≡ c
-  [hi≡id] = [A≅B]→[fg≡id] [B≅C]
-
-  [fg≡id] : (b : B) → (f ∘ g) b ≡ b
-  [fg≡id] = [A≅B]→[fg≡id] [A≅B] 
-
-  [gf≡id] : (a : A) → (g ∘ f) a ≡ a
-  [gf≡id] = [A≅B]→[gf≡id] [A≅B]
-
-  [ihfa≡fa] : (a : A) → i (h (f a)) ≡ f a
-  [ihfa≡fa] a = [ih≡id] (f a)
-
-  [gihfa≡gfa] : (a : A) → g (i (h (f a))) ≡ g (f a)
-  [gihfa≡gfa] a = [a≡b]→[fa≡fb] g (i (h (f a))) (f a) ([ihfa≡fa] a)
-
-  gi-inv-hf : (a : A) → g (i (h (f a))) ≡ a
-  gi-inv-hf a = ≡-⇶ ([gihfa≡gfa] a) ([gf≡id] a)
-
-  [fgic≡ic] : (c : C) → f (g (i c)) ≡ i c
-  [fgic≡ic] c = [fg≡id] (i c)
-
-  [hfgic≡hic] : (c : C) → h (f (g (i c))) ≡ h (i c)
-  [hfgic≡hic] c = [a≡b]→[fa≡fb] h (f (g (i c))) (i c) ([fgic≡ic] c)
-
-  hf-inv-gi : (c : C) → h (f (g (i c))) ≡ c
-  hf-inv-gi c = ≡-⇶ ([hfgic≡hic] c) ([hi≡id] c)
-
-
-
-
-
-structural-invariant : ∀ {α β} (P : ★ α → ★ β) → ★ ((lsuc α) ⊔ β)
-structural-invariant {α} {β} P = (A B : ★ α) → A ≅ B → P A → P B
-
--- Is there any property that's not a structural invariant?
--- https://www.andrew.cmu.edu/user/awodey/preprints/siu.pdf
--- according to this, every property is structurally invariant
--- but is this a logical proof or a metalogical proof?
-
---principle of invariance implies univalence
-POI→UA : ∀ {α} (A B : ★ α) → (∀ {γ δ} (P : ★ γ → ★ δ) (C D : ★ γ) → C ≅ D → P C → P D) → (A ≅ B → A ≡ B)
-POI→UA A B SIP [A≅B] = SIP (λ T → A ≡ T) A B [A≅B] (⟲ A)
-
---univalence implies principle of invariance  
-UA→POI : (∀ {α} (A B : ★ α) → (A ≅ B → A ≡ B)) → (∀ {γ δ} (P : ★ γ → ★ δ) (C D : ★ γ) → (C ≅ D) → P C → P D)
-UA→POI UA P C D [C≅D] PC = Δ (UA C D [C≅D]) P PC
-
---univalence implies function-extensionality ?
-{-
-UA→FE : (∀ {α} (A B : ★ α) → (A ≅ B → A ≡ B)) → (∀ {γ δ} (C : ★ γ) (D : ★ δ) (f g : C → D) → ((x : C) → f x ≡ g x) → f ≡ g)
-UA→FE UA C D f g fg-ext-id = 
-
--}
-
---Angiuli, Harper, Wilson
---Computational Higher Type Theory
-
---Coquand, Mortberg, Huber
---https://www.math.ias.edu/~amortberg/papers/cubicaltt.pdf
---https://arxiv.org/pdf/1607.04156v1.pdf
-
---Adam, Bezem, Coquand
---https://arxiv.org/abs/1610.00026
-
-
---Licata, Brunerie
---http://dlicata.web.wesleyan.edu/pubs/lb15cubicalsynth/lb15cubicalsynth.pdf
-
---Awodey slides
---http://www.helsinki.fi/lc2015/materials/slides_awodey.pdf
-
---https://github.com/HoTT/HoTT
-
---Voevodsky's conjecture: there is a procedure for normalization "up to homotopy"
-
-
-
-≅-Δ : 
- ∀ {α β} (A B : ★ α) ([A≅B] : A ≅ B) 
- (P : A → ★ β) (a : A) (b : B) → (([A≅B]→[A→B] [A≅B]) a ≡ b) → 
- P a → (P ∘ ([A≅B]→[B→A] [A≅B])) b
-≅-Δ A B [A≅B] P a b [fa≡b] Pa = Δ [a≡gb] P Pa    
- where
-  f : A → B
-  f = [A≅B]→[A→B] [A≅B]
-  
-  g : B → A
-  g = [A≅B]→[B→A] [A≅B]
-
-  a→[gfa≡a] : (a : A) → _≡_ ((g ∘ f) a) a
-  a→[gfa≡a] = [A≅B]→[gf≡id] [A≅B]
-
-  [a≡gfa] : _≡_ a ((g ∘ f) a)
-  [a≡gfa] = ≡-↑↓ (a→[gfa≡a] a) 
-
-  [gfa≡gb] : _≡_ ((g ∘ f) a) (g b)
-  [gfa≡gb] = [a≡b]→[fa≡fb] g (f a) b [fa≡b]
-  
-  [a≡gb] : _≡_ a (g b)
-  [a≡gb] = ≡-⇶ [a≡gfa] [gfa≡gb]
-  
-  
-
-
--- Boolean true is not equal to Boolean false
-𝕥≠𝕗 : 𝕥 ≠ 𝕗
-𝕥≠𝕗 p = ⊤≠⊥ ([a≡b]→[fa≡fb] 𝔹-★ 𝕥 𝕗 p)
-
-
-
--- No Boolean equals its own negation
-a≠!a : ∀ (a : 𝔹) → a ≠ ! a
-a≠!a 𝕥 p = ⊤≠⊥ ([a≡b]→[fa≡fb] 𝔹-★ 𝕥 𝕗 p)
-a≠!a 𝕗 p = ⊤≠⊥ (≡-↑↓ ([a≡b]→[fa≡fb] 𝔹-★ 𝕗 𝕥 p))
 
 
 -- The Peano naturals
@@ -754,70 +683,40 @@ data ℕ : ★₀ where
  𝕤 : ℕ → ℕ
 
 
--- Algebraic data-structures:
 
-
--- uniqueness
-unique : 
- ∀ {α β} {A : ★ α} (P : A → ★ β) (a : A) → 
- ★ (α ⊔ β)
-unique {α} {β} {A} P a = ∀ (a' : A) (p : P a') → a ≡ a'
-
-
---bi-implication
-_⇆_ : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-A ⇆ B = (A → B) ∧ (B → A)
-infixr 0 _⇆_ 
-
-
-_↔_ : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-_↔_ A B = (A → B) ∧ (B → A)
-infix 0 _↔_
-
---non-existence
-∄ : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
-∄ A P = ¬ ( ∃ x ∈ A , P x ) 
-
-syntax ∄ A (λ x → e) = ∄ x ∈ A , e
+pred : ℕ → ℕ
+pred 𝕫 = 𝕫
+pred (𝕤 n) = n
 
 
 
---unique existence
-∃! : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
-∃! A P = ∃ x ∈ A , (Π y ∈ A , (P x ⇆ x ≡ y))
-
-syntax ∃! A (λ x → e) = ∃! x ∈ A , e
-
-∃!₂ : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
-∃!₂ A P = ∃ x ∈ A , (P x ∧ ∄ y ∈ A , (P y ∧ y ≠ x))
-
-∃!₃ : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
-∃!₃ A P = ∃ x ∈ A , (P x ∧ Π y ∈ A , (P y → y ≡ x))
-
-∃!₄ : ∀ {α β} (A : ★ α) (P : A → ★ β) → ★ (α ⊔ β)
-∃!₄ A P = (∃ x ∈ A , P x) ∧ ((y z : A) → ((P y ∧ P z) → y ≡ z))
-   
-{- prove that these 4 definitions are equivalent -}
 
 
+
+
+
+
+
+
+-- Algebraic structures:
 
 --Latin squares:
-LatinRight : ∀ {α} {A : ★ α} (+ : A → A → A) → ★ α
-LatinRight {α} {A} +' = ∀ (a b : A) → ∃! x ∈ A , (a + x ≡ b) 
+LatinRight : ∀ {α} {A : ★ α} (• : A → A → A) → ★ α
+LatinRight {α} {A} •' = ∀ (a b : A) → ∃! x ∈ A , (a • x ≡ b) 
  where 
-  _+_ : A → A → A
-  x + y = +' x y
-  infix 2 _+_
+  _•_ : A → A → A
+  x • y = •' x y
+  infix 2 _•_
 
-LatinLeft : ∀ {α} {A : ★ α} (+ : A → A → A) → ★ α
-LatinLeft {α} {A} +' = ∀ (a b : A) → ∃! y ∈ A , (y + a ≡ b)
+LatinLeft : ∀ {α} {A : ★ α} (• : A → A → A) → ★ α
+LatinLeft {α} {A} •' = ∀ (a b : A) → ∃! y ∈ A , (y • a ≡ b)
  where
-  _+_ : A → A → A
-  x + y = +' x y
-  infix 2 _+_
+  _•_ : A → A → A
+  x • y = •' x y
+  infix 2 _•_
 
-LatinSquare : ∀ {α} {A : ★ α} (+ : A → A → A) → ★ α
-LatinSquare + = LatinLeft + ∧ LatinRight +
+LatinSquare : ∀ {α} {A : ★ α} (• : A → A → A) → ★ α
+LatinSquare • = LatinLeft • ∧ LatinRight •
 
 
 
@@ -1014,8 +913,7 @@ record Monoid : ★₁ where
   +-assoc : is-associative +
 
 
-{-
-record Group : Set ★₁ where
+record Group : Set (lsuc ℓ₁) where
  field
   M : ★₀
   + : M → M → M
@@ -1023,15 +921,11 @@ record Group : Set ★₁ where
   +-assoc : is-associative +
   +-inv : has-inverses (record {M = M; + = +; +-id = +-id})
 
--}
 
-
-{-
-record AbelianGroup : ★₁  where
+record AbelianGroup : Set (lsuc ℓ₁)  where
  field
   G : Group
   +-comm : is-commutative (Group.+ G) 
--}
 
 
 record rng : ★₁ where
@@ -1063,18 +957,27 @@ record CommutativeMonoid : ★₁ where
   +-comm : is-commutative +
 
 
--- equal functions on equal arguments have equal results:
-[f≡g]→[fa≡ga] : 
-  ∀ {α β} {A : ★ α} {B : ★ β} →
-  (f g : A → B) → (h : f ≡ g) → (a : A) → 
-  f a ≡ g a
-[f≡g]→[fa≡ga] {α} {β} {A} {B} f .f (⟲ .f) a = ⟲ (f a)
+if_then_else_ : ∀ {α β₁ β₂} {A : ★ α} {P1 : A → ★ β₁} {P2 : A → ★ β₂} → 𝔹 → (f1 : (a : A) → P1 a) → (f2 : (a : A) → P2 a) → (a : A) → (P1 a) ∨ (P2 a)
+(if 𝕥 then f1 else f2) a = ∨-cons1 (f1 a) 
+(if 𝕗 then f1 else f2) a = ∨-cons2 (f2 a)
 
-[f≡g]→[fa≡ga]₂ : 
- ∀ {α β} {A : ★ α} {B : ★ β} →
- (f g : A → B) → (h : f ≡ g) → (a1 a2 : A) → a1 ≡ a2 → 
- f a1 ≡ g a2
-[f≡g]→[fa≡ga]₂ {α} {β} {A} {B} f .f (⟲ .f) a .a (⟲ .a) = ⟲ (f a)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -- addition on Nats
@@ -1083,44 +986,80 @@ _+_ : ℕ → ℕ → ℕ
 (𝕤 x) + y = 𝕤 (x + y)
 infixr 2 _+_
 
+_+'_ : ℕ → ℕ → ℕ
+x +' y = y + x
+infix 2 _+'_
+
+
+--This attempt just returns m
 _minus_ : ℕ → ℕ → ℕ
 𝕫 minus n = 𝕫
 (𝕤 m) minus n = 𝕤 (m minus n)
 infix 2 _minus_
+
+diff : ℕ → ℕ → ℕ
+diff 𝕫 x = x
+diff x 𝕫 = x
+diff (𝕤 x) (𝕤 y) = diff x y
+
 
 
 isZero : ℕ → 𝔹
 isZero 𝕫 = 𝕥
 isZero x = 𝕗
 
-𝕤x≠𝕫 : (x : ℕ) → (𝕤 x) ≠ 𝕫
-𝕤x≠𝕫 x [𝕤x≡𝕫] = ☢
- where
-  [isZero-𝕫≡𝕥] : isZero 𝕫 ≡ 𝕥
-  [isZero-𝕫≡𝕥] = ⟲ 𝕥
-
-  [isZero-𝕤x≡𝕗] : isZero (𝕤 x) ≡ 𝕗
-  [isZero-𝕤x≡𝕗] = ⟲ 𝕗
-
-  [isZero-𝕫≡isZero-𝕤x] : isZero 𝕫 ≡ isZero (𝕤 x)
-  [isZero-𝕫≡isZero-𝕤x] = [f≡g]→[fa≡ga]₂ isZero isZero (⟲ isZero) 𝕫 (𝕤 x) (≡-↑↓ [𝕤x≡𝕫])
-
-  [𝕥≡𝕗] : 𝕥 ≡ 𝕗
-  [𝕥≡𝕗] = ≡-⇶ (≡-⇶ (≡-↑↓ [isZero-𝕫≡𝕥]) [isZero-𝕫≡isZero-𝕤x]) [isZero-𝕤x≡𝕗]
-
-  ☢ : ⊥
-  ☢ = 𝕥≠𝕗 [𝕥≡𝕗]
-
-𝕫≠𝕤x : (x : ℕ) → 𝕫 ≠ (𝕤 x)
-𝕫≠𝕤x x = ≠-↑↓ (𝕤x≠𝕫 x)
-
+{-
 ¬[≠-⇶] : (∀ {α} {A : ★ α} {x y z : A} (p : x ≠ y) (q : y ≠ z) → x ≠ z) → ⊥
 ¬[≠-⇶] hyp = ☢
  where
   ☢ : ⊥
   ☢ = hyp (𝕫≠𝕤x 𝕫) (𝕤x≠𝕫 𝕫) (⟲ 𝕫)
+-}
+
+_*_ : ℕ → ℕ → ℕ
+𝕫 * y = 𝕫 
+(𝕤 x) * y = y + (x * y) 
+infixr 2 _*_
 
 
+
+
+_gte_ : ℕ → ℕ → 𝔹
+x gte 𝕫 = 𝕥
+𝕫 gte (𝕤 n) = 𝕗
+(𝕤 n) gte (𝕤 m) = n gte (𝕤 m)
+infix 2 _gte_ 
+
+
+
+
+
+even : ℕ → 𝔹
+even 𝕫 = 𝕥
+even (𝕤 𝕫) = 𝕗
+even (𝕤 (𝕤 n)) = even n
+
+odd : ℕ → 𝔹
+odd 𝕫 = 𝕗
+odd (𝕤 𝕫) = 𝕥
+odd (𝕤 (𝕤 n)) = odd n
+
+
+Even1 : ℕ → ★₀
+Even1 n = (even n) ≡ 𝕥
+
+Odd1 : ℕ → ★₀
+Odd1 n = (odd n) ≡ 𝕥
+
+
+
+
+
+
+{-
+dependencies:
+  _+_ : ℕ → ℕ → ℕ
+-}
 _≥_ : ℕ → ℕ → ★₀
 x ≥ y = ∃ n ∈ ℕ , (y + n ≡ x)
 infix 1 _≥_ 
@@ -1153,47 +1092,571 @@ _≮_ : ℕ → ℕ → ★₀
 x ≮ y = y ≯ x
 infix 1 _≮_
 
-x<y→x≤y : (x y : ℕ) → x < y → x ≤ y
-x<y→x≤y x y (a , (b , (∧-cons [𝕤b≡a] [x+a≡y]))) = (a , [x+a≡y])
 
-x>y→x≥y : (x y : ℕ) → x > y → x ≥ y
-x>y→x≥y x y (a , (b , (∧-cons [𝕤b≡a] [y+a≡x]))) = (a , [y+a≡x])
 
+
+
+
+
+
+data Maybe {α} (A : ★ α) : ★ α where
+ Just : (a : A) → Maybe A  
+ Nothing : Maybe A
+
+
+ 
+
+-- Homogeneous binary relations : 
+{-
+  Should probably make heterogeneous n-ary relations instead and define
+  homogeneous binary relations as a special case.
+-}
+
+
+relation : ∀ {α} {A : ★ α} → ★ α
+relation {α} {A} = A → A → 𝔹
+
+
+--Reflexivity
+IsReflexive : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
+IsReflexive {α} {A} R' = (a : A) → a R a ≡ 𝕥
+ where
+  _R_ : relation {α} {A}
+  x R y = R' x y
+  infix 2 _R_
+ 
+
+IsIrreflexive : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
+IsIrreflexive {α} {A} R' = (a : A) -> a R a ≡ 𝕗
+ where
+  _R_ : relation {α} {A}
+  x R y = R' x y
+  infix 2 _R_
+
+
+
+--Symmetry
+IsSymmetric : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
+IsSymmetric {α} {A} R' = (a b : A) → a R b ≡ 𝕥 → b R a ≡ 𝕥
+ where
+  _R_ : relation {α} {A}
+  x R y = R' x y
+  infix 2 _R_
+
+
+IsAntisymmetric : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
+IsAntisymmetric {α} {A} R' = (a b : A) → (a R b ≡ 𝕥) → (b R a ≡ 𝕥) → (a ≡ b)
+ where
+  _R_ : relation {α} {A}
+  x R y = R' x y
+  infix 2 _R_
+
+
+IsAsymmetric : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
+IsAsymmetric {α} {A} R' = (a b : A) → (a R b ≡ 𝕥) → (b R a ≡ 𝕗)
+ where
+  _R_ : relation {α} {A}
+  x R y = R' x y
+  infix 2 _R_
+
+
+--Transitivity
+IsTransitive : ∀ {α} {A : ★ α} → relation { α } { A } -> ★ α
+IsTransitive {α} {A} R' = (a b c : A) → (a R b ≡ 𝕥) → (b R c ≡ 𝕥) → (a R c ≡ 𝕥)
+ where
+  _R_ : relation {α} {A}
+  x R y = R' x y
+  infix 2 _R_
+
+
+
+
+--Specific relations
+IsPreorder : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
+IsPreorder {α} {A} R = (IsReflexive R) ∧ (IsTransitive R)
+
+IsPartialOrder : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
+IsPartialOrder {α} {A} R = (IsReflexive R) ∧ (IsAntisymmetric R) ∧ (IsTransitive R)
+
+IsEquivalence : ∀ {α} {A : ★ α} → relation { α } { A } -> ★ α
+IsEquivalence {α} {A} R = (IsReflexive R) ∧ (IsSymmetric R) ∧ (IsTransitive R)
+
+
+
+--These definitions have to return universe-polymorphic function types
+--which means their return type is actually not Set (lmax m n), but SetOmega
+--which is not allowed in Agda.
+--Why?
+{-
+epimorphic : {m n : Level} {A : Set m} {B : Set n} -> (f : A -> B) -> Set (lmax m n)
+epimorphic {m} {n} {A} {B} f = 
+ {q : Level} {C : Set q} (g1 g2 : B -> C) -> FuncId (comp g1 f) (comp g2 f) -> FuncId g1 g2
+
+epimorphic-strong : {m n : Level} {A : Set m} {B : Set n} -> (f : A -> B) -> Set (lmax m n)
+epimorphic-strong {m} {n} {A} {B} f = 
+ {q : Level} {C : Set q} (g1 g2 : B -> C) -> Id (comp g1 f) (comp g2 f) -> Id g1 g2
+
+monomorphic : {m n : Level} {A : Set m} {B : Set n} -> (f : A -> B) -> Set (lmax m n)
+monomorphic {m} {n} {A} {B} f =
+ {q : Level} {C : Set q} (g1 g2 : C -> A) -> FuncId (comp f g1) (comp f g2) -> FuncId g1 g2
+
+monomorphic-strong : {m n : Level} {A : Set m} {B : Set n} -> (f : A -> B) -> Set (lmax m n)
+monomorphic-strong {m} {n} {A} {B} f = 
+ {q : Level} {C : Set q} (g1 g2 : C -> A) -> Id (comp f g1) (comp f g2) -> Id g1 g2
+
+-}  
+
+-- needs more defining axioms in order to actually characterizie it as a Functor
+record Functor {α β} {A : ★ α} {B : ★ β} : ★ (α ⊔ β) where
+ field
+  omap : A → B
+  fmap : (A → A) → (B → B)
+  
+data [_] {α} (A : ★ α) : ★ α where
+ [] : [ A ]
+ _::_ : A → [ A ] → [ A ]
+
+
+
+
+
+
+
+
+
+
+
+{-
+ Everything before this point is definitions
+ Everything after is theorems
+
+-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Basic implications:
+
+-- True implies True
+⊤→⊤ : ⊤ → ⊤
+⊤→⊤ = id
+
+⊤→⊤₂ : ⊤ → ⊤
+⊤→⊤₂ ● = ●
+
+
+-- False implies False
+⊥→⊥ : ⊥ → ⊥
+⊥→⊥ = id
+
+-- False implies True
+⊥→⊤ : ⊥ → ⊤
+⊥→⊤ ☢ = ω ☢
+
+-- True doesn't imply False
+¬[⊤→⊥] : (⊤ → ⊥) → ⊥
+¬[⊤→⊥] [⊤→⊥] = [⊤→⊥] ●
+
+
+
+
+
+
+
+-- ¬(A∨B) implies ¬(A∧B)  
+[¬[A∨B]]→[¬[A∧B]] : ∀ {α β} (A : ★ α) (B : ★ β) → (¬ (A ∨ B) → ¬ (A ∧ B))
+[¬[A∨B]]→[¬[A∧B]] A B [¬∨] (∧-cons x y) = [¬∨] (∨-cons1 x)
+
+-- (A∧B) implies (A∨B)
+[A∧B]→[A∨B] : ∀ {α β} {A : ★ α} {B : ★ β} → (A ∧ B → A ∨ B)
+[A∧B]→[A∨B] {A} {B} (∧-cons x y) = ∨-cons1 x  
+
+[A∧B]→[A∨B]₂ : ∀ {α β} {A : ★ α} {B : ★ β} → (A ∧ B → A ∨ B)
+[A∧B]→[A∨B]₂ {A} {B} (∧-cons x y) = ∨-cons2 y
+
+
+
+
+
+
+
+
+-- If A = B then A → B
+[A=B]→[A→B] : ∀ {α} {A B : ★ α} (p : A ≡ B) → (A → B)
+[A=B]→[A→B] {α} {A} {.A} (⟲ .A) x = x
+
+
+-- thus, ⊤ is not equal to ⊥ 
+⊤≠⊥ : ⊤ ≠ ⊥
+⊤≠⊥ p = [A=B]→[A→B] p ●
+
+
+
+-- Equality is reflexive
+≡-⟲ : ∀ {α} {A : ★ α} (x : A) → x ≡ x
+≡-⟲ = ⟲
+
+
+-- Equality is symmetric
+≡-↑↓ : ∀ {α} {A : ★ α} {x y : A} (p : x ≡ y) → y ≡ x
+≡-↑↓ (⟲ a) = ⟲ a
+
+
+-- Equality is transitive
+≡-⇶ : ∀ {α} {A : ★ α} {x y z : A} (p : x ≡ y) (q : y ≡ z) → x ≡ z
+≡-⇶ (⟲ x) (⟲ .x) = ⟲ x
+
+≡-⇶₂ : ∀ {α} {A : ★ α} {x y z : A} (p : x ≡ y) (q : y ≡ z) → x ≡ z
+≡-⇶₂ (⟲ x) e = e
+
+
+≠-irreflexive : ∀ {α} {A : ★ α} (x : A) → x ≠ x → ⊥
+≠-irreflexive x [x≠x] = [x≠x] (⟲ x)
+
+≠-↑↓ : ∀ {α} {A : ★ α} (x y : A) → x ≠ y → y ≠ x
+≠-↑↓ x y [x≠y] [y≡x] = ☢
+ where
+  ☢ : ⊥
+  ☢ = [x≠y] (≡-↑↓ [y≡x])
+
+
+-- Path transport
+Δ : ∀ {α β} {A : ★ α} {x y : A} (p : x ≡ y) (P : A → ★ β) → P x → P y
+Δ {α} {β} {A} {a} {.a} (⟲ .a) P pa = pa
+
+-- Propositional transport
+★-Δ : ∀ {α β} (A : ★ α) (B : ★ α) (p : A ≡ B) (P : A → ★ β) → (B → ★ β)
+★-Δ A .A (⟲ .A) [A→★] = [A→★]
+
+
+-- Functions preserve equality
+[a≡b]→[fa≡fb] : 
+ ∀ {α β} {A : ★ α} {B : ★ β} 
+ (f : A → B) (x y : A) (p : x ≡ y) → 
+ f x ≡ f y
+[a≡b]→[fa≡fb] f a .a (⟲ .a) = ⟲ (f a) 
+
+-- PI's preserve equality
+[a≡b]→[Pa≡Pb] : 
+ ∀ {α β} {A : ★ α} {B : A → ★ β} 
+ (f : (a : A) → B a) (x y : A) (p : x ≡ y) → 
+ Δ p B (f x) ≡ f y
+[a≡b]→[Pa≡Pb] f a .a (⟲ .a) = ⟲ (f a)
+
+
+-- Isomorphism is reflexive
+≅-⟲ : ∀ {α} (A : ★ α) → A ≅ A
+≅-⟲ A = ≅-cons id id (∧-cons (λ a → ⟲ a) (λ b → ⟲ b))
+
+-- Isomorphism is symmetric
+≅-↑↓ : ∀ {α} (A B : ★ α) → A ≅ B → B ≅ A
+≅-↑↓ A B (≅-cons f g fg-inv) = ≅-cons g f (∧-cons (∧-π₂ fg-inv) (∧-π₁ fg-inv))
+
+-- Isomorphism is transitive
+≅-⇶ : ∀ {α} (A B C : ★ α) → A ≅ B → B ≅ C → A ≅ C
+≅-⇶ A B C [A≅B] [B≅C] = ≅-cons (h ∘ f) (g ∘ i) (∧-cons gi-inv-hf hf-inv-gi)
+ where
+  f : A → B
+  f = [A≅B]→[A→B] [A≅B]
+
+  g : B → A
+  g = [A≅B]→[B→A] [A≅B]
+
+  h : B → C
+  h = [A≅B]→[A→B] [B≅C]
+ 
+  i : C → B
+  i = [A≅B]→[B→A] [B≅C]
+  
+  [ih≡id] : (b : B) → (i ∘ h) b ≡ b
+  [ih≡id] = [A≅B]→[gf≡id] [B≅C]
+
+  [hi≡id] : (c : C) → (h ∘ i) c ≡ c
+  [hi≡id] = [A≅B]→[fg≡id] [B≅C]
+
+  [fg≡id] : (b : B) → (f ∘ g) b ≡ b
+  [fg≡id] = [A≅B]→[fg≡id] [A≅B] 
+
+  [gf≡id] : (a : A) → (g ∘ f) a ≡ a
+  [gf≡id] = [A≅B]→[gf≡id] [A≅B]
+
+  [ihfa≡fa] : (a : A) → i (h (f a)) ≡ f a
+  [ihfa≡fa] a = [ih≡id] (f a)
+
+  [gihfa≡gfa] : (a : A) → g (i (h (f a))) ≡ g (f a)
+  [gihfa≡gfa] a = [a≡b]→[fa≡fb] g (i (h (f a))) (f a) ([ihfa≡fa] a)
+
+  gi-inv-hf : (a : A) → g (i (h (f a))) ≡ a
+  gi-inv-hf a = ≡-⇶ ([gihfa≡gfa] a) ([gf≡id] a)
+
+  [fgic≡ic] : (c : C) → f (g (i c)) ≡ i c
+  [fgic≡ic] c = [fg≡id] (i c)
+
+  [hfgic≡hic] : (c : C) → h (f (g (i c))) ≡ h (i c)
+  [hfgic≡hic] c = [a≡b]→[fa≡fb] h (f (g (i c))) (i c) ([fgic≡ic] c)
+
+  hf-inv-gi : (c : C) → h (f (g (i c))) ≡ c
+  hf-inv-gi c = ≡-⇶ ([hfgic≡hic] c) ([hi≡id] c)
+
+
+
+
+--principle of invariance implies univalence
+POI→UA : ∀ {α} (A B : ★ α) → (∀ {γ δ} (P : ★ γ → ★ δ) (C D : ★ γ) → C ≅ D → P C → P D) → (A ≅ B → A ≡ B)
+POI→UA A B SIP [A≅B] = SIP (λ T → A ≡ T) A B [A≅B] (⟲ A)
+
+--univalence implies principle of invariance  
+UA→POI : (∀ {α} (A B : ★ α) → (A ≅ B → A ≡ B)) → (∀ {γ δ} (P : ★ γ → ★ δ) (C D : ★ γ) → (C ≅ D) → P C → P D)
+UA→POI UA P C D [C≅D] PC = Δ (UA C D [C≅D]) P PC
+
+--univalence implies function-extensionality ?
+{-
+UA→FE : (∀ {α} (A B : ★ α) → (A ≅ B → A ≡ B)) → (∀ {γ δ} (C : ★ γ) (D : ★ δ) (f g : C → D) → ((x : C) → f x ≡ g x) → f ≡ g)
+UA→FE UA C D f g fg-ext-id = 
+
+-}
+
+--Angiuli, Harper, Wilson
+--Computational Higher Type Theory
+
+--Coquand, Mortberg, Huber
+--https://www.math.ias.edu/~amortberg/papers/cubicaltt.pdf
+--https://arxiv.org/pdf/1607.04156v1.pdf
+
+--Adam, Bezem, Coquand
+--https://arxiv.org/abs/1610.00026
+
+
+--Licata, Brunerie
+--http://dlicata.web.wesleyan.edu/pubs/lb15cubicalsynth/lb15cubicalsynth.pdf
+
+--Awodey slides
+--http://www.helsinki.fi/lc2015/materials/slides_awodey.pdf
+
+--https://github.com/HoTT/HoTT
+
+--Voevodsky's conjecture: there is a procedure for normalization "up to homotopy"
+
+
+
+≅-Δ :
+ -- for every pair A, B of isomorphic sets
+ ∀ {α β} (A B : ★ α) ([A≅B] : A ≅ B)
+ -- and every proposition P defined on A
+ (P : A → ★ β)
+ -- an object from A and an object from B 
+ (a : A) (b : B) →
+ let f = ≅-π₁ [A≅B] in
+  let g = ≅-π₂ [A≅B] in
+   (f a ≡ b) → P a → (P ∘ g) b
+ 
+≅-Δ A B [A≅B] P a b [fa≡b] Pa = Δ [a≡gb] P Pa    
+ where
+  f : A → B
+  f = ≅-π₁ [A≅B]
+  
+  g : B → A
+  g = ≅-π₂ [A≅B]
+
+  a→[gfa≡a] : (a : A) → _≡_ ((g ∘ f) a) a
+  a→[gfa≡a] = ∧-π₁ (≅-π₃ [A≅B])
+
+  [a≡gfa] : _≡_ a ((g ∘ f) a)
+  [a≡gfa] = ≡-↑↓ (a→[gfa≡a] a) 
+
+  [gfa≡gb] : _≡_ ((g ∘ f) a) (g b)
+  [gfa≡gb] = [a≡b]→[fa≡fb] g (f a) b [fa≡b]
+  
+  [a≡gb] : _≡_ a (g b)
+  [a≡gb] = ≡-⇶ [a≡gfa] [gfa≡gb]
+  
+{-
+    [a≡gb]
+    /     \
+   /       \
+   [a≡gfa≡gb]
+     |   |
+   [A≅B] |g∘
+         |
+      [fa≡b]
+-}
+
+
+-- Boolean true is not equal to Boolean false
+𝕥≠𝕗 : 𝕥 ≠ 𝕗
+𝕥≠𝕗 p = ⊤≠⊥ ([a≡b]→[fa≡fb] 𝔹-★ 𝕥 𝕗 p)
+
+
+
+-- No Boolean equals its own negation
+a≠!a : ∀ (a : 𝔹) → a ≠ ! a
+a≠!a 𝕥 p = ⊤≠⊥ ([a≡b]→[fa≡fb] 𝔹-★ 𝕥 𝕗 p)
+a≠!a 𝕗 p = ⊤≠⊥ (≡-↑↓ ([a≡b]→[fa≡fb] 𝔹-★ 𝕗 𝕥 p))
+
+
+
+
+
+
+
+
+
+
+
+
+-- equal functions on equal arguments have equal results:
+[f≡g]→[fa≡ga] : 
+  ∀ {α β} {A : ★ α} {B : ★ β} →
+  (f g : A → B) → (h : f ≡ g) → (a : A) → 
+  f a ≡ g a
+[f≡g]→[fa≡ga] {α} {β} {A} {B} f .f (⟲ .f) a = ⟲ (f a)
+
+[f≡g]→[fa≡ga]₂ : 
+ ∀ {α β} {A : ★ α} {B : ★ β} →
+ (f g : A → B) → (h : f ≡ g) → (a1 a2 : A) → a1 ≡ a2 → 
+ f a1 ≡ g a2
+[f≡g]→[fa≡ga]₂ {α} {β} {A} {B} f .f (⟲ .f) a .a (⟲ .a) = ⟲ (f a)
+
+
+
+
+
+𝕤x≠𝕫 : (x : ℕ) → (𝕤 x) ≠ 𝕫
+𝕤x≠𝕫 x [𝕤x≡𝕫] = ☢
+ where
+  [𝕥≡isZero-𝕫] : 𝕥 ≡ isZero 𝕫
+  [𝕥≡isZero-𝕫] = ⟲ 𝕥
+
+  [isZero-𝕤x≡𝕗] : isZero (𝕤 x) ≡ 𝕗
+  [isZero-𝕤x≡𝕗] = ⟲ 𝕗
+
+  [isZero-𝕫≡isZero-𝕤x] : isZero 𝕫 ≡ isZero (𝕤 x)
+  [isZero-𝕫≡isZero-𝕤x] = [f≡g]→[fa≡ga]₂ isZero isZero (⟲ isZero) 𝕫 (𝕤 x) (≡-↑↓ [𝕤x≡𝕫])
+
+  [𝕥≡𝕗] : 𝕥 ≡ 𝕗
+  [𝕥≡𝕗] = ≡-⇶ (≡-⇶ [𝕥≡isZero-𝕫] [isZero-𝕫≡isZero-𝕤x]) [isZero-𝕤x≡𝕗]
+
+  ☢ : ⊥
+  ☢ = 𝕥≠𝕗 [𝕥≡𝕗]
+{-
+               ☢
+               ^
+               |
+              𝕥≠𝕗
+               |
+             [𝕥≡𝕗]
+         /          \
+  [𝕥 ≡ isZero-𝕫 ≡ isZero-𝕤x ≡ 𝕗]
+     ^          ^             ^
+     |          |             |
+  def:isZero-𝕫  |isZero     def:isZero-𝕤x
+                |
+             [𝕫≡𝕤x]
+-}
+
+
+𝕫≠𝕤x : (x : ℕ) → 𝕫 ≠ (𝕤 x)
+𝕫≠𝕤x x = ≠-↑↓ (𝕤 x) 𝕫 (𝕤x≠𝕫 x)
+
+
+
+--𝕤 is an injection:
+[𝕤x≡𝕤y]→[x≡y] : (x y : ℕ) → (𝕤 x) ≡ (𝕤 y) → x ≡ y
+[𝕤x≡𝕤y]→[x≡y] x y [𝕤x≡𝕤y] = [a≡b]→[fa≡fb] pred (𝕤 x) (𝕤 y) [𝕤x≡𝕤y]
+
+
+
+
+-- 𝕫 + x ≡ x
 𝕫+x≡x : (x : ℕ) → 𝕫 + x ≡ x
-𝕫+x≡x n = ⟲ n
+𝕫+x≡x x = ⟲ x
 
+x≡𝕫+x : (x : ℕ) → x ≡ 𝕫 + x
+x≡𝕫+x x = ≡-↑↓ (𝕫+x≡x x)
+
+
+
+-- x + 𝕫 ≡ x
+
+-- base case for x + 𝕫 ≡ x
+𝕫+𝕫≡𝕫 : 𝕫 + 𝕫 ≡ 𝕫
+𝕫+𝕫≡𝕫 = ⟲ 𝕫
+ 
+-- inductive step for x + 𝕫 ≡ x
 [x+𝕫≡x]→[𝕤x+𝕫≡𝕤x] : (x : ℕ) → (x + 𝕫 ≡ x) → (𝕤 x + 𝕫 ≡ 𝕤 x)
 [x+𝕫≡x]→[𝕤x+𝕫≡𝕤x] x [x+𝕫≡x] = [a≡b]→[fa≡fb] 𝕤 (x + 𝕫) x [x+𝕫≡x] 
 
 x+𝕫≡x : (x : ℕ) → x + 𝕫 ≡ x
-x+𝕫≡x 𝕫 = ⟲ 𝕫
-x+𝕫≡x (𝕤 n) = [x+𝕫≡x]→[𝕤x+𝕫≡𝕤x] n (x+𝕫≡x n)
+x+𝕫≡x 𝕫 = 𝕫+𝕫≡𝕫
+x+𝕫≡x (𝕤 x) = [x+𝕫≡x]→[𝕤x+𝕫≡𝕤x] x (x+𝕫≡x x)
 
-x≥𝕫 : (x : ℕ) → x ≥ 𝕫
-x≥𝕫 x = (x , 𝕫+x≡x x)
+x≡x+𝕫 : (x : ℕ) → x ≡ x + 𝕫
+x≡x+𝕫 x = ≡-↑↓ (x+𝕫≡x x)
+
+
+
+
+
+
 
 𝕤𝕫+x≡𝕤x : (x : ℕ) → (𝕤 𝕫) + x ≡ 𝕤 x
 𝕤𝕫+x≡𝕤x x = ⟲ (𝕤 x)
 
+
+
+-- (𝕤 x) + y ≡ 𝕤 (x + y)
 𝕤x+y≡𝕤[x+y] : (x y : ℕ) → (𝕤 x) + y ≡ 𝕤 (x + y)
 𝕤x+y≡𝕤[x+y] x y = ⟲ (𝕤 (x + y))
 
-+-comm-base : (n : ℕ) → n + 𝕫 ≡ 𝕫 + n
-+-comm-base n = [n+𝕫≡𝕫+n]
- where
-  [n+𝕫≡n] : n + 𝕫 ≡ n
-  [n+𝕫≡n] = x+𝕫≡x n
- 
-  [n≡𝕫+n] : n ≡ 𝕫 + n
-  [n≡𝕫+n] = ≡-↑↓ (𝕫+x≡x n)
+𝕤[x+y]≡𝕤x+y : (x y : ℕ) → (𝕤 (x + y)) ≡ (𝕤 x) + y
+𝕤[x+y]≡𝕤x+y x y = ≡-↑↓ (𝕤x+y≡𝕤[x+y] x y)
 
-  [n+𝕫≡𝕫+n] = ≡-⇶ [n+𝕫≡n] [n≡𝕫+n] 
 
+
+
+
+
+
+
+-- x + (𝕤 𝕫) ≡ (𝕤 x)
+
+-- base case for x+𝕤𝕫≡𝕤x
 
 𝕫+𝕤𝕫≡𝕤𝕫 : 𝕫 + (𝕤 𝕫) ≡ (𝕤 𝕫)
 𝕫+𝕤𝕫≡𝕤𝕫 = ⟲ (𝕤 𝕫)
 
 
+-- inductive step for x+𝕤𝕫≡𝕤x
 [x+𝕤𝕫≡𝕤x]→[𝕤x+𝕤𝕫≡𝕤𝕤x] : (x : ℕ) → x + (𝕤 𝕫) ≡ 𝕤 x → (𝕤 x) + (𝕤 𝕫) ≡ 𝕤 (𝕤 x)
 [x+𝕤𝕫≡𝕤x]→[𝕤x+𝕤𝕫≡𝕤𝕤x] x [x+𝕤𝕫≡𝕤x] = [𝕤x+𝕤𝕫≡𝕤𝕤x]
  where
@@ -1205,209 +1668,49 @@ x≥𝕫 x = (x , 𝕫+x≡x x)
 
   [𝕤x+𝕤𝕫≡𝕤𝕤x] : (𝕤 x) + (𝕤 𝕫) ≡ 𝕤 (𝕤 x)
   [𝕤x+𝕤𝕫≡𝕤𝕤x] = ≡-⇶ [𝕤x+𝕤𝕫≡𝕤[x+𝕤𝕫]] [𝕤[x+𝕤𝕫]≡𝕤𝕤x]
+{-
+         [𝕤x+𝕤𝕫≡𝕤𝕤x]
+              ^
+              |
+            ≡-⇶
+              |
+   [𝕤x+𝕤𝕫 ≡ 𝕤[x+𝕤𝕫] ≡ 𝕤𝕤x]
+          ^          ^
+          |          |𝕤
+          |      [x+𝕤𝕫≡𝕤x] -- ind. hyp. 
+      𝕤x+y≡𝕤[x+y]
+          /\
+         x  𝕤𝕫
+-}
+
 
 x+𝕤𝕫≡𝕤x : (x : ℕ) → x + (𝕤 𝕫) ≡ 𝕤 x
 x+𝕤𝕫≡𝕤x 𝕫 = 𝕫+𝕤𝕫≡𝕤𝕫
 x+𝕤𝕫≡𝕤x (𝕤 n) = [x+𝕤𝕫≡𝕤x]→[𝕤x+𝕤𝕫≡𝕤𝕤x] n (x+𝕤𝕫≡𝕤x n)
 
+𝕤x≡x+𝕤𝕫 : (x : ℕ) → (𝕤 x) ≡ x + (𝕤 𝕫)
+𝕤x≡x+𝕤𝕫 x = ≡-↑↓ (x+𝕤𝕫≡𝕤x x)
 
-𝕤[x+𝕫]≡x+𝕤𝕫 : (x : ℕ) → 𝕤 (x + 𝕫) ≡ x + (𝕤 𝕫)
-𝕤[x+𝕫]≡x+𝕤𝕫 x = proof
- where
-  [x+𝕫≡x] : x + 𝕫 ≡ x
-  [x+𝕫≡x] = x+𝕫≡x x
-  
-  [𝕤[x+𝕫]≡𝕤x] : 𝕤 (x + 𝕫) ≡ 𝕤 x
-  [𝕤[x+𝕫]≡𝕤x] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) (x + 𝕫) x [x+𝕫≡x]
-  
-  [𝕤x≡x+𝕤𝕫] : 𝕤 x ≡ x + (𝕤 𝕫)
-  [𝕤x≡x+𝕤𝕫] = ≡-↑↓ (x+𝕤𝕫≡𝕤x x) 
 
-  proof : 𝕤 (x + 𝕫) ≡ x + (𝕤 𝕫)
-  proof = ≡-⇶ [𝕤[x+𝕫]≡𝕤x] [𝕤x≡x+𝕤𝕫]
 
+
+
+
+
+-- 𝕤 (x + y) ≡ x + (𝕤 y)
+
+
+-- Base case for 𝕤[x+y]≡x+𝕤y
 𝕤[𝕫+y]≡𝕫+𝕤y : (y : ℕ) → 𝕤 (𝕫 + y) ≡ 𝕫 + (𝕤 y)
 𝕤[𝕫+y]≡𝕫+𝕤y y = ⟲ (𝕤 y)
 
-[𝕤[𝕫+y]≡𝕫+𝕤y]→[𝕤[𝕫+𝕤y]≡𝕫+𝕤𝕤y] : (y : ℕ) → 𝕤 (𝕫 + y) ≡ 𝕫 + (𝕤 y) → 𝕤 (𝕫 + (𝕤 y)) ≡ 𝕫 + (𝕤 (𝕤 y))
-[𝕤[𝕫+y]≡𝕫+𝕤y]→[𝕤[𝕫+𝕤y]≡𝕫+𝕤𝕤y] y [𝕤[𝕫+y]≡𝕫+𝕤y] = [𝕤[𝕫+𝕤y]≡𝕫+𝕤𝕤y]
- where
-  [𝕤[𝕫+𝕤y]≡𝕫+𝕤𝕤y] : 𝕤 (𝕫 + (𝕤 y)) ≡ 𝕫 + (𝕤 (𝕤 y))
-  [𝕤[𝕫+𝕤y]≡𝕫+𝕤𝕤y] = 𝕤[𝕫+y]≡𝕫+𝕤y (𝕤 y)
 
-
-{-
-[[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y]]→[[𝕤[𝕤x+y]≡𝕤x+𝕤y]→[𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y]] :
- ((x y : ℕ) → (𝕤 (x + y) ≡ x + (𝕤 y)) → (𝕤 (x + 𝕤 y) ≡ x + 𝕤 (𝕤 y))) →
- (x y : ℕ) → (𝕤 ((𝕤 x) + y) ≡ (𝕤 x) + (𝕤 y)) → (𝕤 ((𝕤 x) + (𝕤 y)) ≡ (𝕤 x) + 𝕤 (𝕤 y))
-
-[[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y]]→[[𝕤[𝕤x+y]≡𝕤x+𝕤y]→[𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y]] 
- [[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y]]
- x y 
- [𝕤[𝕤x+y]≡𝕤x+𝕤y]
- 
- = [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y]
-
-  where
-   [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y] : 𝕤 ((𝕤 x) + (𝕤 y)) ≡ (𝕤 x) + 𝕤 (𝕤 y)
-   [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y] = [[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y]] (𝕤 x) y [𝕤[𝕤x+y]≡𝕤x+𝕤y]
--}
-
-
-pred : ℕ → ℕ
-pred 𝕫 = 𝕫
-pred (𝕤 n) = n
-
-pred-𝕤n≡n : (n : ℕ) → pred (𝕤 n) ≡ n
-pred-𝕤n≡n n = ⟲ n
-
-[𝕤x≡𝕤y]→[x≡y] : (x y : ℕ) → (𝕤 x) ≡ (𝕤 y) → x ≡ y
-[𝕤x≡𝕤y]→[x≡y] x y [𝕤x≡𝕤y] = [a≡b]→[fa≡fb] pred (𝕤 x) (𝕤 y) [𝕤x≡𝕤y]
-
-
-[[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y]]→[[𝕤[𝕤x+y]≡𝕤x+𝕤y]→[𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y]] :
- (x : ℕ) →
- ((y : ℕ) → (𝕤 (x + y) ≡ x + (𝕤 y)) → (𝕤 (x + (𝕤 y)) ≡ x + (𝕤 (𝕤 y)))) →
-  (y : ℕ) → (𝕤 ((𝕤 x) + y) ≡ (𝕤 x) + (𝕤 y)) → (𝕤 ((𝕤 x) + (𝕤 y)) ≡ (𝕤 x) + (𝕤 (𝕤 y)))
-
-[[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y]]→[[𝕤[𝕤x+y]≡𝕤x+𝕤y]→[𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y]] 
- x
- [[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y]]
- y
- [𝕤[𝕤x+y]≡𝕤x+𝕤y]
- 
- = [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y]
-
- where
-    
-  [𝕤x+𝕤y≡𝕤[x+𝕤y]] : (𝕤 x) + (𝕤 y) ≡ 𝕤 (x + (𝕤 y))
-  [𝕤x+𝕤y≡𝕤[x+𝕤y]] = 𝕤x+y≡𝕤[x+y] x (𝕤 y)
- 
-  [𝕤[𝕤x+𝕤y]≡𝕤[𝕤[x+𝕤y]]] : 𝕤 ((𝕤 x) + (𝕤 y)) ≡ 𝕤 (𝕤 (x + 𝕤 y))
-  [𝕤[𝕤x+𝕤y]≡𝕤[𝕤[x+𝕤y]]] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) ((𝕤 x) + (𝕤 y)) (𝕤 (x + 𝕤 y)) [𝕤x+𝕤y≡𝕤[x+𝕤y]]
- 
-  [[𝕤[𝕤[𝕤x+y]]]≡𝕤[𝕤x+𝕤y]] : (𝕤 (𝕤 ((𝕤 x) + y))) ≡ (𝕤 ((𝕤 x) + (𝕤 y)))
-  [[𝕤[𝕤[𝕤x+y]]]≡𝕤[𝕤x+𝕤y]] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) (𝕤 ((𝕤 x) + y)) ((𝕤 x) + (𝕤 y)) [𝕤[𝕤x+y]≡𝕤x+𝕤y]
-
-  [𝕤𝕤𝕤[x+y]≡𝕤𝕤[𝕤x+y]] : (𝕤 (𝕤 (𝕤 (x + y)))) ≡ 𝕤 (𝕤 ((𝕤 x) + y))
-  [𝕤𝕤𝕤[x+y]≡𝕤𝕤[𝕤x+y]] = [f≡g]→[fa≡ga]₂ (𝕤 ∘ 𝕤) (𝕤 ∘ 𝕤) (⟲ (𝕤 ∘ 𝕤)) (𝕤 (x + y)) ((𝕤 x) + y) (≡-↑↓ (𝕤x+y≡𝕤[x+y] x y)) 
-
-  [𝕤𝕤𝕤[x+y]≡𝕤[𝕤x+𝕤y]] : (𝕤 (𝕤 (𝕤 (x + y)))) ≡ (𝕤 ((𝕤 x) + (𝕤 y)))
-  [𝕤𝕤𝕤[x+y]≡𝕤[𝕤x+𝕤y]] = ≡-⇶ [𝕤𝕤𝕤[x+y]≡𝕤𝕤[𝕤x+y]] [[𝕤[𝕤[𝕤x+y]]]≡𝕤[𝕤x+𝕤y]]
-  
-  [𝕤𝕤𝕤[x+y]≡𝕤𝕤[x+𝕤y]]] : (𝕤 (𝕤 (𝕤 (x + y)))) ≡ (𝕤 (𝕤 (x + (𝕤 y))))
-  [𝕤𝕤𝕤[x+y]≡𝕤𝕤[x+𝕤y]]] = ≡-⇶ [𝕤𝕤𝕤[x+y]≡𝕤[𝕤x+𝕤y]] [𝕤[𝕤x+𝕤y]≡𝕤[𝕤[x+𝕤y]]] 
-
-  [𝕤𝕤[x+y]≡𝕤[x+𝕤y]] : (𝕤 (𝕤 (x + y))) ≡ (𝕤 (x + (𝕤 y)))
-  [𝕤𝕤[x+y]≡𝕤[x+𝕤y]] = [𝕤x≡𝕤y]→[x≡y] (𝕤 (𝕤 (x + y))) (𝕤 (x + (𝕤 y))) [𝕤𝕤𝕤[x+y]≡𝕤𝕤[x+𝕤y]]]
- 
-  [𝕤[x+y]≡x+𝕤y] : (𝕤 (x + y)) ≡ x + (𝕤 y)
-  [𝕤[x+y]≡x+𝕤y] = [𝕤x≡𝕤y]→[x≡y] (𝕤 (x + y)) (x + (𝕤 y)) [𝕤𝕤[x+y]≡𝕤[x+𝕤y]]
-  
-  [𝕤[x+𝕤y]≡x+𝕤𝕤y] : (𝕤 (x + (𝕤 y))) ≡ x + (𝕤 (𝕤 y)) 
-  [𝕤[x+𝕤y]≡x+𝕤𝕤y] = [[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y]] y [𝕤[x+y]≡x+𝕤y]
-
-  [𝕤𝕤[x+y]≡x+𝕤𝕤y] : (𝕤 (𝕤 (x + y))) ≡ x + (𝕤 (𝕤 y))
-  [𝕤𝕤[x+y]≡x+𝕤𝕤y] = ≡-⇶ [𝕤𝕤[x+y]≡𝕤[x+𝕤y]] [𝕤[x+𝕤y]≡x+𝕤𝕤y]
-
-  [𝕤𝕤𝕤[x+y]≡𝕤[x+𝕤𝕤y]] : (𝕤 (𝕤 (𝕤 (x + y)))) ≡ (𝕤 x) + (𝕤 (𝕤 y))
-  [𝕤𝕤𝕤[x+y]≡𝕤[x+𝕤𝕤y]] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) (𝕤 (𝕤 (x + y))) (x + (𝕤 (𝕤 y))) [𝕤𝕤[x+y]≡x+𝕤𝕤y]
-  
-
-  [𝕤[x+𝕤𝕤y]≡𝕤x+𝕤𝕤y] : (𝕤 (x + (𝕤 (𝕤 y)))) ≡ (𝕤 x) + (𝕤 (𝕤 y))
-  [𝕤[x+𝕤𝕤y]≡𝕤x+𝕤𝕤y] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] x (𝕤 (𝕤 y)))
- 
-  [𝕤𝕤𝕤[x+y]≡𝕤x+𝕤𝕤y]] : (𝕤 (𝕤 (𝕤 (x + y)))) ≡ 𝕤 (x + (𝕤 (𝕤 y)))
-  [𝕤𝕤𝕤[x+y]≡𝕤x+𝕤𝕤y]] = ≡-⇶ [𝕤𝕤𝕤[x+y]≡𝕤[x+𝕤𝕤y]] [𝕤[x+𝕤𝕤y]≡𝕤x+𝕤𝕤y]
-  
-  [𝕤[𝕤x+𝕤y]≡𝕤𝕤𝕤[x+y]] : (𝕤 ((𝕤 x) + (𝕤 y))) ≡ (𝕤 (𝕤 (𝕤 (x + y))))
-  [𝕤[𝕤x+𝕤y]≡𝕤𝕤𝕤[x+y]] = ≡-↑↓ [𝕤𝕤𝕤[x+y]≡𝕤[𝕤x+𝕤y]]
-  
-  [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y] : (𝕤 ((𝕤 x) + (𝕤 y))) ≡ (𝕤 x) + (𝕤 (𝕤 y))
-  [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y] = ≡-⇶ [𝕤[𝕤x+𝕤y]≡𝕤𝕤𝕤[x+y]] [𝕤𝕤𝕤[x+y]≡𝕤x+𝕤𝕤y]]
-
-
-
-
-
-
-
-[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y] : (x y : ℕ) → 𝕤 (x + y) ≡ x + (𝕤 y) → 𝕤 (x + 𝕤 y) ≡ x + 𝕤 (𝕤 y)
-[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y] 𝕫 y p = 𝕤[𝕫+y]≡𝕫+𝕤y (𝕤 y)
-[𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y] (𝕤 x) y [𝕤[𝕤x+y]≡𝕤x+𝕤y] = [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y]
- where
- [𝕤[𝕤x+y]≡𝕤𝕤[x+y]] : (𝕤 ((𝕤 x) + y)) ≡ (𝕤 (𝕤 (x + y)))
- [𝕤[𝕤x+y]≡𝕤𝕤[x+y]] = 𝕤x+y≡𝕤[x+y] (𝕤 x) y 
-
- [𝕤𝕤[x+y]≡[𝕤[𝕤x+y]] : (𝕤 (𝕤 (x + y))) ≡ (𝕤 ((𝕤 x) + y))
- [𝕤𝕤[x+y]≡[𝕤[𝕤x+y]] = ≡-↑↓ [𝕤[𝕤x+y]≡𝕤𝕤[x+y]]
-
- [𝕤x+𝕤y≡𝕤[x+𝕤y]] : (𝕤 x) + (𝕤 y) ≡ (𝕤 (x + (𝕤 y)))
- [𝕤x+𝕤y≡𝕤[x+𝕤y]] = 𝕤x+y≡𝕤[x+y] x (𝕤 y) 
- 
- 
- [𝕤[x+𝕤y]≡𝕤x+𝕤y] : (𝕤 (x + (𝕤 y))) ≡ (𝕤 x) + (𝕤 y)
- [𝕤[x+𝕤y]≡𝕤x+𝕤y] = ≡-↑↓ [𝕤x+𝕤y≡𝕤[x+𝕤y]]
-
- [𝕤𝕤[x+y]≡𝕤x+𝕤y] : (𝕤 (𝕤 (x + y))) ≡ (𝕤 x) + (𝕤 y)
- [𝕤𝕤[x+y]≡𝕤x+𝕤y] = ≡-⇶ [𝕤𝕤[x+y]≡[𝕤[𝕤x+y]] [𝕤[𝕤x+y]≡𝕤x+𝕤y]
-
- [𝕤𝕤[x+y]≡𝕤[x+𝕤y]] : (𝕤 (𝕤 (x + y))) ≡ (𝕤 (x + (𝕤 y)))
- [𝕤𝕤[x+y]≡𝕤[x+𝕤y]] = ≡-⇶ [𝕤𝕤[x+y]≡𝕤x+𝕤y] [𝕤x+𝕤y≡𝕤[x+𝕤y]]
-
- [𝕤[x+y]≡[x+𝕤y]] : (𝕤 (x + y)) ≡ x + (𝕤 y)
- [𝕤[x+y]≡[x+𝕤y]] = [𝕤x≡𝕤y]→[x≡y] (𝕤 (x + y)) (x + (𝕤 y)) [𝕤𝕤[x+y]≡𝕤[x+𝕤y]]
- 
- [𝕤[x+𝕤y]≡x+𝕤𝕤y] : (𝕤 (x + (𝕤 y))) ≡ x + (𝕤 (𝕤 y))
- [𝕤[x+𝕤y]≡x+𝕤𝕤y] = [𝕤[x+y]≡x+𝕤y]→[𝕤[x+𝕤y]≡x+𝕤𝕤y] x y [𝕤[x+y]≡[x+𝕤y]]
-
- [𝕤x+𝕤y≡x+𝕤𝕤y] : (𝕤 x) + (𝕤 y) ≡ x + (𝕤 (𝕤 y))
- [𝕤x+𝕤y≡x+𝕤𝕤y] = ≡-⇶ [𝕤x+𝕤y≡𝕤[x+𝕤y]] [𝕤[x+𝕤y]≡x+𝕤𝕤y]
-
- [𝕤[𝕤x+𝕤y]≡𝕤[x+𝕤𝕤y]] : (𝕤 ((𝕤 x) + (𝕤 y))) ≡ (𝕤 (x + (𝕤 (𝕤 y))))
- [𝕤[𝕤x+𝕤y]≡𝕤[x+𝕤𝕤y]] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) ((𝕤 x) + (𝕤 y)) (x + (𝕤 (𝕤 y))) [𝕤x+𝕤y≡x+𝕤𝕤y]
-
- [𝕤[x+𝕤𝕤y]≡𝕤x+𝕤𝕤y] : (𝕤 (x + (𝕤 (𝕤 y)))) ≡ (𝕤 x) + (𝕤 (𝕤 y))
- [𝕤[x+𝕤𝕤y]≡𝕤x+𝕤𝕤y] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] x (𝕤 (𝕤 y)))  
- 
-
- [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y] : (𝕤 ((𝕤 x) + (𝕤 y))) ≡ (𝕤 x) + (𝕤 (𝕤 y))
- [𝕤[𝕤x+𝕤y]≡𝕤x+𝕤𝕤y] = ≡-⇶ [𝕤[𝕤x+𝕤y]≡𝕤[x+𝕤𝕤y]] [𝕤[x+𝕤𝕤y]≡𝕤x+𝕤𝕤y]
-
-
-[𝕤[x+y]≡x+𝕤y]→[𝕤[𝕤x+y]≡𝕤x+𝕤y] : 
- (y : ℕ) → 
- ((x : ℕ) → (𝕤 (x + y)) ≡ x + (𝕤 y)) →
- (x : ℕ) → (𝕤 ((𝕤 x) + y)) ≡ (𝕤 x) + (𝕤 y) 
-[𝕤[x+y]≡x+𝕤y]→[𝕤[𝕤x+y]≡𝕤x+𝕤y]
- y
- x→[𝕤[x+y]≡x+𝕤y]
- x
- = [𝕤[𝕤x+y]≡𝕤x+𝕤y]
-  where 
-   [𝕤[x+y]≡x+𝕤y] : (𝕤 (x + y)) ≡ x + (𝕤 y)
-   [𝕤[x+y]≡x+𝕤y] = x→[𝕤[x+y]≡x+𝕤y] x
-
-   [𝕤x+y≡𝕤[x+y]] : (𝕤 x) + y ≡ (𝕤 (x + y))
-   [𝕤x+y≡𝕤[x+y]] = 𝕤x+y≡𝕤[x+y] x y
-
-   [𝕤x+y≡x+𝕤y] : (𝕤 x) + y ≡ x + (𝕤 y)
-   [𝕤x+y≡x+𝕤y] = ≡-⇶ [𝕤x+y≡𝕤[x+y]] [𝕤[x+y]≡x+𝕤y]
-
-   [𝕤[𝕤x+y]≡𝕤[x+𝕤y]] : (𝕤 ((𝕤 x) + y)) ≡ (𝕤 ( x + (𝕤 y)))
-   [𝕤[𝕤x+y]≡𝕤[x+𝕤y]] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) ((𝕤 x) + y) ( x + (𝕤 y)) [𝕤x+y≡x+𝕤y]
-
-   [𝕤[x+𝕤y]≡𝕤x+𝕤y] : (𝕤 (x + (𝕤 y))) ≡ (𝕤 x) + (𝕤 y)
-   [𝕤[x+𝕤y]≡𝕤x+𝕤y] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] x (𝕤 y))   
-
-   [𝕤[𝕤x+y]≡𝕤x+𝕤y] :  (𝕤 ((𝕤 x) + y)) ≡ (𝕤 x) + (𝕤 y)
-   [𝕤[𝕤x+y]≡𝕤x+𝕤y] = ≡-⇶ [𝕤[𝕤x+y]≡𝕤[x+𝕤y]] [𝕤[x+𝕤y]≡𝕤x+𝕤y]
-
-[𝕤[x+y]≡x+𝕤y]→[𝕤[𝕤x+y]≡𝕤x+𝕤y]₂ :
+-- Inductive step for 𝕤[x+y]≡x+𝕤y
+[𝕤[x+y]≡x+𝕤y]→[𝕤[𝕤x+y]≡𝕤x+𝕤y] :
  (x y : ℕ) → 
  (𝕤 (x + y)) ≡ x + (𝕤 y) →
  (𝕤 ((𝕤 x) + y)) ≡ (𝕤 x) + (𝕤 y)
-[𝕤[x+y]≡x+𝕤y]→[𝕤[𝕤x+y]≡𝕤x+𝕤y]₂ x y [𝕤[x+y]≡x+𝕤y] = [𝕤[𝕤x+y]≡𝕤x+𝕤y] 
+[𝕤[x+y]≡x+𝕤y]→[𝕤[𝕤x+y]≡𝕤x+𝕤y] x y [𝕤[x+y]≡x+𝕤y] = [𝕤[𝕤x+y]≡𝕤x+𝕤y] 
  where
    [𝕤x+y≡𝕤[x+y]] : (𝕤 x) + y ≡ (𝕤 (x + y))
    [𝕤x+y≡𝕤[x+y]] = 𝕤x+y≡𝕤[x+y] x y
@@ -1419,105 +1722,163 @@ pred-𝕤n≡n n = ⟲ n
    [𝕤[𝕤x+y]≡𝕤[x+𝕤y]] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) ((𝕤 x) + y) ( x + (𝕤 y)) [𝕤x+y≡x+𝕤y]
 
    [𝕤[x+𝕤y]≡𝕤x+𝕤y] : (𝕤 (x + (𝕤 y))) ≡ (𝕤 x) + (𝕤 y)
-   [𝕤[x+𝕤y]≡𝕤x+𝕤y] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] x (𝕤 y))   
+   [𝕤[x+𝕤y]≡𝕤x+𝕤y] = 𝕤[x+y]≡𝕤x+y x (𝕤 y)   
 
+   
    [𝕤[𝕤x+y]≡𝕤x+𝕤y] :  (𝕤 ((𝕤 x) + y)) ≡ (𝕤 x) + (𝕤 y)
    [𝕤[𝕤x+y]≡𝕤x+𝕤y] = ≡-⇶ [𝕤[𝕤x+y]≡𝕤[x+𝕤y]] [𝕤[x+𝕤y]≡𝕤x+𝕤y]
 
+{-
+       [𝕤[𝕤x+y]≡𝕤x+𝕤y]
+               ^
+               |
+              ≡-⇶
+               |
+   [𝕤[𝕤x+y] ≡  𝕤[x+𝕤y]  ≡  𝕤x+𝕤y]
+           ^             ^
+          𝕤|             |
+      [𝕤x+y≡x+𝕤y]        |
+           ^             |
+           |       𝕤[x+y]≡𝕤x+y
+         ≡-⇶            /\               
+           |            x  𝕤y
+  [𝕤x+y≡𝕤[x+y] ≡ x+𝕤y]
+       ^        ^
+       |        |
+   𝕤x+y≡𝕤[x+y]  |
+       /\       |
+      x  y      |
+           [𝕤[x+y]≡x+𝕤y] -- ind. hyp.
   
+-}
+
 
 𝕤[x+y]≡x+𝕤y : (x y : ℕ) → 𝕤 (x + y) ≡ x + (𝕤 y)
 𝕤[x+y]≡x+𝕤y 𝕫 y  = 𝕤[𝕫+y]≡𝕫+𝕤y y
 𝕤[x+y]≡x+𝕤y (𝕤 x) y = [𝕤[𝕤x+y]≡𝕤x+𝕤y]
  where
   [𝕤[𝕤x+y]≡𝕤x+𝕤y] : (𝕤 ((𝕤 x) + y)) ≡ (𝕤 x) + (𝕤 y)
-  [𝕤[𝕤x+y]≡𝕤x+𝕤y] = [𝕤[x+y]≡x+𝕤y]→[𝕤[𝕤x+y]≡𝕤x+𝕤y]₂ x y (𝕤[x+y]≡x+𝕤y x y)
+  [𝕤[𝕤x+y]≡𝕤x+𝕤y] = [𝕤[x+y]≡x+𝕤y]→[𝕤[𝕤x+y]≡𝕤x+𝕤y] x y (𝕤[x+y]≡x+𝕤y x y)
 
-𝕤x+y≡x+𝕤y : (x y : ℕ) → (𝕤 x) + y ≡ x + (𝕤 y)
-𝕤x+y≡x+𝕤y x y = ≡-⇶ (𝕤x+y≡𝕤[x+y] x y) (𝕤[x+y]≡x+𝕤y x y)
-
-[𝕤n+x]+y≡[n+x]+𝕤y : (x y n : ℕ) → ((𝕤 n) + x) + y ≡ (n + x) + 𝕤 y
-[𝕤n+x]+y≡[n+x]+𝕤y x y n = [[𝕤n+x]+y≡[n+x]+𝕤y]
- where
- [𝕤n+x]≡𝕤[n+x] : (𝕤 n) + x ≡ 𝕤 (n + x)
- [𝕤n+x]≡𝕤[n+x] = 𝕤x+y≡𝕤[x+y] n x
-
- _⊗_ : ℕ → ℕ → ℕ
- x ⊗ y = y + x
- infix 2 _⊗_
-
- [[𝕤n+x]+y≡𝕤[n+x]+y] : ((𝕤 n) + x) + y ≡ (𝕤 (n + x)) + y
- [[𝕤n+x]+y≡𝕤[n+x]+y] = [f≡g]→[fa≡ga]₂ (_⊗_ y)  (_⊗_ y) (⟲ (_⊗_ y)) ((𝕤 n) + x) (𝕤 (n + x)) [𝕤n+x]≡𝕤[n+x]
- 
-
- [𝕤[n+x]+y≡[n+x]+𝕤y] : (𝕤 (n + x)) + y ≡ (n + x) + (𝕤 y)
- [𝕤[n+x]+y≡[n+x]+𝕤y] = 𝕤x+y≡x+𝕤y (n + x) y
-
- [[𝕤n+x]+y≡[n+x]+𝕤y] : ((𝕤 n) + x) + y ≡ (n + x) + (𝕤 y)
- [[𝕤n+x]+y≡[n+x]+𝕤y] = ≡-⇶ [[𝕤n+x]+y≡𝕤[n+x]+y] [𝕤[n+x]+y≡[n+x]+𝕤y] 
+x+𝕤y≡𝕤[x+y] : (x y : ℕ) → x + (𝕤 y) ≡ (𝕤 (x + y))
+x+𝕤y≡𝕤[x+y] x y = ≡-↑↓ (𝕤[x+y]≡x+𝕤y x y)
 
 
 
 
--- Lemma 
+
+
+
+
+
+
+-- Base case for [a+x]+y≡x+[a+y]
+[𝕫+x]+y≡x+[𝕫+y] : (x y : ℕ) → (𝕫 + x) + y ≡ x + (𝕫 + y)
+[𝕫+x]+y≡x+[𝕫+y] x y = ⟲ (x + y)
+
+
+-- Inductive step for [a+x]+y≡x+[a+y]
+
 [[a+x]+y≡x+[a+y]]→[[𝕤a+x]+y≡x+[𝕤a+y]] : (x y a : ℕ) → (a + x) + y ≡ x + (a + y) → ((𝕤 a) + x) + y ≡ x + ((𝕤 a) + y)
 [[a+x]+y≡x+[a+y]]→[[𝕤a+x]+y≡x+[𝕤a+y]] x y a [[a+x]+y≡x+[a+y]] = [[𝕤a+x]+y≡x+[𝕤a+y]]
  where
-  [𝕤[[a+x]+y]≡[𝕤[a+x]]+y] : (𝕤 ((a + x) + y)) ≡ (𝕤 (a + x)) + y
-  [𝕤[[a+x]+y]≡[𝕤[a+x]]+y] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] (a + x) y) 
 
-  [𝕤[a+x]+y≡𝕤[[a+x]+y]] : (𝕤 (a + x)) + y ≡ (𝕤 ((a + x) + y))
-  [𝕤[a+x]+y≡𝕤[[a+x]+y]] = ≡-↑↓ [𝕤[[a+x]+y]≡[𝕤[a+x]]+y]
+-- Defs
+  +y : ℕ → ℕ
+  +y = _+'_ y
 
-  [𝕤[a+x]≡𝕤a+x] : (𝕤 (a + x)) ≡ (𝕤 a) + x
-  [𝕤[a+x]≡𝕤a+x] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] a x)
+  x+ : ℕ → ℕ
+  x+ = _+_ x
 
-  _⊕_ : ℕ → ℕ → ℕ
-  x ⊕ y = y + x
-  infix 2 _⊕_ 
 
-  [𝕤[a+x]+y≡[𝕤a+x]+y] : (𝕤 (a + x)) + y ≡ ((𝕤 a) + x) + y
-  [𝕤[a+x]+y≡[𝕤a+x]+y] = [f≡g]→[fa≡ga]₂ (_⊕_ y) (_⊕_ y) (⟲ (_⊕_ y))  (𝕤 (a + x)) ((𝕤 a) + x) [𝕤[a+x]≡𝕤a+x]
+--  1)
+  [𝕤a+x≡𝕤[a+x]] : (𝕤 a) + x ≡ (𝕤 (a + x))
+  [𝕤a+x≡𝕤[a+x]] = 𝕤x+y≡𝕤[x+y] a x
 
   [[𝕤a+x]+y≡𝕤[a+x]+y] : ((𝕤 a) + x) + y ≡ (𝕤 (a + x)) + y
-  [[𝕤a+x]+y≡𝕤[a+x]+y] = ≡-↑↓ [𝕤[a+x]+y≡[𝕤a+x]+y]
+  [[𝕤a+x]+y≡𝕤[a+x]+y] = [f≡g]→[fa≡ga]₂ +y +y (⟲ +y) ((𝕤 a) + x) (𝕤 (a + x)) [𝕤a+x≡𝕤[a+x]]
 
-  [[𝕤a+x]+y≡𝕤[[a+x]+y]] : ((𝕤 a) + x) + y ≡ (𝕤 ((a + x) + y))
-  [[𝕤a+x]+y≡𝕤[[a+x]+y]] = ≡-⇶ [[𝕤a+x]+y≡𝕤[a+x]+y] [𝕤[a+x]+y≡𝕤[[a+x]+y]]
 
-  [𝕤[x+[a+y]]≡𝕤x+[a+y]] : (𝕤 (x + (a + y))) ≡ (𝕤 x) + (a + y)
-  [𝕤[x+[a+y]]≡𝕤x+[a+y]] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] x (a + y))
-  
-  [𝕤x+[a+y]≡x+𝕤[a+y]] : (𝕤 x) + (a + y) ≡ x + (𝕤 (a + y))
-  [𝕤x+[a+y]≡x+𝕤[a+y]] = 𝕤x+y≡x+𝕤y x (a + y)
+--  2)
+  [𝕤[a+x]+y≡𝕤[[a+x]+y]] : (𝕤 (a + x)) + y ≡ (𝕤 ((a + x) + y))
+  [𝕤[a+x]+y≡𝕤[[a+x]+y]] = 𝕤x+y≡𝕤[x+y] (a + x) y
 
-  [x+𝕤[a+y]≡x+[𝕤a+y]] : x + (𝕤 (a + y)) ≡ x + ((𝕤 a) + y)
-  [x+𝕤[a+y]≡x+[𝕤a+y]] = [f≡g]→[fa≡ga]₂ (_+_ x) (_+_ x) (⟲ (_+_ x)) (𝕤 (a + y)) ((𝕤 a) + y) (≡-↑↓ (𝕤x+y≡𝕤[x+y] a y))
- 
+
+
+--  3)  
   [𝕤[[a+x]+y]≡𝕤[x+[a+y]]] : (𝕤 ((a + x) + y)) ≡ (𝕤 (x + (a + y)))
   [𝕤[[a+x]+y]≡𝕤[x+[a+y]]] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) ((a + x) + y) (x + (a + y)) [[a+x]+y≡x+[a+y]]
 
-  [[𝕤a+x]+y≡𝕤[x+[a+y]]] : ((𝕤 a) + x) + y ≡ (𝕤 (x + (a + y)))
-  [[𝕤a+x]+y≡𝕤[x+[a+y]]] = ≡-⇶ [[𝕤a+x]+y≡𝕤[[a+x]+y]] [𝕤[[a+x]+y]≡𝕤[x+[a+y]]]
+
+--  4)
+  [𝕤[x+[a+y]]≡x+𝕤[a+y]] : (𝕤 (x + (a + y))) ≡ x + (𝕤 (a + y))
+  [𝕤[x+[a+y]]≡x+𝕤[a+y]] = 𝕤[x+y]≡x+𝕤y x (a + y)
+
+  
+--  5)
+  
+  [𝕤[a+y]≡𝕤a+y] : (𝕤 (a + y)) ≡ (𝕤 a) + y
+  [𝕤[a+y]≡𝕤a+y] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] a y)
+  
+  [x+𝕤[a+y]≡x+[𝕤a+y]] : x + (𝕤 (a + y)) ≡ x + ((𝕤 a) + y)
+  [x+𝕤[a+y]≡x+[𝕤a+y]] = [f≡g]→[fa≡ga]₂ (x+) (x+) (⟲ x+) (𝕤 (a + y)) ((𝕤 a) + y) [𝕤[a+y]≡𝕤a+y]
  
-  [[𝕤a+x]+y≡𝕤x+[a+y]] : ((𝕤 a) + x) + y ≡ (𝕤 x) + (a + y)
-  [[𝕤a+x]+y≡𝕤x+[a+y]] = ≡-⇶ [[𝕤a+x]+y≡𝕤[x+[a+y]]] [𝕤[x+[a+y]]≡𝕤x+[a+y]]
 
-  [[𝕤a+x]+y≡x+𝕤[a+y]] : ((𝕤 a) + x) + y ≡ x + (𝕤 (a + y))
-  [[𝕤a+x]+y≡x+𝕤[a+y]] = ≡-⇶ [[𝕤a+x]+y≡𝕤x+[a+y]] [𝕤x+[a+y]≡x+𝕤[a+y]]
-
+-- Goal:
   [[𝕤a+x]+y≡x+[𝕤a+y]] : ((𝕤 a) + x) + y ≡ x + ((𝕤 a) + y)
-  [[𝕤a+x]+y≡x+[𝕤a+y]] = ≡-⇶ [[𝕤a+x]+y≡x+𝕤[a+y]] [x+𝕤[a+y]≡x+[𝕤a+y]]
+  [[𝕤a+x]+y≡x+[𝕤a+y]] = ≡-⇶ [[𝕤a+x]+y≡𝕤[a+x]+y] (             --1
+                        ≡-⇶ [𝕤[a+x]+y≡𝕤[[a+x]+y]] (           --2
+                        ≡-⇶ [𝕤[[a+x]+y]≡𝕤[x+[a+y]]] (         --3
+                        ≡-⇶ [𝕤[x+[a+y]]≡x+𝕤[a+y]]             --4
+                            [x+𝕤[a+y]≡x+[𝕤a+y]]               --5
+                       )))
+
+  
+
+-- Diagram :
+{-
+                           [[𝕤a+x]+y ≡ x+[𝕤a+y]]
+                                     ^
+  ___________________________________|_____________________________________________
+  |                                                                                |
+            1          2           3            4            5
+  [[𝕤a+x]+y ≡ 𝕤[a+x]+y ≡ 𝕤[[a+x]+y] ≡ 𝕤[x+[a+y]]          ≡   x+𝕤[a+y] ≡ x+[𝕤a+y]]     
+           ^            ^           ^                      ^             ^  
+           |+y          |          𝕤|                      |             |
+           |            |  [[a+x]+y]≡x+[a+y]] -- ind-hyp   |             | x+
+      [𝕤a+x≡𝕤[a+x]]     |                                  |             |
+           ^      𝕤[x+y]≡𝕤x+y                              |      [𝕤[a+y]≡𝕤a+y]
+           |           / \                           𝕤[x+y]≡x+𝕤y         ^
+           |         a+x  y                               /\             |
+           |                                             x  a+y    𝕤[x+y]≡𝕤x+y
+       𝕤x+y≡𝕤[x+y]                                                      /\
+          / \                                                          a  y
+         a   x
+-}
 
 
 
 [a+x]+y≡x+[a+y] : (x y a : ℕ) → (a + x) + y ≡ x + (a + y)
-[a+x]+y≡x+[a+y] x y 𝕫 = ⟲ (x + y)
+[a+x]+y≡x+[a+y] x y 𝕫 = [𝕫+x]+y≡x+[𝕫+y] x y
 [a+x]+y≡x+[a+y] x y (𝕤 n) = [[a+x]+y≡x+[a+y]]→[[𝕤a+x]+y≡x+[𝕤a+y]] x y n ([a+x]+y≡x+[a+y] x y n)
 
+
+
+
+
+
+
+
+--addition is commutative
 x+y≡y+x : (x y : ℕ) → x + y ≡ y + x
 x+y≡y+x x y = [x+y≡y+x]
  where
+
+-- Defs :
+  x+ : ℕ → ℕ
+  x+ = _+_ x
+
+--
   [[y+x]+𝕫≡x+[y+𝕫]] : (y + x) + 𝕫 ≡ x + (y + 𝕫)
   [[y+x]+𝕫≡x+[y+𝕫]] = [a+x]+y≡x+[a+y] x 𝕫 y
 
@@ -1528,7 +1889,7 @@ x+y≡y+x x y = [x+y≡y+x]
   [y+𝕫≡y] = x+𝕫≡x y
 
   [x+[y+𝕫]≡x+y] : x + (y + 𝕫) ≡ x + y
-  [x+[y+𝕫]≡x+y] = [f≡g]→[fa≡ga]₂ (_+_ x) (_+_ x) (⟲ (_+_ x)) (y + 𝕫) y [y+𝕫≡y]
+  [x+[y+𝕫]≡x+y] = [f≡g]→[fa≡ga]₂ x+ x+ (⟲ x+) (y + 𝕫) y [y+𝕫≡y]
 
   [x+[y+𝕫]≡y+x] : x + (y + 𝕫) ≡ y + x
   [x+[y+𝕫]≡y+x] = ≡-⇶ (≡-↑↓ [[y+x]+𝕫≡x+[y+𝕫]]) [[y+x]+𝕫≡y+x]
@@ -1536,18 +1897,22 @@ x+y≡y+x x y = [x+y≡y+x]
   [x+y≡y+x] : x + y ≡ y + x
   [x+y≡y+x] = ≡-⇶ (≡-↑↓ [x+[y+𝕫]≡x+y]) [x+[y+𝕫]≡y+x]
 
+
+-- addition is associative
 [a+b]+c≡a+[b+c] : (a b c : ℕ) → (a + b) + c ≡ a + (b + c)
 [a+b]+c≡a+[b+c] a b c = [[a+b]+c≡a+[b+c]]
  where
+
+-- Defs :
+  +c : ℕ → ℕ
+  +c = _+'_ c
+
+--
   [b+a≡a+b] : b + a ≡ a + b
   [b+a≡a+b] = x+y≡y+x b a
 
-  _⊕_ : ℕ → ℕ → ℕ
-  x ⊕ y = y + x
-  infix 2 _⊕_
-
   [[b+a]+c≡[a+b]+c] : (b + a) + c ≡ (a + b) + c
-  [[b+a]+c≡[a+b]+c] = [f≡g]→[fa≡ga]₂ (_⊕_ c) (_⊕_ c) (⟲ (_⊕_ c)) (b + a) (a + b) [b+a≡a+b]  
+  [[b+a]+c≡[a+b]+c] = [f≡g]→[fa≡ga]₂ +c +c (⟲ +c) (b + a) (a + b) [b+a≡a+b]  
 
   [[b+a]+c≡a+[b+c]] : (b + a) + c ≡ a + (b + c)
   [[b+a]+c≡a+[b+c]] = [a+x]+y≡x+[a+y] a c b
@@ -1555,6 +1920,48 @@ x+y≡y+x x y = [x+y≡y+x]
 
   [[a+b]+c≡a+[b+c]] : (a + b) + c ≡ a + (b + c)
   [[a+b]+c≡a+[b+c]] = ≡-⇶ (≡-↑↓ [[b+a]+c≡[a+b]+c]) [[b+a]+c≡a+[b+c]]
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+-- less than implies less than or equal
+x<y→x≤y : (x y : ℕ) → x < y → x ≤ y
+x<y→x≤y x y (a , (b , (∧-cons [𝕤b≡a] [x+a≡y]))) = (a , [x+a≡y])
+
+-- greater than implies greater than or equal
+x>y→x≥y : (x y : ℕ) → x > y → x ≥ y
+x>y→x≥y x y (a , (b , (∧-cons [𝕤b≡a] [y+a≡x]))) = (a , [y+a≡x])
+
+{-
+x≰y→x≮y : (x y : ℕ) → x ≰ y → x ≮ y
+
+x≱y→x≯y : (x y : ℕ) → x ≱ y → x ≯ y
+-}
+
+{-
+x<y→x≱y
+
+x>y→x≰y
+-}
+
+x≥𝕫 : (x : ℕ) → x ≥ 𝕫
+x≥𝕫 x = (x , 𝕫+x≡x x)
+
+
+
+pred-𝕤n≡n : (n : ℕ) → pred (𝕤 n) ≡ n
+pred-𝕤n≡n n = ⟲ n
 
 
  
@@ -1597,23 +2004,6 @@ x<𝕤x x = (𝕤 𝕫 , (𝕫 , (∧-cons (⟲ (𝕤 𝕫)) (x+𝕤𝕫≡𝕤x
 𝕤x>𝕫 𝕫 = 𝕤𝕫>𝕫
 𝕤x>𝕫 (𝕤 n) = [𝕤x>𝕫]→[𝕤𝕤x>𝕫] n (𝕤x>𝕫 n)
 
-
-
-even : ℕ → 𝔹
-even 𝕫 = 𝕥
-even (𝕤 𝕫) = 𝕗
-even (𝕤 (𝕤 n)) = even n
-
-odd : ℕ → 𝔹
-odd 𝕫 = 𝕗
-odd (𝕤 𝕫) = 𝕥
-odd (𝕤 (𝕤 n)) = odd n
-
-Even1 : ℕ → ★₀
-Even1 n = (even n) ≡ 𝕥
-
-Odd1 : ℕ → ★₀
-Odd1 n = (odd n) ≡ 𝕥
 
 𝕫-Even1 : Even1 𝕫
 𝕫-Even1 = ⟲ 𝕥
@@ -1715,11 +2105,6 @@ even-𝕤𝕫≡𝕗 = ⟲ 𝕗
 Even→[¬Odd] : (n : ℕ) → Even n → ¬ (Odd n)
 Even→[¬Odd] n [n-Even] = 
 -}
-_gte_ : ℕ → ℕ → 𝔹
-x gte 𝕫 = 𝕥
-𝕫 gte (𝕤 n) = 𝕗
-(𝕤 n) gte (𝕤 m) = n gte (𝕤 m)
-infix 2 _gte_ 
 
 x-gte-𝕫→x≥𝕫 : (x : ℕ) → x gte 𝕫 ≡ 𝕥 → x ≥ 𝕫
 x-gte-𝕫→x≥𝕫 x [x-gte-𝕫≡𝕥] = [x≥𝕫]
@@ -1759,10 +2144,6 @@ x≤y→y≤z→x≤z x y z (a , [x+a≡y]) (b , [y+b≡z]) = ((a + b) , [x+[a+b
   [x+[a+b]≡z] : x + (a + b) ≡ z
   [x+[a+b]≡z] = ≡-⇶ [x+[a+b]≡y+b] [y+b≡z]
 
-_⊕_ : ℕ → ℕ → ℕ
-x ⊕ y = y + x
-infix 2 _⊕_
-
 
 x<y→y<z→x<z : (x y z : ℕ) → x < y → y < z → x < z
 x<y→y<z→x<z 
@@ -1779,7 +2160,7 @@ x<y→y<z→x<z
 
 
    [𝕤a'+b≡a+b] : (𝕤 a') + b ≡ a + b
-   [𝕤a'+b≡a+b] = [f≡g]→[fa≡ga]₂ (_⊕_ b) (_⊕_ b) (⟲ (_⊕_ b)) (𝕤 a') a [𝕤a'≡a]
+   [𝕤a'+b≡a+b] = [f≡g]→[fa≡ga]₂ (_+'_ b) (_+'_ b) (⟲ (_+'_ b)) (𝕤 a') a [𝕤a'≡a]
  
    [𝕤a'+b≡𝕤[a'+b]] : (𝕤 a') + b ≡ 𝕤 (a' + b)
    [𝕤a'+b≡𝕤[a'+b]] = 𝕤x+y≡𝕤[x+y] a' b
@@ -1811,7 +2192,7 @@ x<y→y<z→x<z
 -- [y+b≡z]
 
    [[x+a]+b≡y+b] : (x + a) + b ≡ y + b
-   [[x+a]+b≡y+b] = [f≡g]→[fa≡ga]₂ (_⊕_ b) (_⊕_ b) (⟲ (_⊕_ b)) (x + a) y [x+a≡y]
+   [[x+a]+b≡y+b] = [f≡g]→[fa≡ga]₂ (_+'_ b) (_+'_ b) (⟲ (_+'_ b)) (x + a) y [x+a≡y]
 
    [[x+a]+b≡z] : (x + a) + b ≡ z
    [[x+a]+b≡z] = ≡-⇶ [[x+a]+b≡y+b] [y+b≡z]
@@ -1998,17 +2379,6 @@ x+𝕤y≠x x y [x+𝕤y≡x] = ☢
 -}
 
 
-{-
-_minus₀ : ℕ → ℕ → ℕ
--}
-
-
--- multiplication on Nats
-_*_ : ℕ → ℕ → ℕ
-𝕫 * y = 𝕫 
-(𝕤 x) * y = y + (x * y) 
-infixr 2 _*_
-
 
 𝕫*x≡𝕫 : (x : ℕ) → 𝕫 * x ≡ 𝕫
 𝕫*x≡𝕫 x = ⟲ 𝕫
@@ -2016,7 +2386,7 @@ infixr 2 _*_
 𝕤𝕫*x≡x : (x : ℕ) → (𝕤 𝕫) * x ≡ x
 𝕤𝕫*x≡x x = [𝕤𝕫*x≡x] 
  where
-  [𝕤𝕫*x≡x+[𝕫*x]] : (𝕤 𝕫) * x ≡ x + (𝕫 * x)
+  [𝕤𝕫*x≡x+[𝕫*x]] : ((𝕤 𝕫) * x) ≡ (x + (𝕫 * x))
   [𝕤𝕫*x≡x+[𝕫*x]] = ⟲ (x + (𝕫 * x))
 
   [x+[𝕫*x]≡x+𝕫] : x + (𝕫 * x) ≡ x + 𝕫
@@ -2030,12 +2400,6 @@ infixr 2 _*_
  
   [𝕤𝕫*x≡x] : (𝕤 𝕫) * x ≡ x
   [𝕤𝕫*x≡x] = ≡-⇶ [𝕤𝕫*x≡x+𝕫] [x+𝕫≡x]
-
-
-diff : ℕ → ℕ → ℕ
-diff 𝕫 x = x
-diff x 𝕫 = x
-diff (𝕤 x) (𝕤 y) = diff x y
 
 diff-𝕫-𝕫≡𝕫 : diff 𝕫 𝕫 ≡ 𝕫
 diff-𝕫-𝕫≡𝕫 = ⟲ 𝕫
@@ -2165,10 +2529,6 @@ diff-𝕤x-𝕫≠𝕫 x [diff-𝕤x-𝕫≡𝕫] = ☢
 {-
 diff-x-y≡diff-y-x
 -}
-{-
-[≡0%n] 
-data Even (n : ℕ) : ★₀ where
--}
 
 {-
 +-assoc : is-associative +
@@ -2211,24 +2571,6 @@ add-id =
 
 
 
-fiber : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → (b : B) → ★ (α ⊔ β)
-fiber {α} {β} {A} {B} f b = ∃ a ∈ A , (f a ≡ b) 
-
-
-Fibers : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
-Fibers {α} {β} {A} {B} f = ∃ b ∈ B , (fiber f b)
-
-
-NoFibers : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
-NoFibers {α} {β} {A} {B} f = ∃ b ∈ B , ((fiber f b) → ⊥)
-
-
-fibrate : ∀ {α β} {A : ★ α} {B : ★ β} → (f : A → B) → A → Fibers f
-fibrate {α} {β} {A} {B} f a = ( f a , ( a , ⟲ (f a))) 
-
-unfibrate : ∀ {α β} {A : ★ α} {B : ★ β} → (f : A → B) → Fibers f → A
-unfibrate {α} {β} {A} {B} f fib = π₁ (π₂ fib)
-
 
 fib-unfib-is-id : ∀ {α β} {A : ★ α} {B : ★ β} → (f : A → B) → (a : A) → a ≡ (unfibrate f (fibrate f a))
 fib-unfib-is-id {α} {β} {A} {B} f a = ⟲ a
@@ -2236,16 +2578,6 @@ fib-unfib-is-id {α} {β} {A} {B} f a = ⟲ a
 
 fib-unfib-is-id-strong : ∀ {α β} {A : ★ α} {B : ★ β} → (f : A → B) → id ≡ ((unfibrate f) ∘ (fibrate f))
 fib-unfib-is-id-strong {α} {β} {A} {B} f = ⟲ (λ a → a)
-
-injection : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
-injection {α} {β} {A} {B} f = (a1 a2 : A) → (f a1 ≡ f a2) → (a1 ≡ a2)
-
-surjection : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
-surjection {α} {β} {A} {B} f = (b : B) → fiber f b 
-
-
-bijection : ∀ {α β} {A : ★ α} {B : ★ β} (f : A → B) → ★ (α ⊔ β)
-bijection {α} {β} {A} {B} f = (injection f) ∧ (surjection f) 
 
 
 id-is-injection : ∀ {α} {A : ★ α} → injection (id { α } { A })
@@ -2306,22 +2638,6 @@ ex-surjA1-imp-AB-imp-B-to-FibersAB {α} {β} {A} {B} {[A→⊤]} surj [A→B] b 
 
 
 
-data Maybe {α} (A : ★ α) : ★ α where
- Just : (a : A) → Maybe A  
- Nothing : Maybe A
-
-
- 
-
--- Homogeneous binary relations : 
-{-
-  Should probably make heterogeneous n-ary relations instead and define
-  homogeneous binary relations as a special case.
--}
-
-
-relation : ∀ {α} {A : ★ α} → ★ α
-relation {α} {A} = A → A → 𝔹
 
 {-
   Two elements either are or aren't related; not both.
@@ -2345,70 +2661,6 @@ relations-are-well-defined {α} {A} R' x y b [xRy≡b] [xRy≡!b] = a≠!a b [b�
   [b≡!b] : b ≡ ! b
   [b≡!b] = ≡-⇶ [b≡xRy] [xRy≡!b]
 
-
---Reflexivity
-IsReflexive : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
-IsReflexive {α} {A} R' = (a : A) → a R a ≡ 𝕥
- where
-  _R_ : relation {α} {A}
-  x R y = R' x y
-  infix 2 _R_
- 
-
-IsIrreflexive : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
-IsIrreflexive {α} {A} R' = (a : A) -> a R a ≡ 𝕗
- where
-  _R_ : relation {α} {A}
-  x R y = R' x y
-  infix 2 _R_
-
-
-
---Symmetry
-IsSymmetric : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
-IsSymmetric {α} {A} R' = (a b : A) → a R b ≡ 𝕥 → b R a ≡ 𝕥
- where
-  _R_ : relation {α} {A}
-  x R y = R' x y
-  infix 2 _R_
-
-
-IsAntisymmetric : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
-IsAntisymmetric {α} {A} R' = (a b : A) → (a R b ≡ 𝕥) → (b R a ≡ 𝕥) → (a ≡ b)
- where
-  _R_ : relation {α} {A}
-  x R y = R' x y
-  infix 2 _R_
-
-
-IsAsymmetric : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
-IsAsymmetric {α} {A} R' = (a b : A) → (a R b ≡ 𝕥) → (b R a ≡ 𝕗)
- where
-  _R_ : relation {α} {A}
-  x R y = R' x y
-  infix 2 _R_
-
-
---Transitivity
-IsTransitive : ∀ {α} {A : ★ α} → relation { α } { A } -> ★ α
-IsTransitive {α} {A} R' = (a b c : A) → (a R b ≡ 𝕥) → (b R c ≡ 𝕥) → (a R c ≡ 𝕥)
- where
-  _R_ : relation {α} {A}
-  x R y = R' x y
-  infix 2 _R_
-
-
-
-
---Specific relations
-IsPreorder : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
-IsPreorder {α} {A} R = (IsReflexive R) ∧ (IsTransitive R)
-
-IsPartialOrder : ∀ {α} {A : ★ α} → relation { α } { A } → ★ α
-IsPartialOrder {α} {A} R = (IsReflexive R) ∧ (IsAntisymmetric R) ∧ (IsTransitive R)
-
-IsEquivalence : ∀ {α} {A : ★ α} → relation { α } { A } -> ★ α
-IsEquivalence {α} {A} R = (IsReflexive R) ∧ (IsSymmetric R) ∧ (IsTransitive R)
 
 
 
@@ -2440,11 +2692,6 @@ partialorders-are-preorders {α} {A} R eq = ∧-cons R-⟲ R-⇶
 
   R-⇶ : IsTransitive R
   R-⇶ = ∧-π₂ (∧-π₂ eq)
-
-
--- extensional equality of functions
-FuncId : ∀ {α β} {A : ★ α} {B : ★ β} (f g : A → B) → ★ (α ⊔ β)
-FuncId {α} {β} {A} {B} f g = (a : A) → f a ≡ g a
 
 
 -- functions are identical to their eta expansions
@@ -2730,15 +2977,6 @@ right-inv {α} {β} {A} {B} g f = (b : B) → b ≡ (f ∘ g) b
 right-inv-strong : ∀ {α β} {A : ★ α} {B : ★ β} (g : B → A) (f : A → B) → ★ β
 right-inv-strong {α} {β} {A} {B} g f = id ≡ (f ∘ g)
 
-{-
-record iso-strong {m n : Level} (A : Set m) (B : Set n) : Set (lmax m n) where
- field
-  isoA : A -> B
-  isoB : B -> A
-  left : left-inv-strong isoB isoA
-  right : right-inv-strong isoB isoA
--} 
-
 
 left-inv-strong-imp-left-inv-weak : (α β : Level) → ★ (lsuc (α ⊔ β))
 left-inv-strong-imp-left-inv-weak α β = 
@@ -2766,7 +3004,6 @@ prf-right-inv-strong-imp-right-inv-weak α β {A} {B} g f p b = [f≡g]→[fa≡
 
 inv-strong-imp-inv-weak : (α β : Level) →  (left-inv-strong-imp-left-inv-weak α β) ∧ (right-inv-strong-imp-right-inv-weak α β)
 inv-strong-imp-inv-weak α β = ∧-cons (prf-left-inv-strong-imp-left-inv-weak α β) (prf-right-inv-strong-imp-right-inv-weak α β)
-
 
 
 different-fibers-different-objects :
@@ -2803,7 +3040,22 @@ different-fibers-different-objects {α} {β} {A} {B} f b1 b2 [b1≠b2] fib1 fib2
 
   ☢ : ⊥
   ☢ = [b1≠b2] [b1≡b2]
- 
+
+
+{-
+         ☢
+         ^
+         |
+      [b1≠b2]
+         |
+      [b1≡b2]
+      /      \
+     /        \
+   [b1≡fa1≡fa2≡b2]
+          ^
+         f|
+       [a1≡a2]
+-}
 
 
 --functions from False to True are injections 
@@ -2814,29 +3066,6 @@ F-T-is-injection f a1 a2 [fa1≡fa2] = ω a1
 F-T-not-surjection : (f : ⊥ → ⊤) → surjection f → ⊥
 F-T-not-surjection f surj = π₁ (surj ●)
 
-
---These definitions have to return universe-polymorphic function types
---which means their return type is actually not Set (lmax m n), but SetOmega
---which is not allowed in Agda.
---Why?
-{-
-epimorphic : {m n : Level} {A : Set m} {B : Set n} -> (f : A -> B) -> Set (lmax m n)
-epimorphic {m} {n} {A} {B} f = 
- {q : Level} {C : Set q} (g1 g2 : B -> C) -> FuncId (comp g1 f) (comp g2 f) -> FuncId g1 g2
-
-epimorphic-strong : {m n : Level} {A : Set m} {B : Set n} -> (f : A -> B) -> Set (lmax m n)
-epimorphic-strong {m} {n} {A} {B} f = 
- {q : Level} {C : Set q} (g1 g2 : B -> C) -> Id (comp g1 f) (comp g2 f) -> Id g1 g2
-
-monomorphic : {m n : Level} {A : Set m} {B : Set n} -> (f : A -> B) -> Set (lmax m n)
-monomorphic {m} {n} {A} {B} f =
- {q : Level} {C : Set q} (g1 g2 : C -> A) -> FuncId (comp f g1) (comp f g2) -> FuncId g1 g2
-
-monomorphic-strong : {m n : Level} {A : Set m} {B : Set n} -> (f : A -> B) -> Set (lmax m n)
-monomorphic-strong {m} {n} {A} {B} f = 
- {q : Level} {C : Set q} (g1 g2 : C -> A) -> Id (comp f g1) (comp f g2) -> Id g1 g2
-
--}  
 
 
 
@@ -3004,19 +3233,6 @@ inj-antisym2 {m} {n} {A} {B} f inj-f g inj-g =
   proj1 = 
  }
 -}
-
-
--- two sets are related by injectivity if there is an injection between them
-injective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-injective {α} {β} A B = ∃ f ∈ (A -> B) , (injection f)
-
--- etc..
-surjective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-surjective {m} {n} A B = ∃ f ∈ (A -> B) , (surjection f)
-
-
-bijective : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-bijective {α} {β} A B = (injective A B) ∧ (surjective A B)
 
 
 -- fibers of injections are contractible
@@ -3269,33 +3485,6 @@ surj-antisym3 {α} {β} {A} {B} f surj-f g surj-g = ∧-cons (injAB) (surjAB)
 
 
 
--- needs more defining axioms in order to actually characterizie it as a Functor
-record Functor {α β} {A : ★ α} {B : ★ β} : ★ (α ⊔ β) where
- field
-  omap : A → B
-  fmap : (A → A) → (B → B)
-  
-  
-
-data [_] {α} (A : ★ α) : ★ α where
- [] : [ A ]
- _::_ : A → [ A ] → [ A ]
-
-
-curry : ∀ {α β γ} {A : ★ α} {B : A → ★ β} {C : ( ∃ a ∈ A , (B a)) → ★ γ} → 
-        ((p : ∃ a ∈ A , (B a)) → C p) →
-        ((x : A) → (y : B x) → C (x , y))
-curry f x y = f (x , y)
-
-
-
-uncurry : 
- ∀ {α β γ} {A : ★ α} {B : A → ★ β} {C : ★ γ} → ((a : A) → (B a) → C) → (∃ a ∈ A , (B a)) → C
-uncurry f (x , y) = f x y
-
-
-true-iso : ∀ {α β} (A : ★ α) (B : ★ β) → ★ (α ⊔ β)
-true-iso {α} {β} A B = ∃ f ∈ (A → B) , (∃ g ∈ (B → A) , ((g ∘ f ≡ id) ∧ (f ∘ g ≡ id)))
 
 [f1≡f2]→[g∘f1≡g∘f2] :
  ∀ {α β γ} {A : ★ α} {B : ★ β} {C : ★ γ} (f1 f2 : A → B) → f1 ≡ f2 → (g : B → C) → (g ∘ f1 ≡ g ∘ f2)
@@ -3308,10 +3497,6 @@ true-iso {α} {β} A B = ∃ f ∈ (A → B) , (∃ g ∈ (B → A) , ((g ∘ f 
   [g∘f1≡g∘f2] = [f≡g]→[fa≡ga]₂ g∘ g∘ (⟲ g∘) f1 f2 [f1≡f2]
 
 
-∘' :
- ∀ {α β γ} {A : ★ α} {B : ★ β} {C : ★ γ} 
- (f : A → B) → (g : B → C) → A → C
-∘' f g = g ∘ f
 
 
 [f1≡f2]→[∘f1≡∘f2] : 
