@@ -1011,13 +1011,6 @@ isZero : ℕ → 𝔹
 isZero 0 = 𝕥
 isZero (𝕤 x) = 𝕗
 
-{-
-¬[≠-⇶] : (∀ {α} {A : ★ α} {x y z : A} (p : x ≠ y) (q : y ≠ z) → x ≠ z) → ⊥
-¬[≠-⇶] hyp = ☢
- where
-  ☢ : ⊥
-  ☢ = hyp (𝕫≠𝕤x 𝕫) (𝕤x≠𝕫 𝕫) (⟲ 𝕫)
--}
 
 _*_ : ℕ → ℕ → ℕ
 0 * y = 0 
@@ -1549,6 +1542,8 @@ a≠!a 𝕗 p = 𝕗≠𝕥 p
 
 
 
+
+-- SECTION : Successor and addition
 -- 1)  𝕫 is not the successor of any number
 -- 2)  𝕤 is an injection
 -- 3)  pred 𝕤n ≡ n
@@ -1564,6 +1559,7 @@ a≠!a 𝕗 p = 𝕗≠𝕥 p
 -- 13) Addition is associative 
 -- 14) 𝕫 is a unique right identity for (ℕ,+)
 -- 15) 𝕫 is a unique left identity for (ℕ,+)
+-- 16) If x + y ≡ 0 then x ≡ 0 and y ≡ 0
 
 
 -- 1) 𝕫 is not the successor of any number
@@ -2088,28 +2084,60 @@ x+y≡y+x x y = [x+y≡y+x]
 
 
 
+-- 16) If x + y ≡ 0, then x ≡ 0 and y ≡ 0
+[x+0≡0]→[[x≡0]∧[0≡0]] : (x : ℕ) → x + 0 ≡ 0 → x ≡ 0 ∧ 0 ≡ 0
+[x+0≡0]→[[x≡0]∧[0≡0]] x [x+0≡0] = ∧-cons [x≡0] (⟲ 0)
+ where
+  [x≡0] : x ≡ 0
+  [x≡0] = [y+x≡x]→[y≡0] 0 x [x+0≡0]
+
+[[x+y≡0]→[[x≡0]∧[y≡0]]]→[[x+𝕤y≡0]→[[x≡0]∧[𝕤y≡0]]] : (x y : ℕ) → (x + y ≡ 0 → x ≡ 0 ∧ y ≡ 0) → x + (𝕤 y) ≡ 0 → x ≡ 0 ∧ (𝕤 y) ≡ 0
+[[x+y≡0]→[[x≡0]∧[y≡0]]]→[[x+𝕤y≡0]→[[x≡0]∧[𝕤y≡0]]] x y [[x+y≡0]→[[x≡0]∧[y≡0]]] [x+𝕤y≡0] = ∧-cons [x≡0] [𝕤y≡0]
+ where
+  [𝕤[x+y]≡x+𝕤y] : (𝕤 (x + y)) ≡ x + (𝕤 y)
+  [𝕤[x+y]≡x+𝕤y] = 𝕤[x+y]≡x+𝕤y x y
+  
+  [𝕤[x+y]≡0] : (𝕤 (x + y)) ≡ 0
+  [𝕤[x+y]≡0] = ≡-⇶ [𝕤[x+y]≡x+𝕤y] [x+𝕤y≡0]
+  
+  ☢ : ⊥
+  ☢ = 𝕤x≠𝕫 (x + y) [𝕤[x+y]≡0]
+
+  [x≡0] : x ≡ 0
+  [x≡0] = ω ☢
+
+  [𝕤y≡0] : (𝕤 y) ≡ 0
+  [𝕤y≡0] = ω ☢
+
+
+[x+y≡0]→[[x≡0]∧[y≡0]] : (x y : ℕ) → x + y ≡ 0 → x ≡ 0 ∧ y ≡ 0
+[x+y≡0]→[[x≡0]∧[y≡0]] x 𝕫 = [x+0≡0]→[[x≡0]∧[0≡0]] x
+[x+y≡0]→[[x≡0]∧[y≡0]] x (𝕤 y) = [[x+y≡0]→[[x≡0]∧[y≡0]]]→[[x+𝕤y≡0]→[[x≡0]∧[𝕤y≡0]]] x y ([x+y≡0]→[[x≡0]∧[y≡0]] x y)
 
 
 
 
 
 
+-- SECTION : ordering; >, <, ≥, ≤ 
 
--- >, <, ≥, ≤ 
-
--- 1) (x < y) → (x ≤ y)
--- 2) (x > y) → (x ≥ y)
--- 3) Every x ∈ ℕ is greater than or equal to 0
--- 4) 1 > 0
--- 5) x+1 > x
--- 6) x < x+1
--- 7) The successor of any natural number is greater than 0
--- 8) Every natural number is greater than or equal to itself
--- 9) ≤ is transitive
--- 10) < is transitive
--- 11) If x ≥ y, then 𝕤x > y
--- 12) If x ≤ y, then x < 𝕤y
--- 13) No natural number is greater than itself
+-- 1)  (x < y) → (x ≤ y)
+-- 2)  (x > y) → (x ≥ y)
+-- 3)  (x ≰ y) → (x ≮ y)
+-- 4)  (x ≱ y) → (x ≯ y)
+-- 5)  (x < y) → (x ≱ y)
+-- 6)  (x > y) → (x ≰ y)
+-- 7)  Every x ∈ ℕ is greater than or equal to 0
+-- 8)  1 > 0
+-- 9)  x+1 > x
+-- 10) x < x+1
+-- 11) The successor of any natural number is greater than 0
+-- 12) Every natural number is greater than or equal to itself
+-- 13) ≤ is transitive
+-- 14) < is transitive
+-- 15) If x ≥ y, then 𝕤x > y
+-- 16) If x ≤ y, then x < 𝕤y
+-- 17) No natural number is greater than itself
 
 -- 1) less than implies less than or equal
 [x<y]→[x≤y] : (x y : ℕ) → x < y → x ≤ y
@@ -2119,40 +2147,119 @@ x+y≡y+x x y = [x+y≡y+x]
 [x>y]→[x≥y] : (x y : ℕ) → x > y → x ≥ y
 [x>y]→[x≥y] x y (a , (b , (∧-cons [𝕤b≡a] [y+a≡x]))) = (a , [y+a≡x])
 
-{-
-x≰y→x≮y : (x y : ℕ) → x ≰ y → x ≮ y
+-- 3) x ≰ y  →  x ≮ y
+[x≰y]→[x≮y] : (x y : ℕ) → x ≰ y → x ≮ y
+[x≰y]→[x≮y] x y [x≰y] [x<y] = ☢
+ where
+  [x≤y] : x ≤ y
+  [x≤y] = [x<y]→[x≤y] x y [x<y]
 
-x≱y→x≯y : (x y : ℕ) → x ≱ y → x ≯ y
--}
+  ☢ : ⊥
+  ☢ = [x≰y] [x≤y]
 
-{-
-x<y→x≱y
+-- 4) x ≱ y  →  x ≯ y
+[x≱y]→[x≯y] : (x y : ℕ) → x ≱ y → x ≯ y
+[x≱y]→[x≯y] x y [x≱y] [x>y] = ☢
+ where
+  [x≥y] : x ≥ y
+  [x≥y] = [x>y]→[x≥y] x y [x>y]
 
-x>y→x≰y
--}
+  ☢ : ⊥
+  ☢ = [x≱y] [x≥y]
 
 
--- 3) Every x ∈ ℕ is greater than or equal to 0
+-- 5) x < y  → x ≱ y
+[x<y]→[x≱y] : (x y : ℕ) → x < y → x ≱ y
+[x<y]→[x≱y] x y (a , (a' , (∧-cons [𝕤a'≡a] [x+a≡y]))) (b , [y+b≡x]) = ☢
+ where
+  +a : ℕ → ℕ
+  +a = _+'_ a
+
+  [[y+b]+a≡x+a] : (y + b) + a ≡ x + a
+  [[y+b]+a≡x+a] = [f≡g]→[fa≡ga]₂ +a +a (⟲ +a) (y + b) x [y+b≡x]
+
+  [[y+b]+a≡y] : (y + b) + a ≡ y
+  [[y+b]+a≡y] = ≡-⇶ [[y+b]+a≡x+a] [x+a≡y]
+
+  [y+[b+a]≡[y+b]+a] : y + (b + a) ≡ (y + b) + a
+  [y+[b+a]≡[y+b]+a] = ≡-↑↓ ([a+b]+c≡a+[b+c] y b a)
+
+  [y+[b+a]≡y] : y + (b + a) ≡ y
+  [y+[b+a]≡y] = ≡-⇶ [y+[b+a]≡[y+b]+a] [[y+b]+a≡y]
+
+  [b+a≡0] : b + a ≡ 0
+  [b+a≡0] = [x+y≡x]→[y≡0] y (b + a) [y+[b+a]≡y]
+
+  [b≡0∧a≡0] : b ≡ 0 ∧ a ≡ 0
+  [b≡0∧a≡0] = [x+y≡0]→[[x≡0]∧[y≡0]] b a [b+a≡0]
+
+  [a≡0] : a ≡ 0
+  [a≡0] = ∧-π₂ [b≡0∧a≡0]
+ 
+  [𝕤a'≡0] : (𝕤 a') ≡ 0
+  [𝕤a'≡0] = ≡-⇶ [𝕤a'≡a] [a≡0]
+
+  ☢ : ⊥
+  ☢ = 𝕤x≠𝕫 a' [𝕤a'≡0]
+
+
+-- 6) x > y  → x ≰ y
+[x>y]→[x≰y] : (x y : ℕ) → x > y → x ≰ y
+[x>y]→[x≰y] x y (a , (a' , (∧-cons [𝕤a'≡a] [y+a≡x]))) (b , [x+b≡y]) = ☢
+ where
+-- Defs :
+  +b : ℕ → ℕ
+  +b = _+'_ b
+
+  [[y+a]+b≡x+b] : (y + a) + b ≡ x + b
+  [[y+a]+b≡x+b] = [f≡g]→[fa≡ga]₂ +b +b (⟲ +b) (y + a) x [y+a≡x]
+
+  [[y+a]+b≡y] : (y + a) + b ≡ y
+  [[y+a]+b≡y] = ≡-⇶ [[y+a]+b≡x+b] [x+b≡y]
+
+  [y+[a+b]≡[y+a]+b] : y + (a + b) ≡ (y + a) + b
+  [y+[a+b]≡[y+a]+b] = ≡-↑↓ ([a+b]+c≡a+[b+c] y a b)
+
+  [y+[a+b]≡y] : y + (a + b) ≡ y
+  [y+[a+b]≡y] = ≡-⇶ [y+[a+b]≡[y+a]+b] [[y+a]+b≡y]
+
+  [a+b≡0] : a + b ≡ 0
+  [a+b≡0] = [x+y≡x]→[y≡0] y (a + b) [y+[a+b]≡y]
+
+  [a≡0∧b≡0] : a ≡ 0 ∧ b ≡ 0
+  [a≡0∧b≡0] = [x+y≡0]→[[x≡0]∧[y≡0]] a b [a+b≡0] 
+ 
+  [a≡0] : a ≡ 0
+  [a≡0] = ∧-π₁ [a≡0∧b≡0]
+
+  [𝕤a'≡0] : (𝕤 a') ≡ 0
+  [𝕤a'≡0] = ≡-⇶ [𝕤a'≡a] [a≡0]
+
+  ☢ : ⊥
+  ☢ = 𝕤x≠𝕫 a' [𝕤a'≡0]
+
+
+-- 7) Every x ∈ ℕ is greater than or equal to 0
 x≥𝕫 : (x : ℕ) → x ≥ 𝕫
 x≥𝕫 x = (x , 𝕫+x≡x x)
 
--- 4) 1 > 0
+-- 8) 1 > 0
 𝕤𝕫>𝕫 : 𝕤 𝕫 > 𝕫
 𝕤𝕫>𝕫 = (𝕤 𝕫 , (𝕫 , ∧-cons (⟲ (𝕤 𝕫)) [[𝕫+𝕤𝕫]≡𝕤𝕫]))
  where
   [[𝕫+𝕤𝕫]≡𝕤𝕫] : 𝕫 + (𝕤 𝕫) ≡ (𝕤 𝕫)
   [[𝕫+𝕤𝕫]≡𝕤𝕫] = 𝕫+x≡x (𝕤 𝕫)   
 
--- 5) x+1 > x
+-- 9) x+1 > x
 𝕤x>x : (x : ℕ) → 𝕤 x > x
 𝕤x>x x = (𝕤 𝕫 , (𝕫 , (∧-cons (⟲ (𝕤 𝕫)) (x+𝕤𝕫≡𝕤x x))))
 
--- 6) x < x+1
+-- 10) x < x+1
 x<𝕤x : (x : ℕ) → x < 𝕤 x
 x<𝕤x x = (𝕤 𝕫 , (𝕫 , (∧-cons (⟲ (𝕤 𝕫)) (x+𝕤𝕫≡𝕤x x))))
 
 
--- 7) The successor of any x ∈ ℕ is greater than 0
+-- 11) The successor of any x ∈ ℕ is greater than 0
 -- inductive step
 [𝕤x>𝕫]→[𝕤𝕤x>𝕫] : (x : ℕ) → (𝕤 x) > 𝕫 → (𝕤 (𝕤 x)) > 𝕫
 [𝕤x>𝕫]→[𝕤𝕤x>𝕫] x (a , (b , (∧-cons [𝕤b≡a] [𝕫+a≡𝕤x]))) = ((𝕤 a) , ((𝕤 b) , (∧-cons [𝕤𝕤b≡𝕤a] [𝕫+𝕤a≡𝕤𝕤x])))
@@ -2175,11 +2282,11 @@ x<𝕤x x = (𝕤 𝕫 , (𝕫 , (∧-cons (⟲ (𝕤 𝕫)) (x+𝕤𝕫≡𝕤x
 𝕤x>𝕫 (𝕤 n) = [𝕤x>𝕫]→[𝕤𝕤x>𝕫] n (𝕤x>𝕫 n)
 
 
--- 8) Every x ∈ ℕ is greater than or equal to itself
+-- 12) Every x ∈ ℕ is greater than or equal to itself
 x≥x : (x : ℕ) → x ≥ x
 x≥x x = (𝕫 , (x+𝕫≡x x))
 
--- 9) ≤ is transitive
+-- 13) ≤ is transitive
 x≤y→y≤z→x≤z : (x y z : ℕ) → x ≤ y → y ≤ z → x ≤ z
 x≤y→y≤z→x≤z x y z (a , [x+a≡y]) (b , [y+b≡z]) = ((a + b) , [x+[a+b]≡z])
  where
@@ -2203,7 +2310,7 @@ x≤y→y≤z→x≤z x y z (a , [x+a≡y]) (b , [y+b≡z]) = ((a + b) , [x+[a+b
   [x+[a+b]≡z] : x + (a + b) ≡ z
   [x+[a+b]≡z] = ≡-⇶ [x+[a+b]≡y+b] [y+b≡z]
 
--- 10) < is transitive
+-- 14) < is transitive
 x<y→y<z→x<z : (x y z : ℕ) → x < y → y < z → x < z
 x<y→y<z→x<z 
  x y z 
@@ -2262,21 +2369,8 @@ x<y→y<z→x<z
    [x+[a+b]≡z] : x + (a + b) ≡ z
    [x+[a+b]≡z] = ≡-⇶ (≡-↑↓ [[x+a]+b≡x+[a+b]]) [[x+a]+b≡z]
 
--- 11) If x is greater than or equal to y, then so is 𝕤x
-[x≥y]→[𝕤x≥y] : (x y : ℕ) → x ≥ y → (𝕤 x) ≥ y
-[x≥y]→[𝕤x≥y] x y (a , [y+a≡x]) = ((𝕤 a) , [y+𝕤a≡𝕤x])
- where
-  --[y+a≡x]
-  [𝕤[y+a]≡y+𝕤a] : (𝕤 (y + a)) ≡ y + (𝕤 a)
-  [𝕤[y+a]≡y+𝕤a] = 𝕤[x+y]≡x+𝕤y y a
 
-  [𝕤[y+a]≡𝕤x] : (𝕤 (y + a)) ≡ (𝕤 x)
-  [𝕤[y+a]≡𝕤x] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) (y + a) x [y+a≡x]
-
-  [y+𝕤a≡𝕤x] : y + (𝕤 a) ≡ (𝕤 x)
-  [y+𝕤a≡𝕤x] = ≡-⇶ (≡-↑↓ [𝕤[y+a]≡y+𝕤a]) [𝕤[y+a]≡𝕤x]
-
--- 11) If x is greater than or equal to y, then 𝕤x is greater than y
+-- 15) If x is greater than or equal to y, then 𝕤x is greater than y
 [x≥y]→[𝕤x>y] : (x y : ℕ) → x ≥ y → (𝕤 x) > y
 [x≥y]→[𝕤x>y] x y (a , [y+a≡x]) = (b , (b' , (∧-cons [𝕤b'≡b] [y+b≡𝕤x])))
  where
@@ -2299,7 +2393,7 @@ x<y→y<z→x<z
   [y+b≡𝕤x] = ≡-⇶ [y+b≡𝕤[y+b']] [𝕤[y+b']≡𝕤x]
 
 
--- 12) If x is less than or equal to y, then x is less than 𝕤y
+-- 16) If x is less than or equal to y, then x is less than 𝕤y
 [x≤y]→[x<𝕤y] : (x y : ℕ) → x ≤ y → x < (𝕤 y)
 [x≤y]→[x<𝕤y] x y (a , [x+a≡y]) = (b , (b' , (∧-cons [𝕤b'≡b] [x+b≡𝕤y])))
  where
@@ -2322,7 +2416,7 @@ x<y→y<z→x<z
   [x+b≡𝕤y] = ≡-⇶ [x+b≡𝕤[x+b']] [𝕤[x+b']≡𝕤y]
 
 
--- 13) No natural number is greater than itself
+-- 17) No natural number is greater than itself
 x≯x : (x : ℕ) → x ≯ x
 x≯x x (a , (b , (∧-cons [𝕤b≡a] [x+a≡x]))) = ☢
  where
