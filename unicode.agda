@@ -682,6 +682,9 @@ data ℕ : ★₀ where
  𝕫 : ℕ
  𝕤 : ℕ → ℕ
 
+-- Need to do this in order to use Arabic numerals as elements of ℕ.
+-- It probably does more than that too, i.e. compiler optimizations
+{-# BUILTIN NATURAL ℕ #-}
 
 
 pred : ℕ → ℕ
@@ -982,7 +985,7 @@ if_then_else_ : ∀ {α β₁ β₂} {A : ★ α} {P1 : A → ★ β₁} {P2 : A
 
 -- addition on Nats
 _+_ : ℕ → ℕ → ℕ
-𝕫 + y = y
+0 + y = y
 (𝕤 x) + y = 𝕤 (x + y)
 infixr 2 _+_
 
@@ -993,20 +996,20 @@ infix 2 _+'_
 
 --This attempt just returns m
 _minus_ : ℕ → ℕ → ℕ
-𝕫 minus n = 𝕫
+0 minus n = 0
 (𝕤 m) minus n = 𝕤 (m minus n)
 infix 2 _minus_
 
 diff : ℕ → ℕ → ℕ
-diff 𝕫 x = x
-diff x 𝕫 = x
+diff 0 x = x
+diff x 0 = x
 diff (𝕤 x) (𝕤 y) = diff x y
 
 
 
 isZero : ℕ → 𝔹
-isZero 𝕫 = 𝕥
-isZero x = 𝕗
+isZero 0 = 𝕥
+isZero (𝕤 x) = 𝕗
 
 {-
 ¬[≠-⇶] : (∀ {α} {A : ★ α} {x y z : A} (p : x ≠ y) (q : y ≠ z) → x ≠ z) → ⊥
@@ -1017,16 +1020,16 @@ isZero x = 𝕗
 -}
 
 _*_ : ℕ → ℕ → ℕ
-𝕫 * y = 𝕫 
+0 * y = 0 
 (𝕤 x) * y = y + (x * y) 
-infixr 2 _*_
+infixr 3 _*_
 
 
 
 
 _gte_ : ℕ → ℕ → 𝔹
-x gte 𝕫 = 𝕥
-𝕫 gte (𝕤 n) = 𝕗
+x gte 0 = 𝕥
+0 gte (𝕤 n) = 𝕗
 (𝕤 n) gte (𝕤 m) = n gte (𝕤 m)
 infix 2 _gte_ 
 
@@ -1035,23 +1038,20 @@ infix 2 _gte_
 
 
 even : ℕ → 𝔹
-even 𝕫 = 𝕥
-even (𝕤 𝕫) = 𝕗
+even 0 = 𝕥
+even 1 = 𝕗
 even (𝕤 (𝕤 n)) = even n
 
 odd : ℕ → 𝔹
-odd 𝕫 = 𝕗
-odd (𝕤 𝕫) = 𝕥
+odd 0 = 𝕗
+odd 1 = 𝕥
 odd (𝕤 (𝕤 n)) = odd n
 
+Even : (x : ℕ) → ★₀
+Even x = ∃ k ∈ ℕ , (x ≡ 2 * k)
 
-Even1 : ℕ → ★₀
-Even1 n = (even n) ≡ 𝕥
-
-Odd1 : ℕ → ★₀
-Odd1 n = (odd n) ≡ 𝕥
-
-
+Odd : (x : ℕ) → ★₀
+Odd x = ∃ k ∈ ℕ , (x ≡ 2 * k + 1)
 
 
 
@@ -1562,7 +1562,8 @@ a≠!a 𝕗 p = 𝕗≠𝕥 p
 -- 11) [a+x]+y ≡ x+[a+y]
 -- 12) Addition is commutative
 -- 13) Addition is associative 
-
+-- 14) 𝕫 is a unique right identity for (ℕ,+)
+-- 15) 𝕫 is a unique left identity for (ℕ,+)
 
 
 -- 1) 𝕫 is not the successor of any number
@@ -2032,9 +2033,58 @@ x+y≡y+x x y = [x+y≡y+x]
  
 
 -}
- 
-[x+𝕫≡x]→[𝕫≡𝕫] : (x : ℕ) → x + 𝕫 ≡ x → 𝕫 ≡ 𝕫
-[x+𝕫≡x]→[𝕫≡𝕫] x [x+𝕫≡x] = ⟲ 𝕫
+
+
+
+-- 14) 0 is a unique right identity for ℕ 
+
+-- base case
+[0+y≡0]→[y≡0] : (y : ℕ) → 0 + y ≡ 0 → y ≡ 0
+[0+y≡0]→[y≡0] y [0+y≡0] = [y≡0]
+ where
+  [y≡0+y] : y ≡ 0 + y
+  [y≡0+y] = x≡𝕫+x y
+
+  [y≡0] : y ≡ 0
+  [y≡0] = ≡-⇶ [y≡0+y] [0+y≡0]
+  
+-- inductive step
+[[x+y≡x]→[y≡0]]→[[𝕤x+y≡𝕤x]→[y≡0]] : (x y : ℕ) → ((x + y ≡ x) → (y ≡ 0)) → ((𝕤 x) + y ≡ (𝕤 x)) → y ≡ 0
+[[x+y≡x]→[y≡0]]→[[𝕤x+y≡𝕤x]→[y≡0]] x y [[x+y≡x]→[y≡0]] [𝕤x+y≡𝕤x] = [y≡0]
+ where
+  [𝕤[x+y]≡𝕤x+y] : (𝕤 (x + y)) ≡  (𝕤 x) + y
+  [𝕤[x+y]≡𝕤x+y] = 𝕤[x+y]≡𝕤x+y x y
+
+  [𝕤[x+y]≡𝕤x] : (𝕤 (x + y)) ≡ (𝕤 x)
+  [𝕤[x+y]≡𝕤x] = ≡-⇶ [𝕤[x+y]≡𝕤x+y] [𝕤x+y≡𝕤x]
+
+  [x+y≡x] : x + y ≡ x
+  [x+y≡x] = [𝕤x≡𝕤y]→[x≡y] (x + y) x [𝕤[x+y]≡𝕤x]
+
+  [y≡0] : y ≡ 0
+  [y≡0] = [[x+y≡x]→[y≡0]] [x+y≡x]
+
+-- final step
+[x+y≡x]→[y≡0] : (x y : ℕ) → x + y ≡ x → y ≡ 0
+[x+y≡x]→[y≡0] 0 y = [0+y≡0]→[y≡0] y 
+[x+y≡x]→[y≡0] (𝕤 x) y = [[x+y≡x]→[y≡0]]→[[𝕤x+y≡𝕤x]→[y≡0]] x y ([x+y≡x]→[y≡0] x y)
+
+
+
+-- 15) 0 is a unique left identity for ℕ
+
+
+[y+x≡x]→[y≡0] : (x y : ℕ) → y + x ≡ x → y ≡ 0
+[y+x≡x]→[y≡0] x y [y+x≡x] = [y≡0]
+ where
+  [x+y≡y+x] : x + y ≡ y + x
+  [x+y≡y+x] = x+y≡y+x x y
+
+  [x+y≡x] : x + y ≡ x
+  [x+y≡x] = ≡-⇶ [x+y≡y+x] [y+x≡x]
+
+  [y≡0] : y ≡ 0
+  [y≡0] = [x+y≡x]→[y≡0] x y [x+y≡x]
 
 
 
@@ -2045,15 +2095,29 @@ x+y≡y+x x y = [x+y≡y+x]
 
 
 
+-- >, <, ≥, ≤ 
 
+-- 1) (x < y) → (x ≤ y)
+-- 2) (x > y) → (x ≥ y)
+-- 3) Every x ∈ ℕ is greater than or equal to 0
+-- 4) 1 > 0
+-- 5) x+1 > x
+-- 6) x < x+1
+-- 7) The successor of any natural number is greater than 0
+-- 8) Every natural number is greater than or equal to itself
+-- 9) ≤ is transitive
+-- 10) < is transitive
+-- 11) If x ≥ y, then 𝕤x > y
+-- 12) If x ≤ y, then x < 𝕤y
+-- 13) No natural number is greater than itself
 
--- less than implies less than or equal
-x<y→x≤y : (x y : ℕ) → x < y → x ≤ y
-x<y→x≤y x y (a , (b , (∧-cons [𝕤b≡a] [x+a≡y]))) = (a , [x+a≡y])
+-- 1) less than implies less than or equal
+[x<y]→[x≤y] : (x y : ℕ) → x < y → x ≤ y
+[x<y]→[x≤y] x y (a , (b , (∧-cons [𝕤b≡a] [x+a≡y]))) = (a , [x+a≡y])
 
--- greater than implies greater than or equal
-x>y→x≥y : (x y : ℕ) → x > y → x ≥ y
-x>y→x≥y x y (a , (b , (∧-cons [𝕤b≡a] [y+a≡x]))) = (a , [y+a≡x])
+-- 2) greater than implies greater than or equal
+[x>y]→[x≥y] : (x y : ℕ) → x > y → x ≥ y
+[x>y]→[x≥y] x y (a , (b , (∧-cons [𝕤b≡a] [y+a≡x]))) = (a , [y+a≡x])
 
 {-
 x≰y→x≮y : (x y : ℕ) → x ≰ y → x ≮ y
@@ -2067,25 +2131,29 @@ x<y→x≱y
 x>y→x≰y
 -}
 
+
+-- 3) Every x ∈ ℕ is greater than or equal to 0
 x≥𝕫 : (x : ℕ) → x ≥ 𝕫
 x≥𝕫 x = (x , 𝕫+x≡x x)
 
-
-
-
+-- 4) 1 > 0
 𝕤𝕫>𝕫 : 𝕤 𝕫 > 𝕫
 𝕤𝕫>𝕫 = (𝕤 𝕫 , (𝕫 , ∧-cons (⟲ (𝕤 𝕫)) [[𝕫+𝕤𝕫]≡𝕤𝕫]))
  where
   [[𝕫+𝕤𝕫]≡𝕤𝕫] : 𝕫 + (𝕤 𝕫) ≡ (𝕤 𝕫)
   [[𝕫+𝕤𝕫]≡𝕤𝕫] = 𝕫+x≡x (𝕤 𝕫)   
 
+-- 5) x+1 > x
 𝕤x>x : (x : ℕ) → 𝕤 x > x
 𝕤x>x x = (𝕤 𝕫 , (𝕫 , (∧-cons (⟲ (𝕤 𝕫)) (x+𝕤𝕫≡𝕤x x))))
 
+-- 6) x < x+1
 x<𝕤x : (x : ℕ) → x < 𝕤 x
 x<𝕤x x = (𝕤 𝕫 , (𝕫 , (∧-cons (⟲ (𝕤 𝕫)) (x+𝕤𝕫≡𝕤x x))))
 
 
+-- 7) The successor of any x ∈ ℕ is greater than 0
+-- inductive step
 [𝕤x>𝕫]→[𝕤𝕤x>𝕫] : (x : ℕ) → (𝕤 x) > 𝕫 → (𝕤 (𝕤 x)) > 𝕫
 [𝕤x>𝕫]→[𝕤𝕤x>𝕫] x (a , (b , (∧-cons [𝕤b≡a] [𝕫+a≡𝕤x]))) = ((𝕤 a) , ((𝕤 b) , (∧-cons [𝕤𝕤b≡𝕤a] [𝕫+𝕤a≡𝕤𝕤x])))
  where
@@ -2101,13 +2169,17 @@ x<𝕤x x = (𝕤 𝕫 , (𝕫 , (∧-cons (⟲ (𝕤 𝕫)) (x+𝕤𝕫≡𝕤x
   [𝕫+𝕤a≡𝕤𝕤x] : 𝕫 + (𝕤 a) ≡ (𝕤 (𝕤 x))
   [𝕫+𝕤a≡𝕤𝕤x] = ≡-⇶ (≡-↑↓ [𝕤[𝕫+a]≡𝕫+𝕤a]) [𝕤[𝕫+a]≡𝕤𝕤x]
 
+-- final step
 𝕤x>𝕫 : (x : ℕ) → (𝕤 x) > 𝕫
 𝕤x>𝕫 𝕫 = 𝕤𝕫>𝕫
 𝕤x>𝕫 (𝕤 n) = [𝕤x>𝕫]→[𝕤𝕤x>𝕫] n (𝕤x>𝕫 n)
 
+
+-- 8) Every x ∈ ℕ is greater than or equal to itself
 x≥x : (x : ℕ) → x ≥ x
 x≥x x = (𝕫 , (x+𝕫≡x x))
 
+-- 9) ≤ is transitive
 x≤y→y≤z→x≤z : (x y z : ℕ) → x ≤ y → y ≤ z → x ≤ z
 x≤y→y≤z→x≤z x y z (a , [x+a≡y]) (b , [y+b≡z]) = ((a + b) , [x+[a+b]≡z])
  where
@@ -2131,7 +2203,7 @@ x≤y→y≤z→x≤z x y z (a , [x+a≡y]) (b , [y+b≡z]) = ((a + b) , [x+[a+b
   [x+[a+b]≡z] : x + (a + b) ≡ z
   [x+[a+b]≡z] = ≡-⇶ [x+[a+b]≡y+b] [y+b≡z]
 
-
+-- 10) < is transitive
 x<y→y<z→x<z : (x y z : ℕ) → x < y → y < z → x < z
 x<y→y<z→x<z 
  x y z 
@@ -2190,9 +2262,9 @@ x<y→y<z→x<z
    [x+[a+b]≡z] : x + (a + b) ≡ z
    [x+[a+b]≡z] = ≡-⇶ (≡-↑↓ [[x+a]+b≡x+[a+b]]) [[x+a]+b≡z]
 
-
-x≥y→𝕤x≥y : (x y : ℕ) → x ≥ y → (𝕤 x) ≥ y
-x≥y→𝕤x≥y x y (a , [y+a≡x]) = ((𝕤 a) , [y+𝕤a≡𝕤x])
+-- 11) If x is greater than or equal to y, then so is 𝕤x
+[x≥y]→[𝕤x≥y] : (x y : ℕ) → x ≥ y → (𝕤 x) ≥ y
+[x≥y]→[𝕤x≥y] x y (a , [y+a≡x]) = ((𝕤 a) , [y+𝕤a≡𝕤x])
  where
   --[y+a≡x]
   [𝕤[y+a]≡y+𝕤a] : (𝕤 (y + a)) ≡ y + (𝕤 a)
@@ -2204,38 +2276,64 @@ x≥y→𝕤x≥y x y (a , [y+a≡x]) = ((𝕤 a) , [y+𝕤a≡𝕤x])
   [y+𝕤a≡𝕤x] : y + (𝕤 a) ≡ (𝕤 x)
   [y+𝕤a≡𝕤x] = ≡-⇶ (≡-↑↓ [𝕤[y+a]≡y+𝕤a]) [𝕤[y+a]≡𝕤x]
 
-
-{-
-x≯x : (x : ℕ) → x ≯ x
-x≯x x [x>x] = ☢
+-- 11) If x is greater than or equal to y, then 𝕤x is greater than y
+[x≥y]→[𝕤x>y] : (x y : ℕ) → x ≥ y → (𝕤 x) > y
+[x≥y]→[𝕤x>y] x y (a , [y+a≡x]) = (b , (b' , (∧-cons [𝕤b'≡b] [y+b≡𝕤x])))
  where
+  b : ℕ
+  b = 𝕤 a
+
+  b' : ℕ
+  b' = a
+
+  [𝕤b'≡b] : (𝕤 b') ≡ b
+  [𝕤b'≡b] = ⟲ (𝕤 a)
+
+  [𝕤[y+b']≡𝕤x] : (𝕤 (y + b')) ≡ (𝕤 x)
+  [𝕤[y+b']≡𝕤x] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) (y + b') x [y+a≡x]
+
+  [y+b≡𝕤[y+b']] : y + b ≡ (𝕤 (y + b'))
+  [y+b≡𝕤[y+b']] = x+𝕤y≡𝕤[x+y] y b'
+
+  [y+b≡𝕤x] : y + b ≡ (𝕤 x)
+  [y+b≡𝕤x] = ≡-⇶ [y+b≡𝕤[y+b']] [𝕤[y+b']≡𝕤x]
+
+
+-- 12) If x is less than or equal to y, then x is less than 𝕤y
+[x≤y]→[x<𝕤y] : (x y : ℕ) → x ≤ y → x < (𝕤 y)
+[x≤y]→[x<𝕤y] x y (a , [x+a≡y]) = (b , (b' , (∧-cons [𝕤b'≡b] [x+b≡𝕤y])))
+ where
+  b : ℕ
+  b = 𝕤 a
   
-  ☢
--}
+  b' : ℕ
+  b' = a
+
+  [𝕤b'≡b] : (𝕤 b') ≡ b
+  [𝕤b'≡b] = ⟲ (𝕤 a)
+
+  [𝕤[x+b']≡𝕤y] : (𝕤 (x + b')) ≡ (𝕤 y)
+  [𝕤[x+b']≡𝕤y] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) (x + b') y [x+a≡y]
+
+  [x+b≡𝕤[x+b']] : x + b ≡ (𝕤 (x + b'))
+  [x+b≡𝕤[x+b']] = x+𝕤y≡𝕤[x+y] x b'
+  
+  [x+b≡𝕤y] : x + b ≡ (𝕤 y)
+  [x+b≡𝕤y] = ≡-⇶ [x+b≡𝕤[x+b']] [𝕤[x+b']≡𝕤y]
 
 
-𝕫≯𝕫 : 𝕫 ≯ 𝕫
-𝕫≯𝕫 (a , (b , (∧-cons [𝕤b≡a] [𝕫+a≡𝕫]))) = ☢
+-- 13) No natural number is greater than itself
+x≯x : (x : ℕ) → x ≯ x
+x≯x x (a , (b , (∧-cons [𝕤b≡a] [x+a≡x]))) = ☢
  where
--- Defs :
-  𝕫+ : ℕ → ℕ
-  𝕫+ = _+_ 𝕫
+  [a≡0] : a ≡ 0
+  [a≡0] = [x+y≡x]→[y≡0] x a [x+a≡x]
 
-  [𝕫+𝕤b≡𝕫+a] : 𝕫 + (𝕤 b) ≡ 𝕫 + a
-  [𝕫+𝕤b≡𝕫+a] = [f≡g]→[fa≡ga]₂ 𝕫+ 𝕫+ (⟲ 𝕫+) (𝕤 b) a [𝕤b≡a]  
-
-  [𝕫+𝕤b≡𝕫] : 𝕫 + (𝕤 b) ≡ 𝕫
-  [𝕫+𝕤b≡𝕫] = ≡-⇶ [𝕫+𝕤b≡𝕫+a] [𝕫+a≡𝕫]
-
-  [𝕫+𝕤b≡𝕤b] : 𝕫 + (𝕤 b) ≡ 𝕤 b
-  [𝕫+𝕤b≡𝕤b] = 𝕫+x≡x (𝕤 b)
-
-  [𝕤b≡𝕫] : (𝕤 b) ≡ 𝕫
-  [𝕤b≡𝕫] = ≡-⇶ (≡-↑↓ [𝕫+𝕤b≡𝕤b]) [𝕫+𝕤b≡𝕫]
-
+  [𝕤b≡0] : (𝕤 b) ≡ 0
+  [𝕤b≡0] = ≡-⇶ [𝕤b≡a] [a≡0]
+  
   ☢ : ⊥
-  ☢ = 𝕤x≠𝕫 b [𝕤b≡𝕫]
-
+  ☢ = 𝕤x≠𝕫 b [𝕤b≡0]
 
 
 
@@ -2249,24 +2347,40 @@ x≯x x [x>x] = ☢
 
 
 -- gte
+{-
+ So we have propositions like "x ≥ y" , but then we have algorithms like "gte"
+ which computes a boolean value intended to indicate whether "x ≥ y" is actually
+ true. So we want to prove bi-implication "x gte y" and "x ≥ y"
+-}
 
-
-x-gte-𝕫→x≥𝕫 : (x : ℕ) → x gte 𝕫 ≡ 𝕥 → x ≥ 𝕫
-x-gte-𝕫→x≥𝕫 x [x-gte-𝕫≡𝕥] = [x≥𝕫]
+-- base case for bi-implication
+x-gte-0→x≥0 : (x : ℕ) → x gte 0 ≡ 𝕥 → x ≥ 0
+x-gte-0→x≥0 x [x-gte-0≡𝕥] = [x≥0]
  where
-  [x≥𝕫] : x ≥ 𝕫
-  [x≥𝕫] = x≥𝕫 x
+  [x≥0] : x ≥ 0
+  [x≥0] = x≥𝕫 x
 
-x≥𝕫→x-gte-𝕫 : (x : ℕ) → x ≥ 𝕫 → x gte 𝕫 ≡ 𝕥
-x≥𝕫→x-gte-𝕫 x (a , [𝕫+a≡x]) = ⟲ 𝕥
+x≥0→x-gte-0 : (x : ℕ) → x ≥ 0 → x gte 0 ≡ 𝕥
+x≥0→x-gte-0 x (a , [0+a≡x]) = ⟲ 𝕥
 
-x-gte-𝕫 : (x : ℕ) → x gte 𝕫 ≡ 𝕥
-x-gte-𝕫 x = x≥𝕫→x-gte-𝕫 x (x≥𝕫 x)
+{-
+[x-gte-𝕤y]→[x-gte-y] : (x y : ℕ) → x gte (𝕤 y) ≡ 𝕥 → x gte y ≡ 𝕥
+[x-gte-𝕤y]→[x-gte-y] x y [x-gte-𝕤y≡𝕥] = [x-gte-y≡𝕥]
+ where
+  [x-gte-y≡𝕥]
+-}
+{-
+[[x-gte-y]→[x≥y]]→[[x-gte-𝕤y]→[x≥𝕤y]] : (x y : ℕ) → (x gte y ≡ 𝕥 → x ≥ y) → x gte (𝕤 y) ≡ 𝕥 → x ≥ (𝕤 y)
+[[x-gte-y]→[x≥y]]→[[x-gte-𝕤y]→[x≥𝕤y]] x y [[x-gte-y]→[x≥y]] [x-gte-𝕤y] = (a , [𝕤y+a≡x])
+ where
+  a : ℕ
+  [𝕤y+a≡x]
+-} 
 
-
-
-
-
+{-
+[x-gte-y]→[x≥y]
+[x≥y]→[x-gte-y] 
+-}
 
 
 
@@ -2275,15 +2389,33 @@ x-gte-𝕫 x = x≥𝕫→x-gte-𝕫 x (x≥𝕫 x)
 
 -- even and odd
 
-𝕫-Even1 : Even1 𝕫
-𝕫-Even1 = ⟲ 𝕥
+-- 1) 𝕫 is even
+-- 2) 𝕫 is not odd
+-- 3) 𝕤𝕫 is not even
+-- 4) 𝕤𝕫 is odd
+-- 5) if n is even then 𝕤𝕤n is even
 
-![𝕫-Odd1] : odd 𝕫 ≡ 𝕗
-![𝕫-Odd1] = ⟲ 𝕗
+-- 1) 𝕫 is even
+even-𝕫≡𝕥 : even 𝕫 ≡ 𝕥
+even-𝕫≡𝕥 = ⟲ 𝕥
+
+-- 2) 𝕫 is not odd
+odd-𝕫≡𝕗 : odd 𝕫 ≡ 𝕗
+odd-𝕫≡𝕗 = ⟲ 𝕗
+
+-- 3) 𝕤𝕫 is not even
+even-𝕤𝕫≡𝕗 : (even (𝕤 𝕫)) ≡ 𝕗
+even-𝕤𝕫≡𝕗 = ⟲ 𝕗
+
+-- 4) 𝕤𝕫 is odd
+odd-𝕤𝕫≡𝕥 : (odd (𝕤 𝕫)) ≡ 𝕥
+odd-𝕤𝕫≡𝕥 = ⟲ 𝕥
+
 
 [even-𝕫≡𝕥]→[even-𝕤𝕫≡𝕗] : (even 𝕫) ≡ 𝕥 → (even (𝕤 𝕫)) ≡ 𝕗
 [even-𝕫≡𝕥]→[even-𝕤𝕫≡𝕗] [even-𝕫≡𝕥] = ⟲ 𝕗
 
+-- 5) if n is even then 𝕤𝕤n is even
 even-𝕫≡even-𝕤𝕤𝕫 : (even 𝕫) ≡ even (𝕤 (𝕤 𝕫))
 even-𝕫≡even-𝕤𝕤𝕫 = ⟲ 𝕥
 
@@ -2294,8 +2426,6 @@ even-n≡even-𝕤𝕤n : (n : ℕ) → (even n) ≡ (even (𝕤 (𝕤 n)))
 even-n≡even-𝕤𝕤n 𝕫 = even-𝕫≡even-𝕤𝕤𝕫
 even-n≡even-𝕤𝕤n (𝕤 n) = [even-n≡even-𝕤𝕤n]→[even-𝕤n≡even-𝕤𝕤𝕤n] n (even-n≡even-𝕤𝕤n n)
 
-even-𝕤𝕫≡𝕗 : (even (𝕤 𝕫)) ≡ 𝕗
-even-𝕤𝕫≡𝕗 = ⟲ 𝕗
 
 [even-n≡𝕥]→[even-n≡even-𝕫] : (n : ℕ) → (even n) ≡ 𝕥 → (even n) ≡ (even 𝕫)
 [even-n≡𝕥]→[even-n≡even-𝕫] n = id
@@ -2363,32 +2493,37 @@ Even→[¬Odd] n [n-Even] =
 
 
 
-
 -- multiplication
-𝕫*x≡𝕫 : (x : ℕ) → 𝕫 * x ≡ 𝕫
-𝕫*x≡𝕫 x = ⟲ 𝕫
+-- 1) 0 * x ≡ 0
+-- 2) 1 * x ≡ x
 
-𝕤𝕫*x≡x : (x : ℕ) → (𝕤 𝕫) * x ≡ x
-𝕤𝕫*x≡x x = [𝕤𝕫*x≡x] 
+
+-- 1) 0 * x ≡ 0
+0*x≡0 : (x : ℕ) → 0 * x ≡ 0
+0*x≡0 x = ⟲ 0
+
+-- 2) 1 * x ≡ x
+1*x≡x : (x : ℕ) → 1 * x ≡ x
+1*x≡x x = [1*x≡x] 
  where
 -- Defs:
   x+ : ℕ → ℕ
   x+ = _+_ x
 
-  [𝕤𝕫*x≡x+[𝕫*x]] : ((𝕤 𝕫) * x) ≡ (x + (𝕫 * x))
-  [𝕤𝕫*x≡x+[𝕫*x]] = ⟲ (x + (𝕫 * x))
+  [1*x≡x+[0*x]] : 1 * x ≡ x + (0 * x)
+  [1*x≡x+[0*x]] = ⟲ (x + (0 * x))
 
-  [x+[𝕫*x]≡x+𝕫] : x + (𝕫 * x) ≡ x + 𝕫
-  [x+[𝕫*x]≡x+𝕫] = [f≡g]→[fa≡ga]₂ x+ x+ (⟲ x+) (𝕫 * x) 𝕫 (𝕫*x≡𝕫 x)
+  [x+[0*x]≡x+0] : x + (0 * x) ≡ x + 0
+  [x+[0*x]≡x+0] = [f≡g]→[fa≡ga]₂ x+ x+ (⟲ x+) (0 * x) 0 (0*x≡0 x)
 
-  [x+𝕫≡x] : (x + 𝕫) ≡ x
-  [x+𝕫≡x] = x+𝕫≡x x
+  [x+0≡x] : x + 0 ≡ x
+  [x+0≡x] = x+𝕫≡x x
 
-  [𝕤𝕫*x≡x+𝕫] : (𝕤 𝕫) * x ≡ x + 𝕫
-  [𝕤𝕫*x≡x+𝕫] = ≡-⇶ [𝕤𝕫*x≡x+[𝕫*x]] [x+[𝕫*x]≡x+𝕫]
+  [1*x≡x+0] : 1 * x ≡ x + 0
+  [1*x≡x+0] = ≡-⇶ [1*x≡x+[0*x]] [x+[0*x]≡x+0]
  
-  [𝕤𝕫*x≡x] : (𝕤 𝕫) * x ≡ x
-  [𝕤𝕫*x≡x] = ≡-⇶ [𝕤𝕫*x≡x+𝕫] [x+𝕫≡x]
+  [1*x≡x] : 1 * x ≡ x
+  [1*x≡x] = ≡-⇶ [1*x≡x+0] [x+0≡x]
 
 
 
@@ -2400,9 +2535,18 @@ Even→[¬Odd] n [n-Even] =
 
 
 -- difference
+
+-- 1) diff x x ≡ 𝕫
+-- 2) diff 𝕤x 𝕤y ≡ diff x y
+-- 3) diff 𝕫 x ≡ x
+-- 4) diff x 𝕫 ≡ x
+
+-- 1) diff x x ≡ 𝕫
+-- base case for diff x x ≡ 𝕫
 diff-𝕫-𝕫≡𝕫 : diff 𝕫 𝕫 ≡ 𝕫
 diff-𝕫-𝕫≡𝕫 = ⟲ 𝕫
 
+-- inductive step for diff x x ≡ 𝕫
 [diff-x-x≡𝕫]→[diff-𝕤x-𝕤x≡𝕫] : (x : ℕ) → diff x x ≡ 𝕫 → diff (𝕤 x) (𝕤 x) ≡ 𝕫
 [diff-x-x≡𝕫]→[diff-𝕤x-𝕤x≡𝕫] x [diff-x-x≡𝕫] = [diff-𝕤x-𝕤x≡𝕫]
  where
@@ -2412,36 +2556,60 @@ diff-𝕫-𝕫≡𝕫 = ⟲ 𝕫
   [diff-𝕤x-𝕤x≡𝕫] :  diff (𝕤 x) (𝕤 x) ≡ 𝕫
   [diff-𝕤x-𝕤x≡𝕫] = ≡-⇶ [diff-𝕤x-𝕤x≡diff-x-x] [diff-x-x≡𝕫]
 
-
+--final step for diff x x ≡ 𝕫
 diff-x-x≡𝕫 : (x : ℕ) → diff x x ≡ 𝕫
 diff-x-x≡𝕫 𝕫 = diff-𝕫-𝕫≡𝕫
 diff-x-x≡𝕫 (𝕤 x) = [diff-x-x≡𝕫]→[diff-𝕤x-𝕤x≡𝕫] x (diff-x-x≡𝕫 x)
 
+𝕫≡diff-x-x : (x : ℕ) → 𝕫 ≡ diff x x
+𝕫≡diff-x-x x = ≡-↑↓ (diff-x-x≡𝕫 x)
+
+
+
+
+{-
 diff-𝕫-𝕫≡diff-𝕫-𝕫 : diff 𝕫 𝕫 ≡ diff 𝕫 𝕫
 diff-𝕫-𝕫≡diff-𝕫-𝕫 = ⟲ (diff 𝕫 𝕫)
+-}
 
+-- 2) diff 𝕤x 𝕤y ≡ diff x y
 diff-𝕤x-𝕤y≡diff-x-y : (x y : ℕ) → diff (𝕤 x) (𝕤 y) ≡ diff x y
 diff-𝕤x-𝕤y≡diff-x-y x y = ⟲ (diff x y)
 
+diff-x-y≡diff-𝕤x-𝕤y : (x y : ℕ) → diff x y ≡ diff (𝕤 x) (𝕤 y)
+diff-x-y≡diff-𝕤x-𝕤y x y = ⟲ (diff x y)
 
+
+-- 3) diff 𝕫 x ≡ x
 diff-𝕫-x≡x : (x : ℕ) → diff 𝕫 x ≡ x
 diff-𝕫-x≡x x = ⟲ x
 
+x≡diff-𝕫-x : (x : ℕ) → x ≡ diff 𝕫 x
+x≡diff-𝕫-x x = ⟲ x
+
+
+-- 4) diff x 𝕫 ≡ x
+-- lemma
 diff-𝕤x-𝕫≡𝕤x : (x : ℕ) → diff (𝕤 x) 𝕫 ≡ (𝕤 x)
 diff-𝕤x-𝕫≡𝕤x x = ⟲ (𝕤 x)
 
-
+-- inductive step for diff-x-𝕫≡x
 [diff-x-𝕫≡x]→[diff-𝕤x-𝕫≡𝕤x] : (x : ℕ) → diff x 𝕫 ≡ x → diff (𝕤 x) 𝕫 ≡ (𝕤 x)
 [diff-x-𝕫≡x]→[diff-𝕤x-𝕫≡𝕤x] x [diff-x-𝕫≡x] = diff-𝕤x-𝕫≡𝕤x x
 
-
+-- final step for diff-x-𝕫≡x
 diff-x-𝕫≡x : (x : ℕ) → diff x 𝕫 ≡ x
 diff-x-𝕫≡x 𝕫 = diff-𝕫-𝕫≡𝕫
 diff-x-𝕫≡x (𝕤 x) = [diff-x-𝕫≡x]→[diff-𝕤x-𝕫≡𝕤x] x (diff-x-𝕫≡x x)
 
+x≡diff-x-𝕫 : (x : ℕ) → x ≡ diff x 𝕫
+x≡diff-x-𝕫 x = ≡-↑↓ (diff-x-𝕫≡x x)
 
+
+
+-- 5) diff x y ≡ diff y x
 diff-x-𝕫≡diff-𝕫-x : (x : ℕ) → diff x 𝕫 ≡ diff 𝕫 x
-diff-x-𝕫≡diff-𝕫-x x = ≡-⇶ (diff-x-𝕫≡x x) (≡-↑↓ (diff-𝕫-x≡x x))
+diff-x-𝕫≡diff-𝕫-x x = ≡-⇶ (diff-x-𝕫≡x x) (x≡diff-𝕫-x x)
 
 [diff-𝕫-𝕫≡𝕫]→[diff-𝕤𝕫-𝕫≡𝕤𝕫] : diff 𝕫 𝕫 ≡ 𝕫 → diff (𝕤 𝕫) 𝕫 ≡ (𝕤 𝕫)
 [diff-𝕫-𝕫≡𝕫]→[diff-𝕤𝕫-𝕫≡𝕤𝕫] [diff-𝕫-𝕫≡𝕫] = diff-𝕤x-𝕫≡𝕤x 𝕫
