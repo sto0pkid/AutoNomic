@@ -499,7 +499,6 @@ _≠_ : ∀ {α} {A : ★ α} (x y : A) → ★ α
 _≠_ x y = ¬ (x ≡ y)
 infixr 1 _≠_
 
-
 -- If A = B then A → B
 [A=B]→[A→B] : ∀ {α} {A B : ★ α} (p : A ≡ B) → (A → B)
 [A=B]→[A→B] {α} {A} {.A} (⟲ .A) x = x
@@ -518,6 +517,12 @@ reflexive {α} {β} {A} P = Π x ∈ A , P x
 ≡-⟲ : ∀ {α} {A : ★ α} (x : A) → x ≡ x
 ≡-⟲ = ⟲
 
+-- but inequality of course is not
+≠-irreflexive : ∀ {α} {A : ★ α} (x : A) → ¬ (x ≠ x)
+≠-irreflexive x [x≠x] = ☢
+ where
+  ☢ : ⊥
+  ☢ = [x≠x] (⟲ x)
 
 symmetric : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
 symmetric {α} {β} {A} P = {x y : A} → P x y → P y x 
@@ -525,6 +530,13 @@ symmetric {α} {β} {A} P = {x y : A} → P x y → P y x
 -- Equality is symmetric
 ≡-↑↓ : ∀ {α} {A : ★ α} {x y : A} (p : x ≡ y) → y ≡ x
 ≡-↑↓ (⟲ a) = ⟲ a
+
+-- ... and so is inequality
+≠-↑↓ : ∀ {α} {A : ★ α} {a b : A} → a ≠ b → b ≠ a
+≠-↑↓ [a≠b] [b≡a] = ☢
+ where
+  ☢ : ⊥
+  ☢ = [a≠b] (≡-↑↓ [b≡a])
 
 
 transitive : ∀ {α β} {A : ★ α} (P : A → A → ★ β) → ★ (α ⊔ β)
@@ -537,6 +549,7 @@ transitive {α} {β} {A} P = {x y z : A} → P x y → P y z → P x z
 ≡-⇶₂ : ∀ {α} {A : ★ α} {x y z : A} (p : x ≡ y) (q : y ≡ z) → x ≡ z
 ≡-⇶₂ (⟲ x) e = e
 
+-- we'll prove that inequality is not transitive a bit further down
 
 -- Path transport
 Δ : ∀ {α β} {A : ★ α} {x y : A} (p : x ≡ y) (P : A → ★ β) → P x → P y
@@ -1075,13 +1088,38 @@ _minus_ : ℕ → ℕ → ℕ
 (𝕤 m) minus n = 𝕤 (m minus n)
 infix 2 _minus_
 
---This attempt just returns m
-{-
-_minus₂_ : ℕ → ℕ → ℕ
-_minus₂_ n .n = 𝕫
-𝕫 minus₂ n = 𝕫
-(𝕤 m) minus₂ n = m minus₂ n
--}
+
+isZero : ℕ → 𝔹
+isZero 𝕫 = 𝕥
+isZero x = 𝕗
+
+𝕤x≠𝕫 : (x : ℕ) → (𝕤 x) ≠ 𝕫
+𝕤x≠𝕫 x [𝕤x≡𝕫] = ☢
+ where
+  [isZero-𝕫≡𝕥] : isZero 𝕫 ≡ 𝕥
+  [isZero-𝕫≡𝕥] = ⟲ 𝕥
+
+  [isZero-𝕤x≡𝕗] : isZero (𝕤 x) ≡ 𝕗
+  [isZero-𝕤x≡𝕗] = ⟲ 𝕗
+
+  [isZero-𝕫≡isZero-𝕤x] : isZero 𝕫 ≡ isZero (𝕤 x)
+  [isZero-𝕫≡isZero-𝕤x] = [f≡g]→[fa≡ga]₂ isZero isZero (⟲ isZero) 𝕫 (𝕤 x) (≡-↑↓ [𝕤x≡𝕫])
+
+  [𝕥≡𝕗] : 𝕥 ≡ 𝕗
+  [𝕥≡𝕗] = ≡-⇶ (≡-⇶ (≡-↑↓ [isZero-𝕫≡𝕥]) [isZero-𝕫≡isZero-𝕤x]) [isZero-𝕤x≡𝕗]
+
+  ☢ : ⊥
+  ☢ = 𝕥≠𝕗 [𝕥≡𝕗]
+
+𝕫≠𝕤x : (x : ℕ) → 𝕫 ≠ (𝕤 x)
+𝕫≠𝕤x x = ≠-↑↓ (𝕤x≠𝕫 x)
+
+¬[≠-⇶] : (∀ {α} {A : ★ α} {x y z : A} (p : x ≠ y) (q : y ≠ z) → x ≠ z) → ⊥
+¬[≠-⇶] hyp = ☢
+ where
+  ☢ : ⊥
+  ☢ = hyp (𝕫≠𝕤x 𝕫) (𝕤x≠𝕫 𝕫) (⟲ 𝕫)
+
 
 _≥_ : ℕ → ℕ → ★₀
 x ≥ y = ∃ n ∈ ℕ , (y + n ≡ x)
@@ -1611,11 +1649,35 @@ even-𝕤𝕫≡𝕗 = ⟲ 𝕗
   ☢ : ⊥
   ☢ = 𝕥≠𝕗 [even-𝕫≡even-𝕤𝕫]
 
+
+[even-x≠even-𝕤x]→[even-𝕤x≠even-𝕤𝕤x] : (x : ℕ) → (even x) ≠ (even (𝕤 x)) → (even (𝕤 x)) ≠ (even (𝕤 (𝕤 x)))
+[even-x≠even-𝕤x]→[even-𝕤x≠even-𝕤𝕤x] x [even-x≠even-𝕤x] [even-𝕤x≡even-𝕤𝕤x] = ☢
+ where
+  [even-𝕤𝕤x≡even-x] : (even (𝕤 (𝕤 x))) ≡ (even x) 
+  [even-𝕤𝕤x≡even-x] = ≡-↑↓ (even-n≡even-𝕤𝕤n x)
+  
+  [even-𝕤x≡even-x] : (even (𝕤 x)) ≡ (even x)
+  [even-𝕤x≡even-x] = ≡-⇶ [even-𝕤x≡even-𝕤𝕤x] [even-𝕤𝕤x≡even-x]
+
+  ☢ : ⊥
+  ☢ = [even-x≠even-𝕤x] (≡-↑↓ [even-𝕤x≡even-x])
+ 
+
+
+[even-x≠even-𝕤x] : (x : ℕ) → (even x) ≠ (even (𝕤 x))
+[even-x≠even-𝕤x] 𝕫 = [even-𝕫≠even-𝕤𝕫]
+[even-x≠even-𝕤x] (𝕤 x) = [even-x≠even-𝕤x]→[even-𝕤x≠even-𝕤𝕤x] x ([even-x≠even-𝕤x] x)
+
+
+
+
+
 𝕤𝕫≠𝕫 : (𝕤 𝕫) ≠ 𝕫
 𝕤𝕫≠𝕫 [𝕤𝕫≡𝕫] = ☢
  where
   ☢ : ⊥
   ☢ = 𝕥≠𝕗 ([f≡g]→[fa≡ga]₂ even even (⟲ even) 𝕫 (𝕤 𝕫) (≡-↑↓ [𝕤𝕫≡𝕫]))
+
 
 [𝕤x≠x]→[𝕤𝕤x≠𝕤x] : (x : ℕ) → (𝕤 x) ≠ x → (𝕤 (𝕤 x)) ≠ (𝕤 x)
 [𝕤x≠x]→[𝕤𝕤x≠𝕤x] x [𝕤x≠x] [𝕤𝕤x≡𝕤x] = ☢
@@ -1801,39 +1863,121 @@ x≯x x [x>x] = ☢
   
   ☢
 -}
-{-
+
+
 𝕫≯𝕫 : 𝕫 ≯ 𝕫
 𝕫≯𝕫 (a , (b , (∧-cons [𝕤b≡a] [𝕫+a≡𝕫]))) = ☢
  where
   [𝕫+𝕤b≡𝕫+a] : 𝕫 + (𝕤 b) ≡ 𝕫 + a
   [𝕫+𝕤b≡𝕫+a] = [f≡g]→[fa≡ga]₂ (_+_ 𝕫) (_+_ 𝕫) (⟲ (_+_ 𝕫)) (𝕤 b) a [𝕤b≡a]  
 
-  [𝕫+𝕤b≡𝕤b] : 𝕫 + (𝕤 b) ≡ 𝕤 b
-  [𝕫+𝕤b≡𝕤b] = 𝕫+x≡x (𝕤 b)
-   
-  [𝕫+a≡a] : 𝕫 + a ≡ a
-  [𝕫+a≡a] = 𝕫+x≡x a
-  
-
-
   [𝕫+𝕤b≡𝕫] : 𝕫 + (𝕤 b) ≡ 𝕫
   [𝕫+𝕤b≡𝕫] = ≡-⇶ [𝕫+𝕤b≡𝕫+a] [𝕫+a≡𝕫]
+
+  [𝕫+𝕤b≡𝕤b] : 𝕫 + (𝕤 b) ≡ 𝕤 b
+  [𝕫+𝕤b≡𝕤b] = 𝕫+x≡x (𝕤 b)
 
   [𝕤b≡𝕫] : (𝕤 b) ≡ 𝕫
   [𝕤b≡𝕫] = ≡-⇶ (≡-↑↓ [𝕫+𝕤b≡𝕤b]) [𝕫+𝕤b≡𝕫]
 
-  [𝕤b>𝕫] : (𝕤 b) > 𝕫
-  [𝕤b>𝕫] = 𝕤x>𝕫 b
+  ☢ : ⊥
+  ☢ = 𝕤x≠𝕫 b [𝕤b≡𝕫]
 
+[x+𝕫≡x]→[𝕫≡𝕫] : (x : ℕ) → x + 𝕫 ≡ x → 𝕫 ≡ 𝕫
+[x+𝕫≡x]→[𝕫≡𝕫] x [x+𝕫≡x] = ⟲ 𝕫
 
-  [𝕤𝕫+b≡𝕫] : (𝕤 𝕫) + b ≡ 𝕫
-  [𝕤𝕫+b≡𝕫] = ≡-⇶ (𝕤x+y≡x+𝕤y 𝕫 b) [𝕫+𝕤b≡𝕫]  
+𝕤x+𝕫≠x : (x : ℕ) → (𝕤 x) + 𝕫 ≠ x
+𝕤x+𝕫≠x x [𝕤x+𝕫≡x] = ☢
+ where
+  [𝕤x+𝕫≡𝕤x] : (𝕤 x) + 𝕫 ≡ (𝕤 x)
+  [𝕤x+𝕫≡𝕤x] = x+𝕫≡x (𝕤 x)
 
+  [𝕤x≡x] : (𝕤 x) ≡ x
+  [𝕤x≡x] = ≡-⇶ (≡-↑↓ [𝕤x+𝕫≡𝕤x]) [𝕤x+𝕫≡x]
+
+  ☢ : ⊥
+  ☢ = 𝕤x≠x x [𝕤x≡x]
+
+{-
+[𝕤x+y≠x]→[𝕤x+𝕤y≠x] : (x y : ℕ) → (𝕤 x) + y ≠ x → (𝕤 x) + (𝕤 y) ≠ x
+[𝕤x+y≠x]→[𝕤x+𝕤y≠x] x y [𝕤x+y≠x] [𝕤x+𝕤y≡x] = ☢
+ where
   
+  ☢
+-}
 
+{-
+𝕤x+y≠x : (x y : ℕ) → (𝕤 x) + y ≠ x
+𝕤x+y≠x x [𝕤x+y≡x] = ☢
+ where
+  
+  ☢
+-}
+x+𝕤𝕫≠x : (x : ℕ) → x + (𝕤 𝕫) ≠ x
+x+𝕤𝕫≠x x [x+𝕤𝕫≡x] = ☢
+ where
+  [x+𝕤𝕫≡𝕤x] : x + (𝕤 𝕫) ≡ (𝕤 x)
+  [x+𝕤𝕫≡𝕤x] = x+𝕤𝕫≡𝕤x x
+
+  [𝕤x≡x] : (𝕤 x) ≡ x
+  [𝕤x≡x] = ≡-⇶ (≡-↑↓ [x+𝕤𝕫≡𝕤x]) [x+𝕤𝕫≡x]
+
+  ☢ : ⊥
+  ☢ = 𝕤x≠x x [𝕤x≡x]
+
+
+{-
+[x+𝕤y≠x]→[x+𝕤𝕤y≠x] : (x y : ℕ) → x + (𝕤 y) ≠ x → x + (𝕤 (𝕤 y)) ≠ x
+[x+𝕤y≠x]→[x+𝕤𝕤y≠x] x y [x+𝕤y≠x] [x+𝕤𝕤y≡x] = ☢
+ where
+  
+  ☢
+-}
+{-
+x+𝕤y≠x : (x y : ℕ) → x + (𝕤 y) ≠ x
+x+𝕤y≠x x y [x+𝕤y≡x] = ☢
+ where
+  [𝕤[x+y]≡x+𝕤y] : (𝕤 (x + y)) ≡ x + (𝕤 y)
+  [𝕤[x+y]≡x+𝕤y] = 𝕤[x+y]≡x+𝕤y x y
+  
+  [𝕤[x+y]≡x] : (𝕤 (x + y)) ≡ x
+  [𝕤[x+y]≡x] = ≡-⇶ [𝕤[x+y]≡x+𝕤y] [x+𝕤y≡x]
 
   ☢
+-}
+{-
+[[x+y≡x]→[y≡𝕫]]→[[x+𝕤y≡x]→[𝕤y≡𝕫]] : (x y : ℕ) → (x + y ≡ x → y ≡ 𝕫) → x + (𝕤 y) ≡ x → (𝕤 y) ≡ 𝕫
+[[x+y≡x]→[y≡𝕫]]→[[x+𝕤y≡x]→[𝕤y≡𝕫]] x y [[x+y≡x]→[y≡𝕫]] [x+𝕤y≡x] = [𝕤y≡𝕫]
+ where
+  [𝕤[x+y]≡x+𝕤y] : (𝕤 (x + y)) ≡ x + (𝕤 y)
+  [𝕤[x+y]≡x+𝕤y] = 𝕤[x+y]≡x+𝕤y x y
 
+  [𝕤[x+y]≡x] : (𝕤 (x + y)) ≡ x
+  [𝕤[x+y]≡x] = ≡-⇶ [𝕤[x+y]≡x+𝕤y] [x+𝕤y≡x]
+
+  [𝕤[x+y]≡𝕤x+y] : (𝕤 (x + y)) ≡ (𝕤 x) + y
+  [𝕤[x+y]≡𝕤x+y] = ≡-↑↓ (𝕤x+y≡𝕤[x+y] x y)
+
+  {-
+  [𝕤[x+y]≡𝕤x] : (𝕤 (x + y)) ≡ 𝕤 x
+  [𝕤[x+y]≡𝕤x] = 
+  [x+𝕤y≡x]
+  -} 
+  [𝕤y≡𝕫]
+-}
+{-
+[x+y≡x]→[y≡𝕫] : (x y : ℕ) → x + y ≡ x → y ≡ 𝕫
+[x+y≡x]→[y≡𝕫] x y [x+y≡x] = [y≡𝕫]
+ where
+  
+  [y≡𝕫]
+-}
+
+{-
+[x≯x]→[𝕤x≯𝕤x] : (x : ℕ) → x ≯ x → (𝕤 x) ≯ (𝕤 x)
+[x≯x]→[𝕤x≯𝕤x] x [x≯x] (a , (b , (∧-cons [𝕤b≡a] [𝕤x+a≡𝕤x] = ☢
+ where
+  ☢
 -}
 
 {-
@@ -1862,9 +2006,165 @@ _minus₀ : ℕ → ℕ → ℕ
 -- multiplication on Nats
 _*_ : ℕ → ℕ → ℕ
 𝕫 * y = 𝕫 
-(𝕤 x) * y = x + (x * y) 
+(𝕤 x) * y = y + (x * y) 
 infixr 2 _*_
 
+
+𝕫*x≡𝕫 : (x : ℕ) → 𝕫 * x ≡ 𝕫
+𝕫*x≡𝕫 x = ⟲ 𝕫
+
+𝕤𝕫*x≡x : (x : ℕ) → (𝕤 𝕫) * x ≡ x
+𝕤𝕫*x≡x x = [𝕤𝕫*x≡x] 
+ where
+  [𝕤𝕫*x≡x+[𝕫*x]] : (𝕤 𝕫) * x ≡ x + (𝕫 * x)
+  [𝕤𝕫*x≡x+[𝕫*x]] = ⟲ (x + (𝕫 * x))
+
+  [x+[𝕫*x]≡x+𝕫] : x + (𝕫 * x) ≡ x + 𝕫
+  [x+[𝕫*x]≡x+𝕫] = [f≡g]→[fa≡ga]₂ (_+_ x) (_+_ x) (⟲ (_+_ x)) (𝕫 * x) 𝕫 (𝕫*x≡𝕫 x)
+
+  [x+𝕫≡x] : (x + 𝕫) ≡ x
+  [x+𝕫≡x] = x+𝕫≡x x
+
+  [𝕤𝕫*x≡x+𝕫] : (𝕤 𝕫) * x ≡ x + 𝕫
+  [𝕤𝕫*x≡x+𝕫] = ≡-⇶ [𝕤𝕫*x≡x+[𝕫*x]] [x+[𝕫*x]≡x+𝕫]
+ 
+  [𝕤𝕫*x≡x] : (𝕤 𝕫) * x ≡ x
+  [𝕤𝕫*x≡x] = ≡-⇶ [𝕤𝕫*x≡x+𝕫] [x+𝕫≡x]
+
+
+diff : ℕ → ℕ → ℕ
+diff 𝕫 x = x
+diff x 𝕫 = x
+diff (𝕤 x) (𝕤 y) = diff x y
+
+diff-𝕫-𝕫≡𝕫 : diff 𝕫 𝕫 ≡ 𝕫
+diff-𝕫-𝕫≡𝕫 = ⟲ 𝕫
+
+[diff-x-x≡𝕫]→[diff-𝕤x-𝕤x≡𝕫] : (x : ℕ) → diff x x ≡ 𝕫 → diff (𝕤 x) (𝕤 x) ≡ 𝕫
+[diff-x-x≡𝕫]→[diff-𝕤x-𝕤x≡𝕫] x [diff-x-x≡𝕫] = [diff-𝕤x-𝕤x≡𝕫]
+ where
+  [diff-𝕤x-𝕤x≡diff-x-x] : diff (𝕤 x) (𝕤 x) ≡ diff x x
+  [diff-𝕤x-𝕤x≡diff-x-x] = ⟲ (diff x x)
+
+  [diff-𝕤x-𝕤x≡𝕫] :  diff (𝕤 x) (𝕤 x) ≡ 𝕫
+  [diff-𝕤x-𝕤x≡𝕫] = ≡-⇶ [diff-𝕤x-𝕤x≡diff-x-x] [diff-x-x≡𝕫]
+
+
+diff-x-x≡𝕫 : (x : ℕ) → diff x x ≡ 𝕫
+diff-x-x≡𝕫 𝕫 = diff-𝕫-𝕫≡𝕫
+diff-x-x≡𝕫 (𝕤 x) = [diff-x-x≡𝕫]→[diff-𝕤x-𝕤x≡𝕫] x (diff-x-x≡𝕫 x)
+
+diff-𝕫-𝕫≡diff-𝕫-𝕫 : diff 𝕫 𝕫 ≡ diff 𝕫 𝕫
+diff-𝕫-𝕫≡diff-𝕫-𝕫 = ⟲ (diff 𝕫 𝕫)
+
+diff-𝕤x-𝕤y≡diff-x-y : (x y : ℕ) → diff (𝕤 x) (𝕤 y) ≡ diff x y
+diff-𝕤x-𝕤y≡diff-x-y x y = ⟲ (diff x y)
+
+
+diff-𝕫-x≡x : (x : ℕ) → diff 𝕫 x ≡ x
+diff-𝕫-x≡x x = ⟲ x
+
+diff-𝕤x-𝕫≡𝕤x : (x : ℕ) → diff (𝕤 x) 𝕫 ≡ (𝕤 x)
+diff-𝕤x-𝕫≡𝕤x x = ⟲ (𝕤 x)
+
+
+[diff-x-𝕫≡x]→[diff-𝕤x-𝕫≡𝕤x] : (x : ℕ) → diff x 𝕫 ≡ x → diff (𝕤 x) 𝕫 ≡ (𝕤 x)
+[diff-x-𝕫≡x]→[diff-𝕤x-𝕫≡𝕤x] x [diff-x-𝕫≡x] = diff-𝕤x-𝕫≡𝕤x x
+
+
+diff-x-𝕫≡x : (x : ℕ) → diff x 𝕫 ≡ x
+diff-x-𝕫≡x 𝕫 = diff-𝕫-𝕫≡𝕫
+diff-x-𝕫≡x (𝕤 x) = [diff-x-𝕫≡x]→[diff-𝕤x-𝕫≡𝕤x] x (diff-x-𝕫≡x x)
+
+
+diff-x-𝕫≡diff-𝕫-x : (x : ℕ) → diff x 𝕫 ≡ diff 𝕫 x
+diff-x-𝕫≡diff-𝕫-x x = ≡-⇶ (diff-x-𝕫≡x x) (≡-↑↓ (diff-𝕫-x≡x x))
+
+[diff-𝕫-𝕫≡𝕫]→[diff-𝕤𝕫-𝕫≡𝕤𝕫] : diff 𝕫 𝕫 ≡ 𝕫 → diff (𝕤 𝕫) 𝕫 ≡ (𝕤 𝕫)
+[diff-𝕫-𝕫≡𝕫]→[diff-𝕤𝕫-𝕫≡𝕤𝕫] [diff-𝕫-𝕫≡𝕫] = diff-𝕤x-𝕫≡𝕤x 𝕫
+
+{-
+[diff-x-𝕫≡𝕫]→[diff-𝕤x-𝕫≡𝕤𝕫] : (x : ℕ) → diff x 𝕫 ≡ 𝕫 → diff (𝕤 x) 𝕫 ≡ (𝕤 𝕫)
+[diff-x-𝕫≡𝕫]→[diff-𝕤x-𝕫≡𝕤𝕫] x [diff-x-𝕫≡𝕫] = 
+-}
+
+[diff-𝕫-𝕫≡𝕫]→[𝕫≡𝕫] : diff 𝕫 𝕫 ≡ 𝕫 → 𝕫 ≡ 𝕫
+[diff-𝕫-𝕫≡𝕫]→[𝕫≡𝕫] [diff-𝕫-𝕫≡𝕫] = ⟲ 𝕫
+
+[[diff-x-y≡𝕫]→[x≡y]]→[[diff-𝕤x-𝕤y≡𝕫]→[𝕤x≡𝕤y]] : (x y : ℕ) → (diff x y ≡ 𝕫 → x ≡ y) → diff (𝕤 x) (𝕤 y) ≡ 𝕫 → (𝕤 x) ≡ (𝕤 y)
+[[diff-x-y≡𝕫]→[x≡y]]→[[diff-𝕤x-𝕤y≡𝕫]→[𝕤x≡𝕤y]] x y [[diff-x-y≡𝕫]→[x≡y]] [diff-𝕤x-𝕤y≡𝕫] = [𝕤x≡𝕤y]
+ where
+  [diff-𝕤x-𝕤y≡diff-x-y] : diff (𝕤 x) (𝕤 y) ≡ diff x y
+  [diff-𝕤x-𝕤y≡diff-x-y] = diff-𝕤x-𝕤y≡diff-x-y x y
+
+  [diff-x-y≡𝕫] : diff x y ≡ 𝕫
+  [diff-x-y≡𝕫] = ≡-⇶ (≡-↑↓ [diff-𝕤x-𝕤y≡diff-x-y]) [diff-𝕤x-𝕤y≡𝕫]
+
+  [x≡y] : x ≡ y
+  [x≡y] = [[diff-x-y≡𝕫]→[x≡y]] [diff-x-y≡𝕫]
+
+  [𝕤x≡𝕤y] : (𝕤 x) ≡ (𝕤 y)
+  [𝕤x≡𝕤y] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) x y [x≡y]
+
+{-
+𝕤x≠𝕫 : (x : ℕ) → (𝕤 x) ≠ 𝕫
+𝕤x≠𝕫 x [𝕤x≡𝕫] = ☢
+ where
+-}
+
+diff-𝕤𝕫-𝕫≠𝕫 : diff (𝕤 𝕫) 𝕫 ≠ 𝕫
+diff-𝕤𝕫-𝕫≠𝕫 [diff-𝕤𝕫-𝕫≡𝕫] = ☢
+ where
+  [diff-𝕤𝕫-𝕫≡𝕤𝕫] : diff (𝕤 𝕫) 𝕫 ≡ (𝕤 𝕫)
+  [diff-𝕤𝕫-𝕫≡𝕤𝕫] = diff-𝕤x-𝕫≡𝕤x 𝕫
+
+  [𝕤𝕫≡𝕫] : (𝕤 𝕫) ≡ 𝕫
+  [𝕤𝕫≡𝕫] = ≡-⇶ (≡-↑↓ [diff-𝕤𝕫-𝕫≡𝕤𝕫]) [diff-𝕤𝕫-𝕫≡𝕫]
+
+  ☢ : ⊥
+  ☢ = 𝕤𝕫≠𝕫 [𝕤𝕫≡𝕫]
+{-
+[diff-𝕤x-𝕫≠𝕫]→[diff-𝕤𝕤x-𝕫≠𝕫] : (x : ℕ) → diff (𝕤 x) 𝕫 ≠ 𝕫 → diff (𝕤 (𝕤 x)) 𝕫 ≠ 𝕫
+[diff-𝕤x-𝕫≠𝕫]→[diff-𝕤𝕤x-𝕫≠𝕫] x [diff-𝕤x-𝕫≠𝕫] [diff-𝕤𝕤x-𝕫≡𝕫] = ☢
+ where
+  
+  ☢
+-}
+{-
+diff-𝕤x-𝕫≠𝕫 : (x : ℕ) → diff (𝕤 x) 𝕫 ≠ 𝕫
+diff-𝕤x-𝕫≠𝕫 x [diff-𝕤x-𝕫≡𝕫] = ☢
+ where
+  [diff-𝕤x-𝕫≡𝕤x] : diff (𝕤 x) 𝕫 ≡ (𝕤 x)
+  [diff-𝕤x-𝕫≡𝕤x] = diff-x-𝕫≡x (𝕤 x)
+
+  [𝕤x≡𝕫] : (𝕤 x) ≡ 𝕫
+  [𝕤x≡𝕫] = ≡-⇶ (≡-↑↓ [diff-𝕤x-𝕫≡𝕤x]) [diff-𝕤x-𝕫≡𝕫]
+
+  ☢
+-}
+{-
+[diff-x-y≡𝕫]→[x≡y] : (x y : ℕ) → diff x y ≡ 𝕫 → x ≡ y
+[diff-x-y≡𝕫]→[x≡y] 𝕫 𝕫 [diff-𝕫-𝕫≡𝕫] = ⟲ 𝕫
+[diff-x-y≡𝕫]→[x≡y] (𝕤 x) 𝕫 [diff-𝕤x-𝕫≡𝕫]
+[diff-x-y≡𝕫]→[x≡y] (𝕤 x) (𝕤 y) [diff-x-y≡𝕫] = [[diff-x-y≡𝕫]→[x≡y]]→[[diff-𝕤x-𝕤y≡𝕫]→[𝕤x≡𝕤y]] x y ([diff-x-y≡𝕫]→[x≡y] x y)
+-}
+
+{-
+[diff-x-y≡𝕫]→[diff-𝕤x-y≡𝕤𝕫] : (x y : ℕ) → diff x y ≡ 𝕫 → diff (𝕤 x) y ≡ (𝕤 𝕫)
+[diff-x-y≡𝕫]→[diff-𝕤x-y≡𝕤𝕫] x y [diff-x-y≡𝕫] = [diff-𝕤x-y≡𝕤z]
+-}
+
+{-
+[diff-x-y≡diff-y-x]→[diff-x-𝕤y≡diff-𝕤y-x] : (x y : ℕ) → diff x y ≡ diff y x → diff x (𝕤 y) ≡ diff (𝕤 y) x
+[diff-x-y≡diff-y-x]→[diff-x-𝕤y≡diff-𝕤y-x] x y [diff-x-y≡diff-y-x] = [diff-x-𝕤y≡diff-𝕤y-x]
+ where
+  
+  [diff-x-𝕤y≡diff-𝕤y-x]
+-}
+
+{-
+diff-x-y≡diff-y-x
+-}
 {-
 [≡0%n] 
 data Even (n : ℕ) : ★₀ where
@@ -3077,7 +3377,7 @@ unop-Δ :
  ([A≅B] : true-iso A B) → (f : A → A) →
  ∃ g ∈ (B → B) , 
   ((π₁ (π₂ [A≅B])) ∘ g ∘ (π₁ [A≅B]) ≡ f)
-unop-Δ {α} {β} {A} {B} (F , (G , ∧-cons [G∘F≡id] [F∘G≡id])) f = ((F ∘ (f ∘ G)) , [G∘g∘F]≡f)
+unop-Δ {α} {β} {A} {B} (F , (G , ∧-cons [G∘F≡id] [F∘G≡id])) f = ((F ∘ (f ∘ G)) , [G∘g∘F≡f])
  where
   
   g : B → B
@@ -3107,8 +3407,8 @@ unop-Δ {α} {β} {A} {B} (F , (G , ∧-cons [G∘F≡id] [F∘G≡id])) f = ((F
   [f∘G∘F≡f] : f ∘ G ∘ F ≡ f
   [f∘G∘F≡f] = [f≡g]→[fa≡ga] _∘G∘F _∘id [∘G∘F≡∘id] f 
 
-  [G∘g∘F]≡f : (G ∘ F ∘ f ∘ G ∘ F) ≡ f
-  [G∘g∘F]≡f = ≡-⇶ [G∘F∘f∘G∘F≡f∘G∘F] [f∘G∘F≡f]
+  [G∘g∘F≡f] : (G ∘ F ∘ f ∘ G ∘ F) ≡ f
+  [G∘g∘F≡f] = ≡-⇶ [G∘F∘f∘G∘F≡f∘G∘F] [f∘G∘F≡f]
 
 {-
 binop-Δ : 
