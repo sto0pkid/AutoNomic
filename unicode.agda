@@ -1021,9 +1021,10 @@ infixr 3 _*_
 
 
 _gte_ : ℕ → ℕ → 𝔹
-x gte 0 = 𝕥
+0 gte 0 = 𝕥
 0 gte (𝕤 n) = 𝕗
-(𝕤 n) gte (𝕤 m) = n gte (𝕤 m)
+(𝕤 n) gte 0 = 𝕥
+(𝕤 n) gte (𝕤 m) = n gte m
 infix 2 _gte_ 
 
 
@@ -2454,11 +2455,12 @@ x-gte-0→x≥0 x [x-gte-0≡𝕥] = [x≥0]
   [x≥0] : x ≥ 0
   [x≥0] = x≥𝕫 x
 
+{-
 x≥0→x-gte-0 : (x : ℕ) → x ≥ 0 → x gte 0 ≡ 𝕥
 x≥0→x-gte-0 x (a , [0+a≡x]) = ⟲ 𝕥
+-}
 
-
-
+{-
 [0-gte-𝕤y]→[0-gte-y] : (y : ℕ) → 0 gte (𝕤 y) ≡ 𝕥 → 0 gte y ≡ 𝕥
 [0-gte-𝕤y]→[0-gte-y] y [0-gte-𝕤y≡𝕥] = [0-gte-y≡𝕥]
  where
@@ -2473,10 +2475,11 @@ x≥0→x-gte-0 x (a , [0+a≡x]) = ⟲ 𝕥
 
   [0-gte-y≡𝕥] : 0 gte y ≡ 𝕥
   [0-gte-y≡𝕥] = ω ☢
-
+-}
 [x-gte-0]→[𝕤x-gte-0] : (x : ℕ) → x gte 0 ≡ 𝕥 → (𝕤 x) gte 0 ≡ 𝕥
 [x-gte-0]→[𝕤x-gte-0] x [x-gte-0≡𝕥] = ⟲ 𝕥
 
+{-
 [[x-gte-y]→[𝕤x-gte-y]]→[[x-gte-𝕤y]→[𝕤x-gte-𝕤y]] : (x y : ℕ) → (x gte y ≡ 𝕥 → (𝕤 x) gte y ≡ 𝕥) → x gte (𝕤 y) ≡ 𝕥 → (𝕤 x) gte (𝕤 y) ≡ 𝕥
 [[x-gte-y]→[𝕤x-gte-y]]→[[x-gte-𝕤y]→[𝕤x-gte-𝕤y]] x y [[x-gte-y]→[𝕤x-gte-y]] [x-gte-𝕤y≡𝕥] = [𝕤x-gte-𝕤y≡𝕥]
  where
@@ -2486,9 +2489,9 @@ x≥0→x-gte-0 x (a , [0+a≡x]) = ⟲ 𝕥
   [𝕤x-gte-𝕤y≡𝕥] : (𝕤 x) gte (𝕤 y) ≡ 𝕥
   [𝕤x-gte-𝕤y≡𝕥] = ≡-⇶ [𝕤x-gte-𝕤y≡x-gte-𝕤y] [x-gte-𝕤y≡𝕥]
   
+-}
 
-
-
+{-
 [x-gte-y]→[𝕤x-gte-y] : (x y : ℕ) → x gte y ≡ 𝕥 → (𝕤 x) gte y ≡ 𝕥
 [x-gte-y]→[𝕤x-gte-y] x 𝕫 = [x-gte-0]→[𝕤x-gte-0] x
 [x-gte-y]→[𝕤x-gte-y] x (𝕤 y) = [[x-gte-y]→[𝕤x-gte-y]]→[[x-gte-𝕤y]→[𝕤x-gte-𝕤y]] x y ([x-gte-y]→[𝕤x-gte-y] x y)
@@ -2515,7 +2518,7 @@ x≥0→x-gte-0 x (a , [0+a≡x]) = ⟲ 𝕥
 [x-gte-𝕤y]→[x-gte-y] : (x y : ℕ) → x gte (𝕤 y) ≡ 𝕥 → x gte y ≡ 𝕥
 [x-gte-𝕤y]→[x-gte-y] 0 y = [0-gte-𝕤y]→[0-gte-y] y
 [x-gte-𝕤y]→[x-gte-y] (𝕤 x) y = [[x-gte-𝕤y]→[x-gte-y]]→[[𝕤x-gte-𝕤y]→[𝕤x-gte-y]] x y ([x-gte-𝕤y]→[x-gte-y] x y)
-
+-}
 
 {-
 [x-gte-𝕤y]→[x≥y]→[x≥𝕤y] : (x y : ℕ) → x gte (𝕤 y) ≡ 𝕥 → x ≥ y → x ≥ (𝕤 y)
@@ -2597,14 +2600,13 @@ x≥0→x-gte-0 x (a , [0+a≡x]) = ⟲ 𝕥
 [x-gte-x]→[𝕤x-gte-𝕤x] : (x : ℕ) → x gte x ≡ 𝕥 → (𝕤 x) gte (𝕤 x) ≡ 𝕥
 [x-gte-x]→[𝕤x-gte-𝕤x] x [x-gte-x≡𝕥] = [𝕤x-gte-𝕤x≡𝕥]
  where
-  [x-gte-x≡𝕥]
-  [𝕤x-gte-𝕤x≡𝕥]
+  [𝕤x-gte-𝕤x≡𝕥] : (𝕤 x) gte (𝕤 x) ≡ 𝕥
 -}
 
 {-
 x-gte-x : (x : ℕ) → x gte x ≡ 𝕥
+x-gte-x x = ⟲ 𝕥
 -}
-
 {-
 [x+0]-gte-x : (x : ℕ) → (x + 0) gte x ≡ 𝕥
 [x+0]-gte-x x = [[x+0]-gte-x]
@@ -2653,6 +2655,67 @@ x-gte-x : (x : ℕ) → x gte x ≡ 𝕥
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+{-
+[[x-gte-𝕤y]→[x-gte-y]]-ind : 
+ (x y : ℕ) → (x gte (𝕤 y) ≡ 𝕥 → x gte y ≡ 𝕥) → (𝕤 x) gte (𝕤 y) ≡ 𝕥 → (𝕤 x) gte y ≡ 𝕥 
+[[x-gte-𝕤y]→[x-gte-y]]-ind x y [[x-gte-𝕤y]→[x-gte-y]] [𝕤x-gte-𝕤y≡𝕥] = [𝕤x-gte-y≡𝕥]
+ where
+-}  
+
+{-
+[x-gte-𝕤y]→[x-gte-y] : (x y : ℕ) → x gte (𝕤 y) ≡ 𝕥 → x gte y ≡ 𝕥
+[x-gte-𝕤y]→[x-gte-y] 0 y [0-gte-𝕤y≡𝕥] =
+[x-gte-𝕤y]→[x-gte-y] x y [x-gte-𝕤y≡𝕥] = [x-gte-y≡𝕥]
+ where
+-}  
+
+
+[x-gte-0]→[x≥0] : (x : ℕ) → x gte 0 ≡ 𝕥 → x ≥ 0
+[x-gte-0]→[x≥0] x [x-gte-0≡𝕥] = (x , (𝕫+x≡x x))
+{-
+[[x-gte-y]→[x≥y]]-ind : (x y : ℕ) → (x gte y ≡ 𝕥 → x ≥ y) → x gte (𝕤 y) ≡ 𝕥 → x ≥ (𝕤 y)
+[[x-gte-y]→[x≥y]]-ind x y [[x-gte-y]→[x≥y]] [x-gte-(𝕤 y)≡𝕥] = (a , [𝕤y+a≡x])
+-}
+{-
+[x-gte-y]→[x≥y] : (x y : ℕ) → x gte y ≡ 𝕥 → x ≥ y
+[x-gte-y]→[x≥y] x y [x-gte-y≡𝕥] =  
+-}
+
+
+{-
+[x-gte-0]→[x≡0+[diff-x-0]] : (x : ℕ) → x gte 0 ≡ 𝕥 → x ≡ 0 + (diff x 0)
+[x-gte-0]→[x≡0+[diff-x-0]] x [x-gte-0≡𝕥] = [x≡0+[diff-x-0]]
+ where
+  [diff-x-0≡x] : diff x 0 ≡ x
+  [diff-x-0≡x] = ⟲ x
+
+  [x≡0+[diff-x-0]]
+-}
+
+
+{-
+[x-gte-y]→[x≡y+[diff-x-y]] : (x y : ℕ) → x gte y →  x ≡ y + (diff x y)
+[x-gte-y]→[x≡y+[diff-x-y]] x y [x-gte-y] = [x≡y+[diff-x-y]]
+ where
+  
+  [x≡y+[diff-xy]]
+-} 
+
+
+
+
+
 -- even and odd
 
 -- 1) 𝕫 is even
@@ -2660,6 +2723,7 @@ x-gte-x : (x : ℕ) → x gte x ≡ 𝕥
 -- 3) 𝕤𝕫 is not even
 -- 4) 𝕤𝕫 is odd
 -- 5) if n is even then 𝕤𝕤n is even
+-- 6) if x is even then 𝕤x is not
 
 -- 1) 𝕫 is even
 even-𝕫≡𝕥 : even 𝕫 ≡ 𝕥
@@ -2682,30 +2746,29 @@ odd-𝕤𝕫≡𝕥 = ⟲ 𝕥
 [even-𝕫≡𝕥]→[even-𝕤𝕫≡𝕗] [even-𝕫≡𝕥] = ⟲ 𝕗
 
 -- 5) if n is even then 𝕤𝕤n is even
+-- base case
 even-𝕫≡even-𝕤𝕤𝕫 : (even 𝕫) ≡ even (𝕤 (𝕤 𝕫))
 even-𝕫≡even-𝕤𝕤𝕫 = ⟲ 𝕥
 
+-- inductive step
 [even-n≡even-𝕤𝕤n]→[even-𝕤n≡even-𝕤𝕤𝕤n] : (n : ℕ) → (even n) ≡ (even (𝕤 (𝕤 n))) → (even (𝕤 n)) ≡ (even (𝕤 (𝕤 (𝕤 n))))
 [even-n≡even-𝕤𝕤n]→[even-𝕤n≡even-𝕤𝕤𝕤n] n [even-n≡even-𝕤𝕤n] = ⟲ (even (𝕤 n))
 
+-- final step
 even-n≡even-𝕤𝕤n : (n : ℕ) → (even n) ≡ (even (𝕤 (𝕤 n)))
 even-n≡even-𝕤𝕤n 𝕫 = even-𝕫≡even-𝕤𝕤𝕫
 even-n≡even-𝕤𝕤n (𝕤 n) = [even-n≡even-𝕤𝕤n]→[even-𝕤n≡even-𝕤𝕤𝕤n] n (even-n≡even-𝕤𝕤n n)
 
 
-[even-n≡𝕥]→[even-n≡even-𝕫] : (n : ℕ) → (even n) ≡ 𝕥 → (even n) ≡ (even 𝕫)
-[even-n≡𝕥]→[even-n≡even-𝕫] n = id
-
-[even-n≡𝕗]→[even-n≡even-𝕤𝕫] : (n : ℕ) → (even n) ≡ 𝕗 → (even n) ≡ (even (𝕤 𝕫))
-[even-n≡𝕗]→[even-n≡even-𝕤𝕫] n = id
-
+-- 6) If x is even then 𝕤x is even 
+-- base case
 [even-𝕫≠even-𝕤𝕫] : (even 𝕫) ≠ (even (𝕤 𝕫))
 [even-𝕫≠even-𝕤𝕫] [even-𝕫≡even-𝕤𝕫] = ☢
  where
   ☢ : ⊥
   ☢ = 𝕥≠𝕗 [even-𝕫≡even-𝕤𝕫]
 
-
+-- inductive step
 [even-x≠even-𝕤x]→[even-𝕤x≠even-𝕤𝕤x] : (x : ℕ) → (even x) ≠ (even (𝕤 x)) → (even (𝕤 x)) ≠ (even (𝕤 (𝕤 x)))
 [even-x≠even-𝕤x]→[even-𝕤x≠even-𝕤𝕤x] x [even-x≠even-𝕤x] [even-𝕤x≡even-𝕤𝕤x] = ☢
  where
@@ -2718,8 +2781,7 @@ even-n≡even-𝕤𝕤n (𝕤 n) = [even-n≡even-𝕤𝕤n]→[even-𝕤n≡eve
   ☢ : ⊥
   ☢ = [even-x≠even-𝕤x] (≡-↑↓ [even-𝕤x≡even-x])
  
-
-
+-- final step
 [even-x≠even-𝕤x] : (x : ℕ) → (even x) ≠ (even (𝕤 x))
 [even-x≠even-𝕤x] 𝕫 = [even-𝕫≠even-𝕤𝕫]
 [even-x≠even-𝕤x] (𝕤 x) = [even-x≠even-𝕤x]→[even-𝕤x≠even-𝕤𝕤x] x ([even-x≠even-𝕤x] x)
@@ -2821,13 +2883,6 @@ diff-x-x≡𝕫 (𝕤 x) = [diff-x-x≡𝕫]→[diff-𝕤x-𝕤x≡𝕫] x (diff
 𝕫≡diff-x-x x = ≡-↑↓ (diff-x-x≡𝕫 x)
 
 
-
-
-{-
-diff-𝕫-𝕫≡diff-𝕫-𝕫 : diff 𝕫 𝕫 ≡ diff 𝕫 𝕫
-diff-𝕫-𝕫≡diff-𝕫-𝕫 = ⟲ (diff 𝕫 𝕫)
--}
-
 -- 2) diff 𝕤x 𝕤y ≡ diff x y
 diff-𝕤x-𝕤y≡diff-x-y : (x y : ℕ) → diff (𝕤 x) (𝕤 y) ≡ diff x y
 diff-𝕤x-𝕤y≡diff-x-y x y = ⟲ (diff x y)
@@ -2864,8 +2919,46 @@ x≡diff-x-𝕫 x = ≡-↑↓ (diff-x-𝕫≡x x)
 
 
 -- 5) diff x y ≡ diff y x
+-- base case
 diff-x-𝕫≡diff-𝕫-x : (x : ℕ) → diff x 𝕫 ≡ diff 𝕫 x
 diff-x-𝕫≡diff-𝕫-x x = ≡-⇶ (diff-x-𝕫≡x x) (x≡diff-𝕫-x x)
+
+[diff-𝕫-y≡diff-y-𝕫]→[diff-𝕫-𝕤y≡diff-𝕤y-𝕫] : (y : ℕ) → diff 𝕫 y ≡ diff y 𝕫 → diff 𝕫 (𝕤 y) ≡ diff (𝕤 y) 𝕫
+[diff-𝕫-y≡diff-y-𝕫]→[diff-𝕫-𝕤y≡diff-𝕤y-𝕫] y [diff-𝕫-y≡diff-y-𝕫] = [diff-𝕫-𝕤y≡diff-𝕤y-𝕫]
+ where
+  [diff-𝕫-𝕤y≡𝕤y] : diff 𝕫 (𝕤 y) ≡ (𝕤 y)
+  [diff-𝕫-𝕤y≡𝕤y] = ⟲ (𝕤 y)
+
+  [𝕤y≡diff-𝕤y-𝕫] : (𝕤 y) ≡ diff (𝕤 y) 𝕫
+  [𝕤y≡diff-𝕤y-𝕫] = ⟲ (𝕤 y)
+
+  [diff-𝕫-𝕤y≡diff-𝕤y-𝕫] : diff 𝕫 (𝕤 y) ≡ diff (𝕤 y) 𝕫
+  [diff-𝕫-𝕤y≡diff-𝕤y-𝕫] = ≡-⇶ [diff-𝕫-𝕤y≡𝕤y] [𝕤y≡diff-𝕤y-𝕫]
+
+{-
+[[diff-x-y≡diff-y-x]→[diff-x-𝕤y≡diff-𝕤y-x]]-ind : 
+ (x y : ℕ) → (diff x y ≡ diff y x → diff x (𝕤 y) ≡ diff (𝕤 y) x) → 
+ diff (𝕤 x) y ≡ diff y (𝕤 x) → diff (𝕤 x) (𝕤 y) ≡ diff (𝕤 y) (𝕤 x)
+[[diff-x-y≡diff-y-x]→[diff-x-𝕤y≡diff-𝕤y-x]]-ind x y [[diff-x-y≡diff-y-x]→[diff-x-𝕤y≡diff-𝕤y-x]] [diff-𝕤x-y≡diff-y-𝕤x] = [diff-𝕤x-𝕤y≡diff-𝕤y-𝕤x]
+ where
+  [diff-𝕤x-𝕤y≡diff-x-y] : diff (𝕤 x) (𝕤 y) ≡ diff x y
+  [diff-𝕤x-𝕤y≡diff-x-y] = ⟲ (diff x y)
+
+  [diff-𝕤y-𝕤x≡diff-y-x] : diff (𝕤 y) (𝕤 x) ≡ diff y x
+  [diff-𝕤y-𝕤x≡diff-y-x] = ⟲ (diff y x)
+
+  [diff-𝕤x-𝕤y≡diff-𝕤y-𝕤x] 
+-}
+-- inductive step
+{-
+[diff-x-y≡diff-y-x]→[diff-x-𝕤y≡diff-𝕤y-x] : (x y : ℕ) → diff x y ≡ diff y x → diff x (𝕤 y) ≡ diff (𝕤 y) x
+[diff-x-y≡diff-y-x]→[diff-x-𝕤y≡diff-𝕤y-x] x y [diff-x-y≡diff-y-x] = [diff-x-𝕤y≡diff-𝕤y-x]
+ where
+  -}  
+
+{-
+diff-x-y≡diff-y-x : (x y : ℕ) → diff x y ≡ diff y x
+-}
 
 [diff-𝕫-𝕫≡𝕫]→[diff-𝕤𝕫-𝕫≡𝕤𝕫] : diff 𝕫 𝕫 ≡ 𝕫 → diff (𝕤 𝕫) 𝕫 ≡ (𝕤 𝕫)
 [diff-𝕫-𝕫≡𝕫]→[diff-𝕤𝕫-𝕫≡𝕤𝕫] [diff-𝕫-𝕫≡𝕫] = diff-𝕤x-𝕫≡𝕤x 𝕫
@@ -2943,8 +3036,150 @@ diff-𝕤x-𝕫≠𝕫 x [diff-𝕤x-𝕫≡𝕫] = ☢
 
 
 
+-- gte
+-- 1) If x gte y, then y + (diff x y) ≡ x
+-- 2) If x gte y ≡ 𝕥 , then x ≥ y.
+-- 3) If x ≥ y , then x gte y ≡ 𝕥. 
 
 
+
+
+-- 1) If x gte y then y+(diff x y)≡x
+
+-- xy-base  
+[0-gte-0]→[0+[diff-0-0]≡0] : 0 gte 0 ≡ 𝕥 → 0 + (diff 0 0) ≡ 0
+[0-gte-0]→[0+[diff-0-0]≡0] [0-gte-0≡𝕥] = ⟲ 0
+
+-- y-base
+[𝕤x-gte-0]→[0+[diff-𝕤x-0]≡𝕤x] : (x : ℕ) → (𝕤 x) gte 0 ≡ 𝕥 → 0 + (diff (𝕤 x) 0) ≡ (𝕤 x)
+[𝕤x-gte-0]→[0+[diff-𝕤x-0]≡𝕤x] x [𝕤x-gte-0≡𝕥] = ⟲ (𝕤 x)
+
+-- x-base
+[0-gte-𝕤y]→[𝕤y+[diff-0-𝕤y]≡0] : (y : ℕ) → 0 gte (𝕤 y) ≡ 𝕥 → (𝕤 y) + (diff 0 (𝕤 y)) ≡ 0
+[0-gte-𝕤y]→[𝕤y+[diff-0-𝕤y]≡0] y [0-gte-𝕤y≡𝕥] = [𝕤y+[diff-0-𝕤y]≡0]
+ where
+  [𝕗≡0-gte-𝕤y] : 𝕗 ≡ 0 gte (𝕤 y)
+  [𝕗≡0-gte-𝕤y] = ⟲ 𝕗
+
+  [𝕗≡𝕥] : 𝕗 ≡ 𝕥
+  [𝕗≡𝕥] = ≡-⇶ [𝕗≡0-gte-𝕤y] [0-gte-𝕤y≡𝕥]
+
+  ☢ : ⊥
+  ☢ = 𝕗≠𝕥 [𝕗≡𝕥]
+
+  [𝕤y+[diff-0-𝕤y]≡0] : (𝕤 y) + (diff 0 (𝕤 y)) ≡ 0
+  [𝕤y+[diff-0-𝕤y]≡0] = ω ☢
+
+-- xy-induction
+[[x-gte-y]→[y+[diff-x-y]≡x]-ind-xy : 
+ (x y : ℕ) → (x gte y ≡ 𝕥 → y + (diff x y) ≡ x) → 
+ (𝕤 x) gte (𝕤 y) ≡ 𝕥 → (𝕤 y) + (diff (𝕤 x) (𝕤 y)) ≡ (𝕤 x)
+[[x-gte-y]→[y+[diff-x-y]≡x]-ind-xy 
+ x y [[x-gte-y]→[y+[diff-x-y]≡x] [𝕤x-gte-𝕤y≡𝕥] = [𝕤y+[diff-𝕤x-𝕤y]≡𝕤x]
+  where
+-- Defs :
+   𝕤y+ : ℕ → ℕ
+   𝕤y+ = _+_ (𝕤 y)
+
+   [x-gte-y≡𝕤x-gte-𝕤y] : x gte y ≡ (𝕤 x) gte (𝕤 y)
+   [x-gte-y≡𝕤x-gte-𝕤y] = ⟲ (x gte y)
+  
+   [x-gte-y≡𝕥] : x gte y ≡ 𝕥
+   [x-gte-y≡𝕥] = ≡-⇶ [x-gte-y≡𝕤x-gte-𝕤y] [𝕤x-gte-𝕤y≡𝕥]
+  
+   [y+[diff-x-y]≡x] : y + (diff x y) ≡ x
+   [y+[diff-x-y]≡x] = [[x-gte-y]→[y+[diff-x-y]≡x] [x-gte-y≡𝕥]  
+
+   [diff-𝕤x-𝕤y≡diff-x-y] : diff (𝕤 x) (𝕤 y) ≡ diff x y
+   [diff-𝕤x-𝕤y≡diff-x-y] = ⟲ (diff x y)
+
+   [𝕤y+[diff-𝕤x-𝕤y]≡𝕤y+[diff-x-y]] : (𝕤 y) + (diff (𝕤 x) (𝕤 y)) ≡ (𝕤 y) + (diff x y)
+   [𝕤y+[diff-𝕤x-𝕤y]≡𝕤y+[diff-x-y]] = [f≡g]→[fa≡ga]₂ 𝕤y+ 𝕤y+ (⟲ 𝕤y+) (diff (𝕤 x) (𝕤 y)) (diff x y) [diff-𝕤x-𝕤y≡diff-x-y]
+
+   [𝕤[y+[diff-x-y]]≡𝕤y+[diff-x-y]] : (𝕤 (y + (diff x y))) ≡ (𝕤 y) + (diff x y)
+   [𝕤[y+[diff-x-y]]≡𝕤y+[diff-x-y]] = 𝕤[x+y]≡𝕤x+y y (diff x y)
+
+   [𝕤[y+[diff-x-y]]≡𝕤x] : 𝕤 (y + (diff x y)) ≡ (𝕤 x)
+   [𝕤[y+[diff-x-y]]≡𝕤x] = [f≡g]→[fa≡ga]₂ 𝕤 𝕤 (⟲ 𝕤) (y + (diff x y)) x [y+[diff-x-y]≡x]
+
+   [𝕤y+[diff-𝕤x-𝕤y]≡𝕤x] : (𝕤 y) + (diff (𝕤 x) (𝕤 y)) ≡ (𝕤 x)
+   [𝕤y+[diff-𝕤x-𝕤y]≡𝕤x] = ≡-↑↓ (≡-⇶ (≡-↑↓ [𝕤[y+[diff-x-y]]≡𝕤x]) (≡-⇶ [𝕤[y+[diff-x-y]]≡𝕤y+[diff-x-y]] (≡-↑↓ [𝕤y+[diff-𝕤x-𝕤y]≡𝕤y+[diff-x-y]])))
+
+-- final:
+[x-gte-y]→[y+[diff-x-y]≡x] : (x y : ℕ) → x gte y ≡ 𝕥 →  y + (diff x y) ≡ x
+[x-gte-y]→[y+[diff-x-y]≡x] 0 0 = [0-gte-0]→[0+[diff-0-0]≡0]
+[x-gte-y]→[y+[diff-x-y]≡x] (𝕤 x) 0 = [𝕤x-gte-0]→[0+[diff-𝕤x-0]≡𝕤x] x
+[x-gte-y]→[y+[diff-x-y]≡x] 0 (𝕤 y) = [0-gte-𝕤y]→[𝕤y+[diff-0-𝕤y]≡0] y
+[x-gte-y]→[y+[diff-x-y]≡x] (𝕤 x) (𝕤 y) = [[x-gte-y]→[y+[diff-x-y]≡x]-ind-xy x y ([x-gte-y]→[y+[diff-x-y]≡x] x y)
+
+
+-- 2) If x gte y ≡ 𝕥 , then x ≥ y.
+[x-gte-y]→[x≥y] : (x y : ℕ) → x gte y ≡ 𝕥 → x ≥ y
+[x-gte-y]→[x≥y] x y [x-gte-y≡𝕥] = ((diff x y) , [y+[diff-x-y]≡x])
+ where
+  [y+[diff-x-y]≡x] : y + (diff x y) ≡ x
+  [y+[diff-x-y]≡x] = [x-gte-y]→[y+[diff-x-y]≡x] x y [x-gte-y≡𝕥]
+
+
+
+-- 3) [x≥y]→[x-gte-y] ; If x ≥ y, then x gte y ≡ 𝕥.
+-- xy-base
+[0≥0]→[0-gte-0] : 0 ≥ 0 → 0 gte 0 ≡ 𝕥
+[0≥0]→[0-gte-0] [0≥0] = ⟲ 𝕥
+
+-- y-base
+[𝕤x≥0]→[𝕤x-gte-0] : (x : ℕ) → (𝕤 x) ≥ 0 → (𝕤 x) gte 0 ≡ 𝕥
+[𝕤x≥0]→[𝕤x-gte-0] x [𝕤x≥0] = ⟲ 𝕥
+
+-- x-base
+[0≥𝕤y]→[0-gte-𝕤y] : (y : ℕ) → 0 ≥ (𝕤 y) → 0 gte (𝕤 y) ≡ 𝕥
+[0≥𝕤y]→[0-gte-𝕤y] y (a , [𝕤y+a≡0]) = [0-gte-𝕤y≡𝕥]
+ where
+  [𝕤[y+a]≡𝕤y+a] : (𝕤 (y + a)) ≡  (𝕤 y) + a
+  [𝕤[y+a]≡𝕤y+a] = 𝕤[x+y]≡𝕤x+y y a  
+
+  [𝕤[y+a]≡0] : (𝕤 (y + a)) ≡ 0
+  [𝕤[y+a]≡0] = ≡-⇶ [𝕤[y+a]≡𝕤y+a] [𝕤y+a≡0]
+
+  ☢ : ⊥
+  ☢ = 𝕤x≠𝕫 (y + a) [𝕤[y+a]≡0]
+  
+  [0-gte-𝕤y≡𝕥] : 0 gte (𝕤 y) ≡ 𝕥
+  [0-gte-𝕤y≡𝕥] = ω ☢
+
+-- xy-induction
+[[x≥y]→[x-gte-y]]-ind-xy :
+  (x y : ℕ) → (x ≥ y → x gte y ≡ 𝕥) → (𝕤 x) ≥ (𝕤 y) → (𝕤 x) gte (𝕤 y) ≡ 𝕥
+[[x≥y]→[x-gte-y]]-ind-xy
+  x y [[x≥y]→[x-gte-y]] (a , [𝕤y+a≡𝕤x]) = [𝕤x-gte-𝕤y≡𝕥]
+  where
+   [𝕤[y+a]≡𝕤y+a] : (𝕤 (y + a)) ≡ (𝕤 y) + a
+   [𝕤[y+a]≡𝕤y+a] = 𝕤[x+y]≡𝕤x+y y a
+
+   [𝕤[y+a]≡𝕤x] : (𝕤 (y + a)) ≡ (𝕤 x)
+   [𝕤[y+a]≡𝕤x] = ≡-⇶ [𝕤[y+a]≡𝕤y+a] [𝕤y+a≡𝕤x]
+
+   [y+a≡x] : y + a ≡ x
+   [y+a≡x] = [𝕤x≡𝕤y]→[x≡y] (y + a) x [𝕤[y+a]≡𝕤x]
+  
+   [x≥y] : x ≥ y
+   [x≥y] = (a , [y+a≡x])
+
+   [x-gte-y≡𝕥] : x gte y ≡ 𝕥
+   [x-gte-y≡𝕥] = [[x≥y]→[x-gte-y]] [x≥y]
+
+   [𝕤x-gte-𝕤y≡x-gte-y] : (𝕤 x) gte (𝕤 y) ≡ x gte y
+   [𝕤x-gte-𝕤y≡x-gte-y] = ⟲ (x gte y)
+
+   [𝕤x-gte-𝕤y≡𝕥] : (𝕤 x) gte (𝕤 y) ≡ 𝕥
+   [𝕤x-gte-𝕤y≡𝕥] = ≡-⇶ [𝕤x-gte-𝕤y≡x-gte-y] [x-gte-y≡𝕥]
+
+-- final step
+[x≥y]→[x-gte-y] : (x y : ℕ) → x ≥ y → x gte y ≡ 𝕥
+[x≥y]→[x-gte-y] 0 0 = [0≥0]→[0-gte-0]
+[x≥y]→[x-gte-y] (𝕤 x) 0 = [𝕤x≥0]→[𝕤x-gte-0] x
+[x≥y]→[x-gte-y] 0 (𝕤 y) = [0≥𝕤y]→[0-gte-𝕤y] y
+[x≥y]→[x-gte-y] (𝕤 x) (𝕤 y) = [[x≥y]→[x-gte-y]]-ind-xy x y ([x≥y]→[x-gte-y] x y)
 
 
 
