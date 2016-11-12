@@ -342,9 +342,36 @@ module : basic defs
 
 --syntax {x : A} → e = ∀ { x ∈ A }, e 
 
+-- Lifting
+record Lift {α ℓ} (A : ★ α) : ★ (α ⊔ ℓ) where
+ constructor lift
+ field lower : A
+
+open Lift 
+
 -- Identity function
 id : ∀ {α}{A : ★ α} → A → A
 id x = x
+
+const : ∀ {α β} {A : ★ α} {B : ★ β} → A → B → A
+const x = λ b → x
+
+flip : ∀ {α β γ} {A : ★ α} {B : ★ β} {C : A → B → ★ γ} →
+       ((x : A) (y : B) → C x y) → ((y : B) (x : A) → C x y)
+flip f = λ y x → f x y
+
+_$_ : ∀ {α β} {A : ★ α} {B : A → ★ β} → 
+      ((x : A) → B x) → ((x : A) → B x)
+f $ x = f x
+
+_<_>_ : ∀ {α β γ} {A : ★ α} {B : ★ β} {C : ★ γ} → 
+        A → (A → B → C) → B → C
+x < f > y = f x y
+
+
+data Decidable {p} (P : ★ p) : ★ p where
+ decidable : (p : P) → Decidable P
+ undecidable : (¬p : ¬ P) → Decidable P
 
 -- Function composition
 _∘_ : 
@@ -366,6 +393,11 @@ data ⊥ : ★₀ where
 --True
 data ⊤ : ★₀ where
  ● : ⊤
+
+--"Agda needs to know about the unit type since some of the primitive operations in the reflected type checking monad return values in the unit type."
+--http://agda.readthedocs.io/en/latest/language/built-ins.html#the-unit-type 
+--{-# BUILTIN UNIT ⊤ #-}
+
 
 -- Not
 ¬ : ∀ {α} → ★ α → ★ α
@@ -667,6 +699,10 @@ _||_ 𝕗 𝕗 = 𝕗
 -- maybe we'll try to prove that later on
 
 
+if_then_else_ : ∀ {α} {A : ★ α}  → 𝔹 → A → A → A
+if 𝕥 then a1 else a2 = a1 
+if 𝕗 then a1 else a2 = a2
+
 
 
 
@@ -682,28 +718,17 @@ data ℕ : ★₀ where
  𝕫 : ℕ
  𝕤 : ℕ → ℕ
 
--- Integers : 
-data ℤ : ★₀ where
- ℤ-0 : ℤ
- pos : ℕ → ℤ
- neg : ℕ → ℤ
+-- Need to do this in order to use Arabic numerals as elements of ℕ.
+-- It probably does more than that too, i.e. compiler optimizations
+{-# BUILTIN NATURAL ℕ #-}
 
-data ℚ+ : ★₀ where
- _/_ : ℕ → ℕ → ℚ+
-infix 3 _/_
 
-data ℚ : ★₀ where
- _/+_ : ℤ → ℕ → ℚ
+ 
 
 
 ℝ : ★₀
 ℝ = ℕ → 𝔹
 
-
-
--- Need to do this in order to use Arabic numerals as elements of ℕ.
--- It probably does more than that too, i.e. compiler optimizations
-{-# BUILTIN NATURAL ℕ #-}
 
 
 pred : ℕ → ℕ
@@ -979,10 +1004,6 @@ record CommutativeMonoid : ★₁ where
   +-comm : is-commutative +
 
 
-if_then_else_ : ∀ {α β₁ β₂} {A : ★ α} {P1 : A → ★ β₁} {P2 : A → ★ β₂} → 𝔹 → (f1 : (a : A) → P1 a) → (f2 : (a : A) → P2 a) → (a : A) → (P1 a) ∨ (P2 a)
-(if 𝕥 then f1 else f2) a = ∨-cons1 (f1 a) 
-(if 𝕗 then f1 else f2) a = ∨-cons2 (f2 a)
-
 
 
 
@@ -1050,7 +1071,6 @@ infix 4 _^_
 _^'_ : ℕ → ℕ → ℕ
 x ^' y = y ^ x
 infix 4 _^'_
- 
 
 _gte_ : ℕ → ℕ → 𝔹
 0 gte 0 = 𝕥
@@ -1120,8 +1140,66 @@ infix 1 _≮_
 
 
 
+data ℕ* : ★₀ where
+ ℕ*-cons : (x : ℕ) → x > 0 → ℕ*
 
 
+-- Integers : 
+data ℤ : ★₀ where
+ ℤ-0 : ℤ
+ pos : ℕ* → ℤ
+ neg : ℕ* → ℤ
+
+data ℤ* : ★₀ where
+ ℤ*-cons : (x : ℤ) → x ≠ ℤ-0 → ℤ*
+
+data ℚ+ : ★₀ where
+ +<_>/_ : ℕ → ℕ* → ℚ+
+infix 3 _/_
+
+ℚ+-num : ℚ+ → ℕ
+ℚ+-num (+< x >/ y) = x
+
+ℚ+-den : ℚ+ → ℕ*
+ℚ+-den (+< x >/ y) = y
+
+data ℚ+* : ★₀ where
+ ℚ+*-cons : ℕ* → ℕ* → ℚ+* 
+
+data ℚ : ★₀ where
+ _/_ : ℤ → ℕ* → ℚ
+
+numerator : ℚ → ℤ
+numerator (x / y) = x
+
+denominator : ℚ → ℕ*
+denominator (x / y) = y
+
+ℕ*→ℕ : ℕ* → ℕ
+ℕ*→ℕ (ℕ*-cons n [n>0]) = n
+{-
+ℤ-+ : ℤ → ℤ → ℤ
+ℤ-+ = 
+
+_÷_ : ℚ → ℚ → ℚ
+(a / b) ÷ (c / d) = ((a * d) /( b * c))
+
+-}
+
+
+
+{-
+_%_ : ℕ → ℕ* → ℕ
+x % y = if ((ℕ*→ℕ y) gte (𝕤 x)) then x else (if (x gte (ℕ*→ℕ y)) then ((x minus (ℕ*→ℕ y)) % y) else 0)
+-}
+
+{-
+data Acc (n : ℕ) : ★₀ where
+ acc : (∀ m → m < n → Acc m) → Acc n
+
+WF : Set
+WF = ∀ (n : ℕ) → Acc n
+-}
 
 
 
@@ -1242,14 +1320,87 @@ data [_] {α} (A : ★ α) : ★ α where
  [] : [ A ]
  _::_ : A → [ A ] → [ A ]
 
+list-length : ∀ {α} {A : ★ α} → (l : [ A ]) → ℕ
+list-length [] = 0
+list-length (first :: rest) = 𝕤 (list-length rest) 
+
+maybe-list-first : ∀ {α} {A : ★ α} → (l : [ A ]) → Maybe A
+maybe-list-first [] = Nothing
+maybe-list-first (first :: rest ) = Just first
+
+maybe-list-rest : ∀ {α} {A : ★ α} → (l : [ A ]) → Maybe ([ A ])
+maybe-list-rest [] = Nothing
+maybe-list-rest (first :: rest) = Just rest
+
+maybe-list-last : ∀ {α} {A : ★ α} → (l : [ A ]) → Maybe A
+maybe-list-last [] = Nothing
+maybe-list-last (first :: []) = Just first
+maybe-list-last (first :: (second :: rest)) = maybe-list-last (second :: rest)
+
+
+maybe-list-idx-n : ∀ {α} {A : ★ α} → (l : [ A ]) → ℕ → Maybe A
+maybe-list-idx-n [] n = Nothing
+maybe-list-idx-n (first :: rest) 0 = Just first
+maybe-list-idx-n (first :: rest) (𝕤 n) = maybe-list-idx-n rest n
+
+list-add-to-end : ∀ {α} {A : ★ α} → (l : [ A ]) → A → [ A ]
+list-add-to-end [] a = (a :: [])
+list-add-to-end (first :: rest) a = (first :: (list-add-to-end rest a))
+
+list-reverse : ∀ {α} {A : ★ α} → (l : [ A ]) → [ A ]
+list-reverse [] = []
+list-reverse {α} {A} (first :: rest) = list-add-to-end rest first
+
+_++_ : ∀ {α} {A : ★ α} → (l1 l2 : [ A ]) → [ A ]
+[]         ++ []         =  []
+(f1 :: r1) ++ []         = (f1 :: r1)
+[]         ++ (f2 :: r2) = (f2 :: r2)
+(f1 :: r1) ++ (f2 :: r2) = (list-add-to-end (f1 :: r1) f2) ++ r2
+
+list-rotate-l : ∀ {α} {A : ★ α} → (l : [ A ]) → [ A ]
+list-rotate-l [] = []
+list-rotate-l (f :: r) = list-add-to-end r f
+
+list-rotate-r : ∀ {α} {A : ★ α} → (l : [ A ]) → [ A ] → [ A ]
+list-rotate-r [] acc = []
+list-rotate-r (f :: []) acc = (f :: acc)
+list-rotate-r (f :: (s :: r)) acc = list-rotate-r (s :: r) (acc ++ (f :: []))
+
+list-map : ∀ {α β} {A : ★ α} {B : ★ β} → (F : A → B) → (l : [ A ]) → [ B ]
+list-map {α} {β} {A} {B} F [] = []
+list-map {α} {β} {A} {B} F (f :: r) = ((F f) :: (list-map F r))
+
+list-fold : ∀ {α β} {A : ★ α} {B : ★ β} → (F : A → B → B) → B → [ A ] → B 
+list-fold {α} {β} {A} {B} F acc [] = acc
+list-fold {α} {β} {A} {B} F acc (f :: r) = list-fold F (F f acc) r 
 
 
 
 
 
 
+data Vec {α} (A : ★ α) : ℕ → ★ α where
+ Vec-nil : Vec A 0
+ Vec-cons : {n : ℕ} → A → Vec A n → Vec A (𝕤 n)
 
+data BinTree {α} (A : ★ α) : ★ α where
+ Tree-nil : BinTree A
+ Node : A → BinTree A → BinTree A → BinTree A
+ 
+tree-map : ∀ {α β} {A : ★ α} {B : ★ β} → (F : A → B) → (treeA : BinTree A) → BinTree B
+tree-map {α} {β} {A} {B} F Tree-nil = Tree-nil
+tree-map {α} {β} {A} {B} F (Node a branch-l branch-r) = Node (F a) (tree-map F branch-l) (tree-map F branch-r)
 
+AdjList : ∀ {α} (A : ★ α) → ★ α
+AdjList {α} A = [ A ] ∧ [ A ∧ A ]
+
+AdjMatrix : ∀ {α} (A : ★ α) → ★ α
+AdjMatrix {α} A = A ∧ A → 𝔹
+
+data Ord : ★₀ where
+ zeroOrd : Ord
+ sucOrd : Ord → Ord
+ limOrd : (ℕ → Ord) → Ord
 
 
 {-
@@ -1258,7 +1409,15 @@ data [_] {α} (A : ★ α) : ★ α where
 
 -}
 
+data Term : ★₀ where
+ Const : ℕ → Term
+ Mult : Term → Term → Term
 
+{-
+eval : Term → ℕ
+eval (Const a) = a
+eval (Mult a b) = a * b
+-}
 
 
 
@@ -3322,7 +3481,60 @@ diff-x-y≡diff-y-x (𝕤 x) (𝕤 y) = [diff-x-y≡diff-y-x]→[diff-𝕤x-𝕤
 
 
 
+-- SECTION : lists
+-- 1) Reversing twice is the identity
 
+rev²-[]≡[] : ∀ {α} {A : ★ α} → list-reverse (list-reverse { α } { A } []) ≡ []
+rev²-[]≡[] = ⟲ []
+
+{-
+rev²-[f::r] : ∀ {α} {A : ★ α} → (r : [ A ]) → (f : A) → list-reverse (list-reverse (f :: r)) ≡ (f :: r)
+rev²-[f::r] {α} {A} r f = [rev²-[f::r]]
+ where
+  
+  [rev²-[f::r]]
+-}
+
+rev-[f::[]]≡[f::[]] : ∀ {α} {A : ★ α} (f : A) → list-reverse (f :: []) ≡ (f :: [])
+rev-[f::[]]≡[f::[]] {α} {A} f = ⟲ (f :: [])
+
+
+rev²[f::[]]≡[f::[]] : ∀ {α} {A : ★ α} (f : A) → list-reverse (list-reverse (f :: [])) ≡ (f :: [])
+rev²[f::[]]≡[f::[]] {α} {A} f = [rev²[f::[]]≡[f::[]]]
+ where
+  [rev[f::[]]≡[f::[]] : list-reverse (f :: []) ≡ (f :: [])
+  [rev[f::[]]≡[f::[]] = ⟲ (f :: [])
+
+  [rev²[f::[]]≡rev[f::[]]] : list-reverse (list-reverse (f :: [])) ≡ list-reverse (f :: [])
+  [rev²[f::[]]≡rev[f::[]]] = [a≡b]→[fa≡fb] list-reverse (list-reverse (f :: [])) (f :: []) [rev[f::[]]≡[f::[]]
+
+  [rev²[f::[]]≡[f::[]]] : list-reverse (list-reverse (f :: [])) ≡ (f :: [])
+  [rev²[f::[]]≡[f::[]]] = ≡-⇶ [rev²[f::[]]≡rev[f::[]]] [rev[f::[]]≡[f::[]]
+{-
+[rev²-[f::r]≡[f::r]]→[rev²-[g::f::r]≡[g::f::r]] : 
+ ∀ {α} {A : ★ α} (r : [ A ]) → (f g : A) → 
+ list-reverse (list-reverse (f :: r)) ≡ (f :: r) → 
+ list-reverse (list-reverse (g :: (f :: r))) ≡ (g :: (f :: r))
+[rev²-[f::r]≡[f::r]]→[rev²-[g::f::r]≡[g::f::r]] 
+ {α} {A} r f g [rev²-[f::r]≡[f::r]] = [rev²-[g::f::r]≡[g::f::r]]
+  where
+   
+   [rev²-[g::f::r]≡[g::f::r]]
+-}
+{-
+ where
+  [rev-[]≡[]] : list-reverse [] ≡ []
+  [rev-[]≡[]] = ⟲ []
+
+  [rev²-[]≡rev-[]] : list-reverse (list-reverse []) ≡ list-reverse []
+  [rev²-[]≡rev-[]] = [a≡b]→[fa≡fb] list-reverse (list-reverse []) [] [rev-[]≡[]]
+
+  [rev²-[]≡[]] : list-reverse (list-reverse []) ≡ [] 
+-}
+
+{-
+rev²-l≡l : ∀ {a} {A : ★ α} (l : [ A ]) → list-reverse (list-reverse l) ≡ l
+-}
 
 
 
