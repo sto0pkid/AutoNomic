@@ -7,6 +7,8 @@ data Expr
  | Lam Sym Type Expr
  | Pi Sym Type Type
  | Kind Kinds
+ | Auth Type
+ | Unauth Type
  deriving (Eq, Read, Show)
 type Type = Expr
 data Kinds = Star | Box deriving (Eq, Read, Show)
@@ -16,6 +18,20 @@ data Kinds = Star | Box deriving (Eq, Read, Show)
 -- the type assumed for that variable in the current context
 newtype Env = Env [(Sym, Type)] deriving (Show)
 
+
+allowedKinds :: [(Type, Type)]
+allowedKinds = [
+ (Kind Star, Kind Star),
+ (Kind Star, Kind Box),
+ (Kind Box, Kind Star),
+ (Kind Box, Kind Box)
+]
+
+
+
+
+-- auth modes:
+data Modes = Ideal | Verifier | Prover
 
 -- The initial context is an empty list of type-assumptions
 initialEnv :: Env
@@ -338,7 +354,7 @@ tCheck r (Lam s t e) = do
 -- Star : Box
 tCheck _ (Kind Star) = return $ Kind Box
 
--- Box has no type
+-- Box has no type; like SetOmega
 tCheck _ (Kind Box) = throwError "Found a Box"
 
 -- r is the context
@@ -365,21 +381,6 @@ typeCheck e =
  Left msg -> error ("Type error:\n" ++ msg)
  -- if it's a Right, then there was no error, so return the type t
  Right t -> return t
-
-
-
-
--- Lambda cube-control:
-allowedKinds :: [(Type, Type)]
-allowedKinds = 
- [
-  (Kind Star, Kind Star),
-  (Kind Star, Kind Box),
-  (Kind Box, Kind Star),
-  (Kind Box, Kind Box)
- ]
-
-
 
 
 main :: IO ()
