@@ -3,6 +3,15 @@
 
 using namespace std;
 
+/*
+References:
+https://yongweiwu.wordpress.com/2014/12/14/y-combinator-and-cplusplus/#fn-39-10
+
+http://mvanier.livejournal.com/2897.html
+
+
+*/
+
 int factorial(int n){
  if (n == 0) return 1;
  else return n * factorial(n - 1);
