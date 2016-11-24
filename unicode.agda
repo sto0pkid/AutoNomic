@@ -4188,6 +4188,10 @@ ex-surj-B1-nex-surj-AB-imp-ex-inj-AB {m} {n} {A} {B} f surj_f nosurjAB =
 
 
 {-
+--This is just false: 
+-- 4*n is an injection from ℕ → 2ℕ
+-- n/2 is an injection from 2ℕ → ℕ
+-- but 4*n is not a bijection.
 --injection A to B, injection B to A implies bijection A to B
 inj-antisym :
   {m n : Level} {A : Set m} {B : Set n} ->
@@ -4198,6 +4202,9 @@ inj-antisym {m} {n} {A} {B} f inj-f g inj-g =
 -}
 
 {-
+-- This is the Schoeder-Bernstein theorem
+-- it's not false; there are non-constructive proofs
+-- but supposedly we shouldn't be able to give a constructive proof of it?
 inj-antisym2 :
  {m n : Level} {A : Set m} {B : Set n} ->
  (f : A -> B) -> injection f ->

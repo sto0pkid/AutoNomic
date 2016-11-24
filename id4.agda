@@ -56,10 +56,10 @@ unit α = λ A x → x
 [A≡B]→[A→B] : ∀ α → (A B : Set α) → (∀ β → Id (lsuc α) (Set α) A B β) → A → B
 [A≡B]→[A→B] α A B p = p α (λ X Y → X → Y) (λ X x → x)
 
-
+{-
 True≠False : (∀ α → (∀ β → Id (lsuc (lsuc α)) (Set (lsuc α)) (True' α) (False' α) β)) → (∀ β → (B : Set β) → B)
 True≠False p = ¬[True→False] ([A≡B]→[A→B] (lsuc α) (True' α) (False' α) (p α))
-
+-}
 
 [a≡b]→[fa≡fb] : 
  ∀ α β → (A : Set α) → (B : Set β) →
