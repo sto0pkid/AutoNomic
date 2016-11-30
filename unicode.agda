@@ -4216,6 +4216,8 @@ inj-antisym2 {m} {n} {A} {B} f inj-f g inj-g =
  }
 -}
 
+-- Related: Myhill isomorphism theorem
+
 
 -- fibers of injections are contractible
 fiber-inj-b-is-unique :

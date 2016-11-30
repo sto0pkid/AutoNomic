@@ -55,4 +55,47 @@ id-Lift id-n = λ A x → x
 
 id∞ : ∀ α → (A : Set α) → A → A
 id∞ α A x = x
- 
+
+-- pseudo-self-application: 
+id∞-id∞ : ∀ α → (A : Set α) → A → A
+id∞-id∞ α = id∞ (lsuc α) ((A : Set α) → A → A) (id∞ α)
+
+id∞' : ∀ {α} {A : Set α} → A → A
+id∞' x = x
+
+-- and with the polymorphism arguments made implicit, it looks
+-- like regular self-application:
+id∞'-id∞' : ∀ {α} {A : Set α} → A → A
+id∞'-id∞' = id∞' id∞' 
+
+data ℕ : Set where
+ 𝕫 : ℕ
+ 𝕤 : ℕ → ℕ
+
+add : ℕ → ℕ → ℕ
+add 𝕫 y = y
+add (𝕤 x) y = 𝕤 (add x y) 
+
+mul : ℕ → ℕ → ℕ
+mul 𝕫 y = 𝕫
+mul (𝕤 x) y = add y (mul x y)
+
+fac : ℕ → ℕ
+fac 𝕫 = (𝕤 𝕫)
+fac (𝕤 x) = mul (𝕤 x) (fac x)
+
+almost-fac : (ℕ → ℕ) → (ℕ → ℕ)
+almost-fac f 𝕫 = (𝕤 𝕫)
+almost-fac f (𝕤 x) = mul (𝕤 x) (f x)
+
+{-
+Y : ∀ {α} → {A : Set α} → (∀ {β} → {B : Set β} → (A → A) → (A → A)) → A → A
+Y {α} {A} f = f (Y f)
+-}
+
+Y : (∀ α → (A : Set α) → A → A) → (∀ α → (A : Set α) → A → A)
+Y x α = x (lsuc α) ((A : Set α) → A → A) (x α)
+
+Y' : (∀ α → (A : Set α) → A → A) → (∀ α → (A : Set α) → A → A)
+Y' x α =  
+
