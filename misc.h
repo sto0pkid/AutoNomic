@@ -1,5 +1,6 @@
 #ifndef __MISC_H__
 #define __MISC_H__
+//why do people do this ^?
 
 #include <map>
 #include <string>
@@ -7,16 +8,19 @@
 #include "strings.h"
 #include "rdf.h"
 
+//check these out
 //#include <boost/interprocess/containers/list.hpp>
 //#include <boost/interprocess/containers/map.hpp>
 //#include <boost/bimap.hpp>
 
 
+//what's up with the marpa stuff
 #ifdef with_marpa
 #define MARPA(x) x
 #else
 #define MARPA(x)
 #endif
+
 
 
 enum ParsingResult {FAIL, /* INCOMPLETE, */ COMPLETE};
@@ -145,6 +149,8 @@ string shorten_uri(string s);
 extern std::list<string>& proc;
 string indent();
 extern int _indent;
+
+
 struct _setproc {
 	string prev;
 	//_setproc(const std::string& p);
@@ -152,12 +158,13 @@ struct _setproc {
 	~_setproc();
 };
 
-
+//where does DEBUG get defined?
 #ifdef DEBUG
 #define setproc(x) _setproc __setproc(x)
 #else
 #define setproc(x)
 #endif
+
 #define FUN setproc(__FUNCTION__);
 
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0059)http://eulersharp.sourceforge.net/2006/02swap/socrates.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <title>Socrates test case</title>
+  <link rel="stylesheet" href="./euler_js_full2_files/dynamic.css" type="text/css">
+  <script src="./euler_js_ep_fixed_2.js" type="text/javascript"></script>
+  <script src="./euler_js_full2_files/builtins.js" type="text/javascript"></script>
+  <script src="./euler_js_full2_files/json.js" type="text/javascript"></script>
+  <script src="./failed_test.js" type="text/javascript"></script>
+</head>
+
+<body>
+<script language="javascript">
+document.write('<pre>')
+var t = new Date()
+trace = true
+document.writeln('/*================== START OF TRACE ======================\n')
+for (var i = 0; i < cases[""].length; i++) if (cases[""][i] != null) {
+  document.writeln('PROVE\n' + JSON.stringify(cases[""][i]) + '\n')
+  prove(cases[""][i], -1)
+}
+for (var i in evidence) evidence["GND"] = cases["GND"]
+t = new Date() - t
+document.writeln('===================== END OF TRACE =====================*/\n')
+document.writeln('//' + version + '\n')
+document.writeln(JSON.stringify(evidence) + '\n')
+document.writeln('//ENDS [' + step + ' steps/' + t + ' msec]')
+document.write("</pre>")
+</script>
+
+</body></html>

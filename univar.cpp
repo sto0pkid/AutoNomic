@@ -1514,6 +1514,7 @@ void compile_pred(nodeid pr)
 	}
 
 	//rules need to be compiled and then added:
+        //why is this outer 'if' needed?
 	if (rules.find(pr) != rules.end()) {
 		for (pos_t i = rules.at(pr).size(); i > 0; i--)
 		{
@@ -1547,19 +1548,19 @@ void check_pred(nodeid pr)
 
 
 
-//Let's get a graphical visualization of this transformation.
+
+//Take the kb, find all the quads in the default context whose pred is 'implication' and return a list of Rule structs containing these
 Rules quads2rules(qdb &kb)
 {
 	FUN;
-  //typedef map<nodeid, vector<Rule>> Rules;
+
 	Rules result;
 
 	//std::map<context,list of quads with that context>
 	//std::map<string,pqlist>
 	auto &quads = kb.first;
 
-	//why only default context? because thats what we reason about
-
+	//we reason in the default context
 	auto it = quads.find(str_default);
 	if (it != quads.end()) {
 		//pqlist
@@ -1580,15 +1581,15 @@ Rules quads2rules(qdb &kb)
 
 			if (p == implication) //then also, if this is a rule, i.e. the predicate is "=>":
 			{
-//hopefully the subject and object are graphs
+				//hopefully the subject (head) and object (body) are graphs
 				if (quads.find(o) != quads.end()) {
-//the object of the implication is the head of the rule
+				//the object of the implication is the head of the rule
 					//Explode the head into separate quads and make a separate
 					//rule for each of them with the same body
-//because from now on our rules must only have one triple for their head
+					//because from now on our rules must only have one triple for their head
 
 					//look for the body graph
-					pqlist b = 0;
+					pqlist b = 0; //0?
 					if (quads.find(s) != quads.end())
 						b = quads[s];
 
@@ -1634,6 +1635,7 @@ void compile_kb(qdb &kb)
 	lists_rules = rules;//we dont have any query at this point
 	collect_lists();
 
+	//if this is a push corresponding to that pop down there, it should be called that.
 	kbdbgp("kb");
 
 	mykb = &kb;
@@ -1642,7 +1644,7 @@ void compile_kb(qdb &kb)
 		for(auto x: builtins)
 			compile_pred(x.first);
 
-	for(auto x: rules)
+	for(auto /* Rule */ x: rules)
 		compile_pred(x.first);
 		
 	kbdbgpop();
@@ -2622,7 +2624,6 @@ rule_t compile_rule(Rule r)
 	//typedef map<nodeid, pos_t> locals_map;
 	//typedef unordered_map<nodeid, pos_t> locals_map;
 	locals_map lm, cm;
-	//i'm not familiar with how this works
 
 	//these will be needed after this func is over so we allocate them on the heap
 	//typedef vector<Thing> Locals;
@@ -3043,13 +3044,16 @@ Rules add_ruleses (Rules &a, Rules b)
 
 
 void yprover::query(qdb& goal){
+	//macro 'FUN' is already defined with a ';' at the end.
+        //macros are superfluous
 	FUN;
+
 	results.clear();
 
 	//die if the query is empty
+	//auto is superfluous
 	auto qit = goal.first.find("@default");
-	if (qit == goal.first.end())
-		return;
+	if (qit == goal.first.end()) return;
 
 #ifdef KBDBG
 	print_kbdbg(qit->second);
@@ -3058,7 +3062,7 @@ void yprover::query(qdb& goal){
 	//Reset the global steps & unifys
 	//Why not turn these into member variables of yprover.
 	//because then all the functions where they are touched and subsequently everything would have to be in yprover.
-	steps = 0;
+	steps = 0; //'steps' should be equivalent to the number of frames processed. maybe would be better to call it 'frames'?
 	unifys = 0;
 	int nresults = 0;
 
@@ -3066,10 +3070,13 @@ void yprover::query(qdb& goal){
 	locals_map lm, cm;
 	Locals locals, consts;
 
+	//what's up with 'dout' vs. 'cout'?
 	dout << KGRN << "COMPILE QUERY" << KNRM << endl;
+
 	//here we combine the two Rules maps, and lists will
 	//be used by get_list and islist deep inside make_locals
 	//get_list or something should then remove the triples of the internalized lists from the query
+	
 
 	auto gr = quads2rules(goal);
 	//Adds the rules from the query to the rules from the kb? just for the lists
@@ -3148,8 +3155,6 @@ void yprover::query(qdb& goal){
 	}
 
 	dout << "That's all, folks, " << nresults << " results." << endl;
-
-  //what does this do//this is a goto label
 	out:;
 
 	dout << unifys << " unifys, " << steps << " steps." << endl;
