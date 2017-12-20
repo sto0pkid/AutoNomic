@@ -3,9 +3,9 @@
 
 Under development, expect bugs and please report any you find; AutoNomic can't be released until we're sure that it's bug-free. 
 
-To run example: "./autonomic < examples/socrates"  
+To run example: "./autonomic < tests/examples/socrates"  
 
-For verbose print: "./autonomic --level 100 < examples/socrates"  
+For verbose print: "./autonomic --level 100 < tests/examples/socrates"  
 
 ###deps:  
 apt-get install libboost-system-dev libboost-filesystem-dev libcurl4-openssl-dev    #todo:not all necessary, update  
