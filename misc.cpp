@@ -456,20 +456,28 @@ _setproc:: _setproc(const string& p) {
 
 const char* an_wsref = " \t\n\r\f\v";
 
+// s = rtrim(s) ++ (\w*)
 // trim from end of string (right)
 inline std::string& rtrim(std::string& s)
 {
-    s.erase(s.find_last_not_of(an_wsref) + 1);
+    //overflows when no whitespace found! :P
+    if(s.find_last_not_of(an_wsref) != (size_t)-1){
+     size_t pos = s.find_last_not_of(an_wsref);
+     s.erase(pos + 1,s.length()-pos-1);
+    }
     return s;
 }
 
+// s = (\w*) ++ ltrim(s)
 // trim from beginning of string (left)
 inline std::string& ltrim(std::string& s)
 {
+
     s.erase(0, s.find_first_not_of(an_wsref));
     return s;
 }
 
+// s = (\w*) ++ trim(s) ++ (\w*)
 // trim from both ends of string (left & right)
 inline std::string& trim(std::string& s)
 {
