@@ -4,10 +4,43 @@
 #include <set>
 #include <stdexcept>
 #include "rdf.h"
-#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string.hpp>
 #include "jsonld.h"
 #include "misc.h"
-using namespace boost::algorithm;
+//using namespace boost::algorithm;
+
+void replace_all(std::string& str,
+               const std::string& oldStr,
+               const std::string& newStr)
+{
+  std::string::size_type pos = 0u;
+  while((pos = str.find(oldStr, pos)) != std::string::npos){
+     str.replace(pos, oldStr.length(), newStr);
+     pos += newStr.length();
+  }
+}
+
+const char* wsref = " \t\n\r\f\v";
+
+// trim from end of string (right)
+inline std::string& rtrim(std::string& s)
+{
+    s.erase(s.find_last_not_of(wsref) + 1);
+    return s;
+}
+
+// trim from beginning of string (left)
+inline std::string& ltrim(std::string& s)
+{
+    s.erase(0, s.find_first_not_of(wsref));
+    return s;
+}
+
+// trim from both ends of string (left & right)
+inline std::string& trim(std::string& s)
+{
+    return ltrim(rtrim(s));
+}
 
 
 nqparser::nqparser() : t(new char[4096/*wat*/*/*da*/4096]) {/*fuck*/}
@@ -444,7 +477,7 @@ pnode nqparser::readlit() {
 
 	//Copy t into t1 and replace all occurrences of "\\\\" with "\\".
 	string t1 = t;
-	boost::replace_all(t1, "\\\\", "\\");
+	replace_all(t1, "\\\\", "\\");
 	//eww, this isnt how you unescape stuff
 
 	//Make a literal node from the value, the IRI and the langtag, and return this node.

@@ -1,8 +1,4 @@
-#CXX=clang++
-#this doesn't account for clang version
-#and the -stdlib=libc++ is redundant
 CXX=clang++-libc++ -stdlib=libc++ 		
-###NEW= -DNEW
 ASAN=   -Xclang -fcolor-diagnostics -ferror-limit=10 -fsanitize=address -fsanitize=integer -fsanitize=unsigned-integer-overflow -fsanitize=undefined -ggdb -gline-tables-only # -fsanitize-undefined-trap-on-error 
 DEBUG=  -DDEBUG -O0  -fno-omit-frame-pointer -fno-optimize-sibling-calls 
 DBG= $(ASAN) -g -ggdb $(DEBUG)
@@ -12,18 +8,18 @@ LDFLAGS=  $(DBG) -L/usr/local/  $(MYLD) #-ldl -pthread -lrt
 OBJECTS= prover.o unifiers.o univar.o autonomic.o jsonld.o rdf.o misc.o json_object.o jsonld_an.o nquads.o
 
 
-all: with_marpa
+all: autonomic
 
-with_marpa: libmarpa/dist/.libs/libmarpa.so marpa_an.o 
+#with_marpa: libmarpa/dist/.libs/libmarpa.so marpa_an.o 
 
-libmarpa/dist/.libs/libmarpa.so:
-	git submodule init
-	git submodule update
-	cd libmarpa;	make dist;	cd dist;	./configure;	make
+#libmarpa/dist/.libs/libmarpa.so:
+#	git submodule init
+#	git submodule update
+#	cd libmarpa;	make dist;	cd dist;	./configure;	make
 
-with_marpa: OBJECTS += marpa_an.o
-with_marpa: CXXFLAGS += -Dwith_marpa  -I libmarpa/dist #-DNOPARSER -DJSON
-with_marpa: LDFLAGS += -Llibmarpa/dist/.libs -lmarpa  -lboost_regex
+#with_marpa: OBJECTS += marpa_an.o
+#with_marpa: CXXFLAGS += -Dwith_marpa  -I libmarpa/dist #-DNOPARSER -DJSON
+#with_marpa: LDFLAGS += -Llibmarpa/dist/.libs -lmarpa  -lboost_regex
 
 
 autonomic: $(OBJECTS)
@@ -50,8 +46,8 @@ release: CXXFLAGS -= -DDEBUG CXXFLAGS -= -ggdb CXXFLAGS += -O3 -NDEBUG
 cl: CXXFLAGS += -DOPENCL
 irc: CXXFLAGS += -DIRC -DDEBUG
 
-with_marpa: $(OBJECTS) $(EXECUTABLE)
-	$(CXX) $(OBJECTS) -o autonomic $(LDFLAGS)
+#with_marpa: $(OBJECTS) $(EXECUTABLE)
+#	$(CXX) $(OBJECTS) -o autonomic $(LDFLAGS)
 debug: $(OBJECTS) $(EXECUTABLE)
 	$(CXX) $(OBJECTS) -o autonomic $(LDFLAGS)
 release: $(OBJECTS) $(EXECUTABLE)

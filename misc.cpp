@@ -1,8 +1,8 @@
 #include "prover.h"
 #include "misc.h"
 #include <iomanip>
-#include <boost/algorithm/string.hpp>
-using namespace boost::algorithm;
+//#include <boost/algorithm/string.hpp>
+//using namespace boost::algorithm;
 
 
 bool deref = true, shorten = false;
@@ -192,13 +192,24 @@ string bidict::tostr() {
 	return s.str();
 }
 
+void an_replace_all(std::string& str,
+               const std::string& oldStr,
+               const std::string& newStr)
+{
+  std::string::size_type pos = 0u;
+  while((pos = str.find(oldStr, pos)) != std::string::npos){
+     str.replace(pos, oldStr.length(), newStr);
+     pos += newStr.length();
+  }
+}
+
 string dstr ( nodeid p, bool escape ) {
 	if (!deref) return *tostr(p);
 	string s = dict[p].tostring();
 	if (escape) {
-		replace_all(s, "\\", "\\\\");
-		replace_all(s, "\"", "\\\"");
-		replace_all(s, "'", "\\'");
+		an_replace_all(s, "\\", "\\\\");
+		an_replace_all(s, "\"", "\\\"");
+		an_replace_all(s, "'", "\\'");
 	}
 	if (dict[p]._type == node::IRI)
 		return maybe_shorten_uri(s);
@@ -441,6 +452,28 @@ string indent() {
 _setproc:: _setproc(const string& p) {
 	proc.push_front(p);
 	++_indent;
+}
+
+const char* an_wsref = " \t\n\r\f\v";
+
+// trim from end of string (right)
+inline std::string& rtrim(std::string& s)
+{
+    s.erase(s.find_last_not_of(an_wsref) + 1);
+    return s;
+}
+
+// trim from beginning of string (left)
+inline std::string& ltrim(std::string& s)
+{
+    s.erase(0, s.find_first_not_of(an_wsref));
+    return s;
+}
+
+// trim from both ends of string (left & right)
+inline std::string& trim(std::string& s)
+{
+    return ltrim(rtrim(s));
 }
 
 _setproc:: ~_setproc() {

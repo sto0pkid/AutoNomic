@@ -11,7 +11,7 @@
 #include "prover.h"
 #include <iterator>
 #include <forward_list>
-#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string.hpp>
 #include <dlfcn.h>
 #ifdef with_marpa
 #include "marpa_an.h"
@@ -22,7 +22,7 @@
 
 #define queuepush(x) { auto y = x; if (lastp) lastp->next = y; lastp = y; }
 
-using namespace boost::algorithm;
+//using namespace boost::algorithm;
 int _indent = 0;
 
 term::term() : p(0), s(0), o(0) {}

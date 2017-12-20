@@ -6,6 +6,8 @@
 #include <stack>
 #include <set>
 #include <stdexcept>
+#include <locale>	// std::locale, std::tolower
+#include <cassert>	// assert()
 
 #include "univar.h"
 
@@ -15,9 +17,9 @@
 #include "marpa_an.h"
 #endif
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string/predicate.hpp>
+//#include <boost/lexical_cast.hpp>
+//#include <boost/algorithm/string.hpp>
 
 #include "pstreams-0.8.1/pstream.h"
 
@@ -440,12 +442,22 @@ ParsingResult _parse(qdb &kb, qdb &query, std::istream &f, string fmt)
 
 string fmt_from_ext(string fn){
 	string fn_lc(fn);
-	boost::algorithm::to_lower(fn_lc);
+        std::locale loc;
+	string::size_type fn_len = fn_lc.length();
+	for(string::size_type i=0; i<fn_len; ++i)
+	 fn_lc[i] = std::tolower(fn_lc[i],loc);
+	//boost::algorithm::to_lower(fn_lc);
 
-	for (auto x:extensions)
-		if (boost::ends_with(fn_lc, x))
-			return x;
-
+	for (auto x:extensions){
+	 bool is_match = true;
+	 string::size_type x_len = x.length();
+	 assert(x_len > 0);
+	 for(string::size_type i=0;i<x_len; i++){
+	  is_match = is_match && (fn_lc[fn_len-1-i] == x[x_len-1-i]);
+	  if(!is_match) break;
+         }
+         if(is_match) return x;
+        }
 	return "";
 }
 
