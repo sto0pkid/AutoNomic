@@ -1,0 +1,33 @@
+Contains some of the configuration settings.
+$MW/includes/LocalSettings.php
+
+
+Web-server routes everything to $MW/index.php
+Mediawiki's PHP code then extracts the tile from the original request url
+Web-server rewrites everything to keep the displayed URLs nice while MW info is
+ being routed around in the background.
+
+$MW/index.php
+ $mediawiki #runs the current mediawiki instance
+
+
+
+
+
+Used for extracting MW info from URLs.
+Contains other configuration settings for interpretation of URLs.
+This is where we'd need to modify the code in order to fix the
+URLs up completely.
+
+$MW/includes/WebRequest.php
+ * function interpolateTitle(...)
+ * function getPathInfo(...)
+
+$MW/includes/PathRouter.php
+ * function parse (...)
+
+
+
+
+
+

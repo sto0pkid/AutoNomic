@@ -1,0 +1,9 @@
+Get a source of randomness
+Create random 256-bit private key.
+Generate 512-bit public key from this using Elliptic Curve DSA.
+Hashed down to 160 bits using SHA-256 and RIPEMD
+Encoded in ASCII using Base58Check encoding
+Wallet Interchange Format
+
+Transaction malleability, uh oh!
+

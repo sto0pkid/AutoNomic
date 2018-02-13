@@ -1,0 +1,41 @@
+CONJUNCTION:
+
+Standard rules:
+
+A     B
+-------			&-intro
+ A & B
+
+
+A & B
+-----   		&-elim1 aka proj1 aka first
+  A
+
+A & B
+-----			&-elim2 aka proj2 aka second
+  B
+
+
+Standard rules from type theory POV:
+
+A : Type    B : Type
+--------------------	&-formation
+    A & B : Type
+
+
+ a : A      b : B
+--------------------	&-intro
+   (a,b) : A & B
+
+
+  p : A & B
+-------------		&-elim1
+ proj1 p : A
+
+
+  p : A & B
+-------------		&-elim2
+ proj2 p : B
+
+
+

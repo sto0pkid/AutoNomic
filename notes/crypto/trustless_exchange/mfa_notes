@@ -1,0 +1,162 @@
+Possibility 1:
+
+Both parties set up a multi-factor authentication wallet that they are
+both factors of. 
+
+Whatever coins get sent to this wallet can't leave unless both
+parties sign the transaction.
+
+So if one party sends coins to the wallet, they can be assured that
+these coins won't exit unless they personally sign the transaction
+for it. They might not be able to get the coins back out unless the
+other party signs their side of the transaction, but they can be
+assured that the other party will not be able to get them.
+
+Now they want to exchange.
+
+Somebody's gotta act first. Let's say it's me.
+
+So I make a transaction to send my asset to some wallet that you control.
+
+A					B
+------					---------
+unsigned transaction to B		unsigned transaction to A
+
+
+I sign this transaction and send it off to you. Now you can sign
+it and send it off without making the transaction back to me. In other
+words, now you can steal my asset.
+
+A					B
+-------					---------
+transaction to B			transaction to A
+ signed by A				 unsigned
+					transaction to B
+					 signed by A
+
+
+
+A					B
+-------					---------
+transaction to B			transaction to A
+ signed by A				 unsigned
+ signed by B				transaction to B
+ sent					 signed by A
+					 signed by B
+					 sent
+Ok so, instead I make this transaction and I *don't* sign, and send the
+unsigned transaction to you. 
+
+
+A sends unsigned transaction to B
+
+A					B
+---------				--------
+transaction to B			transaction to A
+ unsigned				 unsigned
+					transaction to B
+					 unsigned
+
+Ok now B can't send off that transaction without A signing it, so
+A is safe so far. 
+
+But B wants this transaction to B to get sent, so B signs that     
+transaction and sends it back to A.
+
+
+A					B
+----------				--------
+transaction to B			transaction to A
+ signed by B				 unsigned
+					transaction to B
+					 signed by B
+
+
+Ok now I can send my asset to you at my discretion, whenever I choose to
+sign it.
+
+Now of course B doesn't want to sign the transaction to A and send it to
+A, because then A can just send it off without sending the transaction to
+B.
+
+So B sends the unsigned transaction to A.
+
+A					B
+------------				--------
+transaction to B			transaction to A
+ signed by B				 unsigned
+transaction to A			transaction to B
+ unsigned				 signed by B
+
+Now A obviously wants this to get sent, so they'll sign it and send it
+back to B.
+
+A					B
+------------				---------
+transaction to B			transaction to A
+ signed by B				 signed by A
+transaction to A			transaction to B
+ signed by A				 signed by B
+
+
+Now, B can send to A, or A can send to B, but neither can send to themselves.
+
+But we're still stuck in a situation of somebody must act first.
+
+Let's say A acts first again:
+
+A					B
+------------				----------
+transaction to B			transaction to A
+ signed by A				 signed by A
+ signed by B				transaction to B
+ sent					 signed by A
+transaction to A			 signed by B
+ signed by A				 sent
+
+
+B wins again.
+
+Now, let's imagine that given a transaction signed by both factors,
+and have the information to sign for one of the factors, you can
+sign for both factors.
+
+Then by receiving the transaction to B signed by B, A could use that
+information to sign the transaction to A, without sending the transaction
+to B.
+
+So let's say instead A makes a transaction to A and signs it and sends it
+to B. B makes a transaction to B and signs it. 
+
+A					B
+-----------				-----------
+transaction to A			transaction to A
+ signed by A				 signed by A
+					transaction to B
+	 				 signed by B
+
+Now if B signs the transaction to A, they can reveal the secret
+to sign their transaction to B. Now once that goes onto the chain,
+A can see it and that will reveal the secret for them to sign
+their transaction to A, but by that point it may be too late, as B
+could make another transaction to B and sign for both.
+
+Ok so that's too much.
+
+Can we relativize it to a particular transaction.
+
+A					B
+------------				------------
+transaction to B			transaction to B
+ signed by A				 signed by A
+
+So B will obviously sign and send this transaction.
+So let's say 
+
+
+
+
+
+
+
+

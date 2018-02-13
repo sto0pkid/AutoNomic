@@ -1,0 +1,835 @@
+Local soundness: local reductions on eliminators applied to introductions
+ * Local soundness gives beta-reduction rules
+Local completeness: local expansions on introductions applied to eliminators
+ * Local completeness gives eta-expansion rules
+Global soundness
+Global completeness
+Cut-elimination
+"Identity"
+
+
+
+
+HYPOTHESIS RULE:
+
+------------------- hyp
+G, x : A |- x : A
+
+
+
+G, x : A, G' |- y : B           G |- a : A
+------------------------------------------- sub
+G, G' |- y[x\a] : B[x\a]
+
+
+
+G |- a : A
+------------------ hyp-ext
+G, G' |- a : A
+
+
+
+FALSE:
+
+----------------------------- False-form
+G |- False prop
+
+
+G |- p : False   
+G, x : False |- C prop
+----------------------------- False-elim
+G |- False-elim p :  C[x\p]
+
+
+
+
+
+Local soundness: no intro rules to apply
+
+hrm, what should the beta-rule be? loop forever?
+
+
+
+
+Local completeness: still no intros to apply but this looks maybe right?
+
+-------------- u      ---------------------------- False-form  
+G |- p : False        G, x : False |- False prop
+------------------------------------------------ False-elim
+G |- False-elim p : False
+
+^ eta rule for false
+
+
+
+
+
+
+
+
+TRUE:
+
+---------------------- True-form
+G |- True prop
+
+
+------------------------- True-intro
+G |- True-intro : True
+
+
+G |- p : True
+G, x : True |- C prop  
+G |- c : C[x\True-intro]
+-------------------------------- True-elim
+G |- True-rec p {}.c : C[x\p]
+
+
+G, x : True |- C prop  
+G |- c : C[x\True-intro]
+-------------------------------------------------------- True-comp
+G |- True-rec True-intro {}.c = c[] : C[x\True-intro]
+
+
+
+
+Local soundness:
+
+----------------------- True-intro       ---------------------- u    ------------------------ v
+G |- True-intro : True                    G, x : True |- C prop       G, c : C[x\True-intro]
+--------------------------------------------------------------------------------------- True-elim
+G |- True-rec True-intro {}.c : C[x\True-intro]                                 
+
+
+
+
+  R    --------------------- v
+=====>  c : C[x\True-intro]
+
+
+
+Local completeness:
+
+-------------- u  
+G |-  p : True          
+
+  E      
+=====>   
+
+-------------- u      ------------------------- True-form      ------------------------- True-intro
+G |- p : True          G, x : True |- True prop                 G |- True-intro : True
+---------------------------------------------------------------------------------------- True-elim
+G |- True-rec p {}.True-intro : True
+
+
+
+
+
+
+
+
+
+
+
+
+
+IMPLICATION:
+
+G |- A prop         
+G |- B prop
+---------------------- -> form
+G |-  A -> B prop
+
+             
+G |- A -> B prop     
+G, x : A |- b : B 
+-------------------------   -> intro
+G |- {x}.b : A -> B
+
+
+G |- f : A -> B   
+G |- a : A
+-------------------------- -> elim
+G |- (app f a) : B 
+
+
+G |- {x}.b : A -> B         
+G |- a : A
+-------------------------------------------- -> comp
+G |- (app {x}.b a) = b[x\a] : B
+
+
+
+
+Local soundness:
+
+-----------------u    ------------------- v
+G |- A -> B prop       G, x : A |- b : B
+----------------------------------------- ->-intro            ------- w
+ G |- {x}.b : A -> B                                           a : A
+-------------------------------------------------------------------------- -> elim
+  G |- (app {x}.b a) : B
+
+        
+ R   ------------------- v    ------------ w
+===>  G, x : A |- b : B        G |- a : A
+     ------------------------------------- sub
+              G |- b[x\a] : B[x\a]
+
+
+But look it's beta-reduction
+
+
+
+Local completeness:
+
+---------------- u           ------------------- v
+G |- f : A -> B               G |- x : A  
+------------------------------------------------- -> elim
+G |- (app f x) : B
+---------------------------- hyp-ext
+G, x : A |- (app f x) : B
+----------------------------- ->-intro 
+G |- \x.(app f x) : A -> B
+
+
+
+
+
+
+
+
+
+
+
+
+CONJUNCTION (NEGATIVE):
+
+
+G |- A prop     
+G |- B prop
+--------------------- &-form
+G |- A & B prop
+
+
+G |- A & B prop
+G |- a : A          
+G |- b : B
+------------------------------- & intro
+G |- (a , b) : A & B
+
+
+G |- p : A & B
+--------------- & elim1
+G |- fst p : A
+
+
+G |- p : A & B
+--------------- & elim2
+G |- snd p : B
+
+
+G |- (a , b) : A & B
+-------------------------- &-comp1
+G |- fst (a , b) = a : A
+
+
+G |- (a , b) : A & B
+-------------------------- &-comp2
+G |- snd (a , b) = b : B
+
+
+
+
+
+Local soundness:
+
+&-intro1/&-elim1
+
+----------u    -------v  ------- w
+A & B prop      a : A     b : B
+-------------------------------- &-intro
+      (a , b) : A & B                         R      ---------- v  
+     ------------------ &-elim1             =====>      a : A
+     fst (a , b)  : A 
+
+
+
+&-intro1/&-elim2
+
+----------- u  ------- v  ------- w
+A & B prop      a : A      b : B
+--------------------------------- &-intro
+      (a , b) : A & B                         R      -------- w
+     ----------------- &-elim2             ======>    b : B
+      snd (a , b) : B
+
+
+
+Local completeness:
+
+----------- u               ------------ u
+ p : A & B                   p : A & B
+------------- &-elim1        ------------ &-elim2
+ fst p : A                    snd p : B
+------------------------------------------ &-intro
+   (fst p , snd p) : A & B
+
+
+
+
+
+
+
+
+
+
+
+CONJUNCTION (POSITIVE):
+
+G |- A prop         
+G |- B prop
+------------------------------ &p-form
+G |- A & B prop
+
+
+G |- A & B prop    
+G |- a : A          
+G |- b : B
+-------------------------------- &p-intro
+G |- (a , b) : A & B
+
+
+G |- p : A & B
+G, q : A & B |- C prop   
+G, x : A, y : B |- c : C[q\(x,y)]
+----------------------------------- &p-elim
+G |- split p {x,y}.c : C[q\p]
+
+
+G |- (a , b) : A & B
+G, q : A & B |- C prop 
+G, x : A, y : B |- c : C
+------------------------------------------------------- &p-comp
+G |- split (a , b) {x,y}.c = c[x\a,y\b] : C[q\(a , b)]
+
+
+
+
+
+Local soundness:
+
+-------------- u ------------ v   ----------- w
+G |- A & B prop     G |- a : A      G |- b : B                   
+---------------------------------------------- &p-intro  ------------------------ x ----------------------------------- y
+  G  |- (a , b) : A & B                                   G, q : A & B |- C prop     G, x : A, y : B |- c : C[q\(x,y)] 
+  -------------------------------------------------------------------------------------------------------------------
+             G |- split p {x,y}.c : C[q\(a,b)]
+   
+
+ R
+===>   ----------------------------------- y     -------------- v
+        G, x : A, y : B |- c : C[q\(x , y)]         G |- a : A           
+       ------------------------------------------------------- sub       ----------- w
+          G , y : B |- c[x\a] : C[q\(x , y)][x\a]                         G |- b : B
+      --------------------------------------------------------------------------------- sub
+            G |- c[x\a,y\b] : C[q\(x , y)][x\a,y\b]
+
+
+Local completeness:
+                                            
+----------- s  ----------- t   --------------- u      ------------------------ s    -------------------------- hyp
+G |- A prop    G |- B prop      G |- p : A & B         G, q : A & B |- A prop        G, x : A, y : B |- x : A
+--------------------------------------------------------------------------------------------------------------- &-elim / v
+ G |- split p {x,y}.x : A
+
+
+------------s -------------t  ---------------- u     ------------------------ t     -------------------------- hyp
+G |- A prop    G |- B prop     G |- p : A & B         G, q : A & B |- B prop         G, x : A, y : B |- y : B
+-------------------------------------------------------------------------------------------------------------- &-elim / w
+G |- split p {x,y}.y : B
+
+
+-----------s   ------------- t
+G |- A prop     G |- B prop
+----------------------------- &-form     ------------------------- v     -------------------------- w
+ G |- A & B prop                          G |- split p {x,y}.x : A        G |- split p {x,y}.y : B
+--------------------------------------------------------------------------------------------------- &-intro
+  G |- (split p {x,y}.x , split p {x,y}.y) : A & B
+
+
+
+
+
+
+DISJUNCTION :
+
+G |- A prop        
+G |- B prop
+-----------------------------------OR-form
+G |- A OR B prop
+
+
+G |- A OR B prop    
+G |- a : A 
+----------------------------- OR-intro1
+G |- (inl a) : A OR B
+
+
+G |- A OR B prop   
+G |- b : B
+----------------------------------------- OR-intro2
+G |- (inr b) : A OR B
+
+
+G |- p : A OR B       
+G, q : A OR B |- C prop  
+G, x : A |- c : C[q\(inl x)]          
+G, y : B |- d : C[q\(inr y)]
+---------------------------------------- OR-elim
+G |- case p {x}.c {y}.d : C[q\p]
+
+
+G |- (inl a) : A OR B
+G, q : A OR B |- C prop
+G, x : A |- c : C[q\(inl x)]
+G, y : B |- d : C[q\(inr y)]
+------------------------------------------------------ OR-comp1
+G |- case (inl a) {x}.c {y}.d = c[x\a] : C[q\(inl a)]
+
+
+G |- (inr b) : A OR B
+G, q : A OR B |- C prop
+G, x : A |- c : C[q\(inl x)]
+G, y : B |- d : C[q\(inr y)]
+------------------------------------------------------ OR-comp2
+G |- case (inr b) {x}.c {y}.d = d[y\b] : C[q\(inr b)]
+
+
+
+
+
+Local soundness:
+
+OR-intro1
+
+----------- u  -------------- v
+G |- A prop     G |- B prop
+------------------              ------------ w
+G |- A OR B prop                 G |- a : A                    
+--------------------------------------------- OR-intro1   
+ G |- (inl a) : A OR B                                     
+G, q : A OR B |- C prop      -- x
+G, x : A |- c : C[q\(inl x)] -- y
+G, y : B |- d : C[q\(inr y)] -- z
+---------------------------------------------- OR-elim
+G |- case (inl a) {x}.c {y}.d : C[q\(inl a)]
+
+
+        
+                        
+          ------------------------------ y   ------------ w
+  R        G, x : A |- c : C[q\(inl x)]      G |- a : A
+=====>    ------------------------------------------------ sub
+           G |- c[x\a] : C[q\(inl a)] 
+
+
+
+OR-intro2
+
+------------ u ------------- v
+G |- A prop     G |- B prop
+----------------------------    -------------- w
+G |- A OR B prop                 G |- b : B
+---------------------------------------------- OR-intro2
+G |- (inr b) : A OR B
+G, q : A OR B |- C prop      -- x
+G, x : A |- c : C[q\(inl x)] -- y
+G, y : B |- d : C[q\(inr y)] -- z
+----------------------------------------- OR-elim
+G |- case (inr b) {x}.c {y}.d : C[q\(inr b)]
+
+
+       -------------------------------- z  ------------ w
+  R     G, y : B |- d : C[q\(inr y)]        G |- b : B
+=====> -------------------------------------------------- sub
+          G |- d[y\b] : C[q\(inr b)]
+
+
+
+
+
+
+Local completeness:          ------------------------------ hyp            ----------------------------- hyp
+                              G, x : A |- x : A                             G, y : B |- y : B
+----------------- u          ------------------------------ OR-intro1      ------------------------------- OR-intro2
+G |- p : A OR B               G, x : A |- (inl x) : A OR B                  G, y : B |- (inr y) : A OR B
+---------------------------------------------------------------------------------------------------------- OR-elim
+G |- case p {x}.(inl x) {y}.(inr y) : A OR B
+
+
+
+
+
+
+
+
+EXISTENTIAL QUANTIFICATION:
+
+G |- A prop         
+G, x : A |- B prop
+------------------------------------------- EQ-form
+G |- Exists A {x}.B prop
+
+
+G |- Exists A {x}.B prop    
+G |- a : A        
+G |- b : B[x\a]
+------------------------------------ EQ-intro
+G |- pair a b : Exists A {x}.B
+
+
+
+G |- p : Exists A {x}.B       
+G, q : Exists A {x}.B |- C prop   
+G, a : A, b : B[x\a] |- c : C[q\(pair a b)]
+------------------------------------------- EQ-elim
+G |- Exists-rec p {a,b}.c : C[q\p]
+
+
+G, p : Exists A {x}.B |- C prop
+G |- Exists-rec (pair x y) {a,b}.c : C[q\(pair x y)]
+-------------------------------------------------------------- EQ-comp
+G |- Exists-rec (pair x y) {a,b}.c = c[a\x,b\y] : C[q\(pair x y)]
+
+
+
+Local soundness:
+
+G |- A prop		-- u
+G, x : A |- B prop	-- v
+---------------------------- EQ-form   ------------w    ----------------x
+G |- Exists A {x}.B prop                G |- a' : A       G |- b': B[x\a']
+------------------------------------------------------------------------ EQ-intro
+G |- pair a' b' : Exists A {x}.B
+G, q : Exists A {x}.B |- C prop          	-- y
+G, a : A, b : B[x\a] |- c : C[q\(pair a b)]	-- z
+------------------------------------------------------- EQ-elim
+G |- Exists-rec (pair a b) {a,b}.c : C[q\(pair a b)]
+
+
+
+							  -------------------------- w
+                                                           G |- a' : A
+  R     ---------------------------------------------- z  --------------------------- hyp-ext
+=====>   G, a : A, b : B[x\a] |- c : C[q\(pair a b)]       G, b : B[x\a] |- a' : A
+        ---------------------------------------------------------------------------- sub       -----------------w
+	 G, b : B[x\a] |- c[a\a'] : C[q\(pair a b)][a\a']			                G |- b' : B[x\a]
+	-------------------------------------------------------------------------------------------------------- sub
+	 G |- c[a\a',b\b'] : C[q\(pair a b)][a\a'][b\b']
+
+
+
+Local completeness:
+
+
+
+------------------------- u 
+G |- p : Exists A {x}.B	     
+G, q : Exists A {x}.B |- Exists A {x}.B prop	  	-- v
+G, a : A, b : B[x\a] |- (pair a b) : Exists A {x}.B	-- w
+---------------------------------------------------------- Exists-elim
+G |- Exists-rec p {a,b}.(pair a b) : Exists A {x}.B
+
+
+
+
+
+
+
+UNIVERSAL QUANTIFICATION:
+
+G |- A prop      
+G, x : A |- B prop
+------------------------------------------------------ UQ-form
+G |- Forall A {x}.B prop
+
+
+G |- Forall A {x}.B prop   
+G, x : A |- b : B[x\a]
+-------------------------------- UQ-intro
+G |- {x}.b : Forall A {x}.B
+
+
+G |- f : Forall A {x}.B          
+G |- a : A
+-------------------------------- UQ-elim
+G |- (App f a) : B[x\a]
+
+
+G |- (App {x}.b a) : B[x\a]
+-------------------------------------- UQ-comp
+G |- (App {x}.b a) = b[x\a] : B[x\a]
+
+
+
+Local soundness:
+
+-------------------------u   ------------------------ v
+G |- Forall A {x}.B prop      G, x : A |- b : B[x\a]
+----------------------------------------------------- UQ-intro     ----------- w
+G |- {x}.b : Forall A {x}.b                                         G |- a : A             
+------------------------------------------------------------------------------- UQ-elim
+G |- (App {x}.b a) : B[x\a]
+
+  R     ----------------------- v       ------------ w
+=====>   G, x : A |- b : B[x\a]           G |- a : A
+        ------------------------------------------ sub
+         G |- b[x\a] : B[x\a]
+
+
+
+Local completeness:
+
+-------------------------------       ------------- v
+G |- f : Forall A {x}.B                 G |- a : A
+----------------------------------------------------- UQ-elim
+G |- (App f a) : B[x\a]
+------------------------------- hyp-ext
+G, a : A |- (App f a) : B[x\a]
+------------------------------------ UQ-intro
+G |- \a.(App f a) : Forall A {x}.b
+
+
+
+IDENTITY:
+
+G |- A prop  
+G |- x : A     
+G |- y : A
+------------------------------- Id-form
+G |- Id A x y prop
+
+
+G |- A prop    
+G |- x : A
+------------------------------- Id-intro
+G |- refl : Id A x x
+
+
+G |- p : Id A x y       
+G, r : Id A x y |- C prop    
+G, refl : Id A x x |- c : C[r\refl]
+--------------------------------------- Id-elim
+G |- Id-elim p c : C[r\p]
+
+
+G |- refl : Id A x y 
+------------------------------------- Id-comp
+G |- Id-elim refl c = c : C[r\refl]
+
+
+
+
+Local soundness:
+hrm...
+
+Local completeness:
+hrm...
+
+
+
+   
+
+BOOL:
+
+-------------------- Bool-form
+G |- Bool prop
+
+
+-------------------- Bool-intro1
+G |- true : Bool
+
+
+-------------------- Bool-intro2
+G |- false : Bool
+
+
+G |- p : Bool     
+G, x : Bool |- C prop
+G |- c : C[x\true]         
+G |- d : C[x\false]
+-------------------------------------- Bool-elim
+G |- if p then {}.c else {}.d : C[x\p]
+
+
+
+G, x : Bool |- C prop
+G |- c : C[x\true]
+G |- d : C[x\false]
+--------------------------------------------------- Bool-comp1
+G |- if true then {}.c else {}.d = c[] : C[x\true]
+
+
+G, x : Bool |- C prop
+G |- c : C[x\true]
+G |- d : C[x\false]
+------------------------------------------------------ Bool-comp2
+G |- if false then {}.c else {}.d = d[] : C[x\false]
+
+
+
+
+
+
+Local soundness:
+
+-------------- Bool-intro1       -------------------- u  --------------- v   ---------------- w
+ true : Bool                      x : Bool |- C prop      c : C[x\true]       d : C[x\false] 
+----------------------------------------------------------------------------------------------
+     if true then {}.c else {}.d : C[x\true]
+
+
+ R    --------------- v    
+===>   c : C[x\true]
+
+
+
+-------------- Bool-intro2       -------------------- u --------------- v  ----------------- w
+ false : Bool                     x : Bool |- C prop     c : C[x\true]      d : C[x\false]
+-------------------------------------------------------------------------------------------- Bool-elim
+     if false then {}.c else {}.d : C[x\false]
+
+ R    ----------------- v
+===>   d : C[x\false]
+
+
+
+
+
+Local completeness:
+
+-------------- u       E      
+G |- p : Bool         =====> 
+
+
+                       
+-------------- u      -------------------------- Bool-form   ---------------- Bool-intro1   --------------------- Bool-intro2
+G |- p : Bool          G, x : Bool |- Bool prop              G |- true : Bool                G |- false : Bool
+----------------------------------------------------------------------------------------------------------------- Bool-elim
+G |- if p then {}.true else {}.false : Bool
+
+^
+is this the eta rule for Bool??   
+
+
+
+
+
+
+
+
+NAT:
+
+------------------------ Nat-form
+G |- Nat prop
+
+
+------------------------- Nat-intro1
+G |- zero : Nat
+
+
+G |- n : Nat
+------------------------- Nat-intro2
+G |- (suc n) : Nat
+
+
+G |- n : Nat          
+G, x : Nat |- C prop     
+G |- cz : C[x\zero]        
+G, m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]
+-------------------------------------------------- Nat-elim
+G |- nat-rec n {}.cz {m,cm}.cm' : C[x\n]
+
+
+G, x : Nat |- C prop  
+G |- cz : C[x\zero]
+G |- m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]
+------------------------------------------------------- Nat-comp1
+G |- nat-rec zero {}.cz {m,cm}.cn' = cz[] : C[x\zero]
+
+
+G, x : Nat |- C prop
+G |- n : Nat 
+G |- cz : C[x\zero]
+G, m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]
+G |- nat-rec n {}.cz {m,cm}.cn' = y : C[x\n]
+--------------------------------------------------------------------- Nat-comp2
+G |- nat-rec (suc n) {}.cz {m,cm}.cn' = cn'[m\n,cm\y] : C[x\(suc n)]
+
+
+
+
+Local soundness:
+
+Nat-intro1:
+
+------------------ Nat-intro1 
+G |- zero : Nat                
+G, x : Nat |- C prop   				-- u
+G |- cz : C[x\zero]    				-- v
+G, m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]	-- w
+--------------------------------------------------- Nat-elim
+G |- nat-rec zero {}.cz {m,cm}.cm' : C[x\zero]
+
+
+  R   --------------- v
+=====> cz : C[x\zero]
+  
+
+
+Nat-intro2:
+
+------------ u
+G |- n : Nat
+------------------- Nat-intro2
+G |- (suc n) : Nat   
+G, x : Nat |- C prop				--u
+G |- cz : C[x\zero]				--v
+G, m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]	--w
+----------------------------------------------------- Nat-elim
+G |- nat-rec (suc n) {}.cz {m,cm}.cm' : C[x\(suc n)]
+
+
+  R
+=====> ----------------------------------------------- w
+        G, m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]
+       --------------------------------------------------------------------------------------------------
+
+
+
+
+Local completeness:
+                                                                                      G, m : Nat, cm : Nat |- m : Nat
+--------------- u  ------------------------ Nat-form  ------------------Nat-intro1   ---------------------------------------
+G |- p : Nat        G, x : Nat |- Nat prop             G |- zero : Nat                G, m : Nat, cm : Nat |- (suc m) : Nat
+---------------------------------------------------------------------------------------------------------------- Nat-elim
+G |- nat-rec p {}.zero {m,cm}.(suc m)' : Nat
+
+^ eta rule for Nat ??
+
+
+
+fold_N z f zero 	= z
+fold_N z f (suc n)	= (App (App f n) (fold_N z f n))
+
+C n = fold_N (C zero) ({m, _}.(C (suc m))) n
+
+C zero = fold_N (C zero) ({m, _}.(C (suc m))) n = C zero
+C (suc n) = fold_N (C zero) ({m , _}.(C (suc m))) n = (App (App ({m , _}.(C (suc m))) n) (fold_N (C zero) ({m , _}.(C (suc m))) n)) = (App ({_}.(C (suc n))) (fold_N (C zero) ({m , _}.(C (suc m))))) = C (suc n)
+ 
+
+
+
+
+
+^ generalized eta rule?

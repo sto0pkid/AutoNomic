@@ -1,0 +1,18 @@
+All the formulae of an FOL theory can be enumerated.
+Assume we are given an FOL proposition P.
+Then we can loop through all the formulae in our theory
+and check each one to see if its a well-formed proof of P.
+If P has a proof, then our algorithm will eventually find it.
+However if P doesn't have a proof, then our algorithm will potentially
+loop forever trying to find it.
+However, if we can solve the halting program, we can simply ask
+if our program halts on input P. If it halts, then P must be
+provable, and if it doesn't halt, then P must be unprovable.
+Due to Godel's completeness theorem, every valid formula is provable,
+so this method would decide (the validity of) every statement of FOL.
+
+
+First-order arithmetic
+Peano arithmetic
+Robinson arithmetic
+Second order arithmetic

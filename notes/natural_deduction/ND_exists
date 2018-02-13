@@ -1,0 +1,36 @@
+Formation:
+               x : A
+                ~
+A set         B(x) set
+-----------------------
+ Exists x in A, B(x) set
+
+
+
+Introduction:
+
+a : A          b : B(a)
+------------------------
+pair(a,b) : Exists x in A , B(x)
+
+
+
+Elimination:
+
+                                   x : A, y : B(x)
+                                         ~
+c : Exists x in A, B(x)         d(x,y) : C(pair(x,y))
+------------------------------------------------------
+             split(c,d) : C(c)
+
+
+
+Computation:
+
+  				   x : A ,  y : B(x)
+  					 ~
+a : A            b : B(a)        d(x,y) : C(pair(x,y))
+------------------------------------------------------
+        split(pair(a,b),d) = d(a,b) : C(pair(a,b))
+
+

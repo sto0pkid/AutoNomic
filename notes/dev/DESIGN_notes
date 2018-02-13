@@ -1,0 +1,17 @@
+Place a decentralized CPU into the global FPGA
+This is not a regular CPU
+Regular computers operate based on what you tell them to do, if you 
+don't tell them what to do they just sit there and don't do anything.
+The global FPGA is already running though, people are
+already computing. If left to its own devices (no pun), computation
+will simply happen.
+The control of the operation of the decentralized CPU is based on what 
+you tell it *not* to do.
+Consensus on state of the decentralized execution environment will be
+maintained by a block-chain overlay network.
+
+DHT
+MLTT-TFPL with authenticated data structures
+open-phase
+closed-phase
+IO/ring

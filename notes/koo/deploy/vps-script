@@ -1,0 +1,15 @@
+apt update
+apt install  -y  mc htop fish tmux screen git
+chsh /usr/bin/fish
+echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/user
+
+cd /etc
+git init
+git add *
+git commit -m "init"
+
+
+adduser user
+chsh -s /usr/bin/fish user
+su user
+

@@ -1,0 +1,41 @@
+This is the elimination rule for OR, and so is all about 
+**what you can prove given a proof p : A OR B **
+
+
+
+
+
+G |- p : A OR B 									
+	if p is a proof of A OR B under assumptions G
+
+
+
+G, q : A OR B |- C prop 							
+	and C is a proposition under the assumptions G, along with the 
+	assumption that q is a proof A OR B (i.e. q may be some variable
+	in the term C)
+
+
+
+G, x : A |- c : C[q\(inl x)]						
+	and c is a proof of C[q\(inl x)] (in other words, the proposition 
+	C for the `inl` case of A OR B), under the assumptions G, along with
+	the assumption that x is a proof of A (i.e. x may be some variable in 
+	the term c) 
+
+
+G, y : B |- d : C[q\(inr y)] 						
+	and d is a proof of C[q\(inr y)] (in other words, the proposition
+	C for the `inr` case of A OR B), ....
+
+
+---------------------------------------- OR-elim	then this rule, call it `OR-elim`, derives:
+ 
+G |- case p {x}.c {y}.d : C[q\p]					
+	C[q\p] is true, under the assumptions G, i.e. the proposition C 
+	is true for whatever proof p you gave for A OR B, because you gave 
+	proofs c and d (with x bound in c, and y bound in d) that cover all 
+	cases of constructors for A OR B. `case p c d` is a syntactic term to 
+	represent the proof-tree that witnesses the truth of C[q\p], and we 
+	write `case p {x}.c {y}.d` to indicate that the variables x and y are 
+	bound in c and d, resp.

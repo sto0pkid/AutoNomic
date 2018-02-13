@@ -1,0 +1,52 @@
+Formation:
+
+A set       B set
+------------------
+  A OR B set
+
+{?A a Set. ?B a Set} => {?A||B ||-fst ?A. ?A||B ||-snd ?B. ?A||B a Set}
+
+
+
+Introduction:
+     a : A 		  b : B
+----------------     -----------------
+ inl a : A OR B	      inr b : A OR B
+
+
+{?A||B ||-fst ?A. ?A||B ||-fst ?B. ?a a ?A.} => {?a inl ?p. ?p a ?A||B}
+
+
+
+Elimination:
+
+		         x : A                     y : A
+		            ~                        ~
+ c : A OR B            d(x) : C(inl x)         e(y) : C(inr y)
+----------------------------------------------------------------
+                     case(c,d,e) : C(c)
+
+
+
+Computation:
+
+
+                         x : A                     y : A
+			   ~                        ~
+a : A                  d(x) : C(inl x)         e(y) : C(inr y)
+-----------------------------------------------------------------
+                  case(inl(a), d, e) = d(a) : C(inl a)
+
+
+
+
+                         x : A                     y : A
+			   ~                        ~
+b : B                 d(x) : C(inl x)         e(y) : C(inr y)
+-----------------------------------------------------------------
+                  case(inr(b), d, e) = e(b) : C(inr b)
+
+
+
+
+

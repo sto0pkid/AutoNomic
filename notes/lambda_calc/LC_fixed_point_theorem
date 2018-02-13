@@ -1,0 +1,68 @@
+Fixed point theorem for LC.
+Every term M in LC has a fixed-point, i.e. another term F such that
+F --> MF
+
+Proof:
+Given M, define F = (\w.M(ww))(\w.M(ww))
+
+Then F = (\w.M(ww))(\w.M(ww)) --> M(ww)[w:=(\w.M(ww))] = M((\w.M(ww))(\w.M(ww)))
+= MF.
+
+
+What about the other direction? For every term M, does there exist a term
+such that MF --> F?
+
+
+Y combinator theorem:
+*Note: theorem 10.1.24 in 
+http://www.cs.vu.nl/~tcs/trs/terese-lambda.pdf
+
+There exists a lambda expression Y which sends any lambda expression M to
+its fixedpoint.
+
+Y = (\x.(\w.x(ww))(\w.x(ww)))
+
+example:
+YM = (\x.(\w.x(ww))(\w.x(ww)))M = (\w.M(ww))(\w.M(ww)) which is exactly just
+the fixedpoint F that we saw earlier.
+
+Exercise 10.1.25: Prove that Y does not reduce to beta-normal form.
+
+Turing's fixed point combinator:
+T = (\z.\x.x(zzx))(\z.\x.x(zzx))
+  --> (\x.x(zzx))[z:=(\z.\x.x(zzx))]
+  = (\x.x((\z.\x.x(zzx))(\z.\x.x(zzx)x)))
+  --> ...
+
+Can prove by induction that it will not terminate.
+
+
+10.1.26: Let Y be a fixed-point combinator:
+i) Prove that Y' := Y(SI) is again a fixed-point combinator.
+
+A general fixed-point combinator is any combinator Y such that YM --> M(YM)
+
+So does Y(SI)M --> M(Y(SI)M)?
+
+Y(SI)M --> SI(Y(SI))M --> IM(Y(SI)M) --> M(Y(SI)M), yep!
+
+ii) Prove that Turing's fixed-point combinator can be obtained by using this
+Y(SI) transformation applied to Turing's fixed-point combinator:
+
+(\x.(\w.x(ww))(\w.x(ww)))(SI) = (\w.(SI)(ww))(\w.(SI)(ww))
+= (SI)(\w.(SI)(ww)) = ((\x.\y.\z.xz(yz))I)(\w.(SI)(ww))
+= (\y.\z.Iz(yz))(\w.(SI)(ww)) = (\y.\z.z(yz))(\w.(SI)(ww))
+
+
+(\f.(\x.f(xx))(\x.f(xx)))(SI) = (\x.\f.f(xxf))(\x.\f.f(xxf))
+
+(\x.(SI)(xx))(\x.(SI)(xx))
+(\x.((\q.\r.\s.qs(rs))I)(xx))(\x.(SI)(xx))
+(\x.(\r.\s.Is(rs)(xx)))(\x.(SI)(xx))
+(\x.(\r.\s.s(rs))(xx))(\x.(SI)(xx))
+(\x.\s.s(xxs))(\x.(SI)(xx))
+
+same reduction applies to the argument, thus demonstrating the equivalence,
+with f renamed to s.
+
+

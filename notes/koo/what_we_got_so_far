@@ -1,0 +1,19 @@
+
+#the rdf reasoner:
+##https://github.com/koo5/univar/blob/master/univar.cpp
+##variants:
+###the original, with lambdas
+###cppout
+###https://github.com/koo5/new_shit/blob/master/src/pyin.py
+
+##open problems:
+###universals/bnodes/lists.
+###finding the one true ep-check method
+
+
+
+
+
+
+
+

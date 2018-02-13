@@ -1,0 +1,47 @@
+Assume we have a Turing machine H that takes descriptions of Turing-machines
+as input and returns true if they halt, false if they don't.
+
+H(X,Y) = 1 if unquote(X) halts on input Y
+	 0 otherwise
+
+
+K(X) = if H(X,X) then loop else halt
+
+H("K","K") = 	1 if unquote("K") halts on input "K"
+	   	0 otherwise
+
+assume H("K","K") = 1, then K("K") halts
+
+K("K") = if H("K","K") then loop else halt
+
+since H("K","K") = 1, this evaluates to loop
+But then H("K","K") got the wrong answer, it should have been 0 to indicate
+that K("K") loops forever.
+
+assume on the other hand that H("K","K") = 0, then K("K") loops forever
+K("K") = if H("K", "K") then loop else halt
+but since H("K","K") is 0, this evaluates to halt
+But then, once again, H("K","K") got the wrong answer, it should have been 1
+to indicate that K("K") halts.
+
+This is a paradoxical situation and we must conclude that could have
+never built this hypothetical machine H in the first place.
+
+
+The truly amazing thing about the halting problem is how simple the proof is
+and how few assumptions it requires on what your machines are capable of doing.
+
+
+Note though how there are a couple flaws in the design.
+H is supposed to be making a metastatement about these machines.
+K is a machine in the class that the metastatement is being made about.
+But K is constructed so as to directly contradict the metastatement.
+Note how the only way that K could have been designed to necessarily contradict
+the metastatement is for it to reference the metastatement in its design.
+In other words this apparent paradoxical situation necessarily arises from breaking
+meta-levels.
+
+What about 
+H("H","(H,H)")?
+
+

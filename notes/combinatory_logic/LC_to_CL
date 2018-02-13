@@ -1,0 +1,502 @@
+Lambda calculus to SKI combinators:
+
+I = \x.x
+K = \x.\y.x
+S = \x.\y.\z.x z (y z)
+
+Lemma:
+Given any SKI-term P and variable x, exactly one of the following is true:
+1. P = x
+2. P does not contain x
+3. P = UV, and P contains x.
+
+Sublemma: At *most* one of those conditions is true.
+It can be seen that cases 1 and 2 cannot be satisfied simultaneously, because x contains x.
+Cases 1 and 3 cannot be satisfied simultaneously, because there are no U and V such that UV = x
+	* this is syntactic equality
+Cases 2 and 3 cannot be satisfied simultaneously, because P cannot both contain x and not contain x.
+
+Sublemma: At *least* one of those conditions is true.
+
+It can be seen that either P does contain x, or P doesn't contain x.
+In the case that P doesn't contain x, then case 2 is satisfied.
+In the case that P does contain x, we must differentiate further.
+It can be seen that P must contain either no combinator applications, or at least one combinator application. 
+In the case that P contains no combinator applications, it must contain only one combinator.
+The terms P that contain only one combinator are of the form:
+* x
+* y, where y is some variable not equal to x
+* I
+* K
+* S
+
+Neither S, K, I, nor y will contain x.
+In the case of x, it can be seen that this satisfies case 1.
+These are the only terms with no combinator applications, any other term must be of the form UV.
+The assumption is that P does contain x, and any term of the form UV which contains x must satisfy
+case 3.
+
+Thus every SKI term falls into exactly one of those cases.
+An analogous theorem could be proven for any other system of combinators, the only part of the
+proof that changes is the part where you're examining the terms that contain only one combinator.
+
+
+
+
+
+For every SKI-term M and variable x, there exists a term F, not containing x, such that
+(FM)N = M[x := N]
+
+First: simulation of functional abstraction in SKI combinators
+Given x and SKI-term M, construct SKI-term \\x.M such that
+ (\\x.M)N --[CL]--> M[x/N]
+
+Define:
+
+1.
+\\x.x 	= I = SKK 
+	= (\x.\y.\z.x z (y z)) K K 
+	= \z.K z (K z)
+	= \z.(\x.\y.x) z (K z)
+	= \z.z
+
+ex.
+(\\x.x)N = IN = N = x[x := N]
+
+
+2.
+\\x.P	= KP,	if x does not appear in P
+	= (\x.\y.x) P
+	= \y.P
+
+ex.
+(\\x.P)N = KPN = P = P[x := N]
+
+* if P does not contain x, then P = P[x := N], for any N.
+
+
+3.
+\\x.PQ	= S(\\x.P)(\\x.Q), if PQ != x, and x in PQ
+
+
+Ex.
+\\x.Kx = S(\\x.K)(\\x.x) = S(KK)(SKK)
+
+
+
+Now, for any term P, 
+S(KK)(SKK)P = (KKP)(SKKP) = K(KP(KP)) = KP
+(\\x.Kx)P = KP
+
+(\\x.PQ)R = S(\\x.P)(\\x.Q)R = (\\x.P)R((\\x.Q)R) = P[x := R](Q[x := R ])
+
+This one needs an inductive proof.
+
+
+
+
+This is exhaustive and unambiguous, since we demonstrated above that every SKI-term falls 
+into exactly one of those 3 cases, thus demonstrating that we can simulate function abstraction,
+application and substitution in SKI combinators. What happens with capture-avoidance?
+
+
+Extensional equality of SKI terms:
+Two terms P and Q are equal if for any term x, Px = Qx.
+For example, SKK != I, but SKKx = Kx(Kx) = x = Ix, for any x.
+SKNx = Kx(Nx) = x = Ix, for any N.
+
+
+
+
+1. T[x] 		=> x
+2. T[(P Q)]	 	=> T[P] T[Q]
+3. T[\x.E] 		=> K T[E], when x does not appear free in E.
+4. T[\x.x] 		=> I
+5. T[\x.\y.E]		=> T[\x.T[\y.E]], if x occurs free in E.
+6. T[\x.(P Q)]		=> S T[\x.P] T[\x.Q], if x occurs free in P or Q.
+
+
+
+1. T[x] = x, variables convert to themselves.
+2.
+3. "Clearly" T[\x.E] = K T[E], when x does not appear free in E.
+4. "Clearly" T[\x.x] = I
+5. 
+6. 
+
+
+CL_k
+CL_i
+
+
+Deduction theorem
+Resolution theorem
+Cut-elimination theorem
+
+
+so (\\x.M)N "looks and feels" like an application of an abstraction to an
+argument, but, in what exact sense can they actually be said to be equivalent?
+
+assume we have two frameworks of computation, A and B. how can we abstract
+away the details of their computations so that we can compare their computational 
+capacities?
+
+abstract rewriting systems.
+abstract rewriting systems are directed graphs.
+the nodes are the terms, the directed edges are the rewrite relations.
+
+we don't care about small-step semantics, we care about big-step semantics, i.e.
+normal forms (where existing).
+
+lambda calc and combinatory logic are both confluent rewriting systems.
+this means that a term in either of these can have at most one normal form
+moreover, given any two different ways to reduce the same term, i.e.
+given: 
+ * a term x
+ * and two terms y1 and y2 
+ * a valid reduction from x to y1 
+ * a valid reduction from x to y2, 
+there will exist:
+ * a term z 
+ * a valid reduction from y1 to z.
+ * a valid reduction from y2 to z.
+
+	 x	-	
+       /   \	 |--- if these exist
+      y1    y2	-
+       \   /	 |--- then so must these
+         z	-
+
+This is called the Church-Rosser theorem.
+
+essentially all lambda calc and combinatory logic terms have a normal form, and
+just one normal form, but sometimes it takes infinitely many steps to get there.
+
+the hypothetical potentially-infinitely-large lambda calc terms you would get 
+from this are called boehm trees
+
+Now, this starts to get back to functors.
+In an abstract rewrite system (ARS) we have this rewrite relation, the edges in
+the graph; call it R. 
+
+If we extend from lambda terms to boehm trees, we can consider an ARS where
+lambda term has a normal form. It might take infinitely many rewrites to 
+get there, and the term might be infinitely large, but, that's not really a
+problem for mathematics, only poses a problem for us actually getting those
+terms onto our computers, through any means other than an indirect logical 
+descriptions of them.
+
+Based on the rewrite relation in this ARS, we can logically construct a relation NF
+such that x --NF--> y if y is the normal form of x relative to the rewrite relation R.
+
+So the notion is, two programs are the same if they compute to the same thing, well, what
+is the same thing, in two different models of computation?
+
+Given a term x in A and y in B, and translation function T : A -> B, 
+then if
+ * x --NF_A--> x'
+ * y --NF_B--> y'
+ * T x = y 
+then 
+ * T x' = y'
+
+This seems to make sense, if program x translates to program y, then if x has normal form x' and
+y has normal form y', then x' should translate to y'.
+
+But is that enough? Alternatively is it *too much*? How do we measure?
+And are we sure that smoothing things out with the inclusion of Boehm trees 
+isn't causing us to miss something?
+
+Indeed we can see that it is actually both too much *AND* not enough.
+In what sense is it too much?
+We might have 
+ * x -- NF_A --> x'
+ * y -- NF_B --> y'
+ * T x = y
+and
+ * T x' = z
+ * z != y'
+ * z -- NF_B --> y'
+
+In other words, x might normalize to x', y might normalize to y', but x' doesn't *directly*
+translate to y', it just translates to something else that normalizes to y'.
+
+ERROR, but read through to understand:
+In what sense is it not enough?
+We might have 
+ * x -->* q
+ * q --NF_A--> x'
+ * y --NF_B--> y'
+ * T x = y
+ * T q = z
+ * z --NF_B--> z'
+ * z' != y'
+
+In other words, the rules appear to only constrain the correctness of the translations T x and T x'
+but what about intermediate steps? Is T constrained to send all reductions of x to terms that 
+reduce to y'?
+
+Given a term x in A and y in B, and translation function T : A -> B,
+then if
+ * x --NF_A--> x'
+ * y --NF_B--> y'
+ * T x = y
+then
+ * T x' = y'
+
+Now, what happens when we substitute q into this?
+ * q -- NF_A --> x'
+ * z -- NF_B --> z'
+ * T q = z
+so
+ * T x' = z'
+
+But T x' = y', and z' != y', a contradiction, so this couldn't have happened, i.e. it should be
+the case that those rules do constrain all intermediate steps to be translated to terms that
+reduce to the same normal form as the translation of the first step, i.e. for all such q, it
+must be the case that (T q) -- NF_B--> y'.
+
+This isn't a constructive proof though, i.e. we are not actually constructing the term (T q) and
+demonstrating its reduction to y', we're assuming that NF(T q) != y' and showing that this must
+be a contradiction. "Not not equal to y'" is not the same as "equal to y'", (from the standpoint
+of constructive logic, anyway).
+
+
+Now, let's consider another situation where it actually *isn't* enough.
+Consider:
+ * NF_A(x) = x'
+ * NF_A(z) = z'
+ * x' != z'
+ * NF_B(y) = y'
+ * T x = y
+ * T z = y
+
+Since we must have T x' = y' and T z' = y', we have x' != z', but (T x') = (T z'). Since x' and z'
+are both normal forms, and are not equal to each other, their translations should not be equal
+to each other.
+
+
+Alright, so how do we fix these problems?
+If 
+ * x -->* x'
+ * NF_B(y) = y'
+ * T x = y
+Then
+ * NF_B(T x') = y'
+
+such that T is an injection over the subset of A that is restricted to terms in normal form.
+
+
+
+
+
+Such a translation function T might be called a "big-step simulation of A by B".
+
+We might also be concerned with "small-step simulations".
+We might also be concerned with interpretations of being able to use terms as variables and
+functions and etc.
+
+What are we concerned with in comparing the lambda calculus ARS to the SKI ARS?
+
+
+C f x y = f y x
+B f g x = f (g x)
+
+B = (S(KS))K
+C = (S(S(K((S(KS))K))S)(KK)
+
+Bfxy		= S(KS)Kfxy	
+		= KSf(Kf)xy
+		= S(Kf)xy
+		= Kfy(xy)
+		= f(xy)
+
+
+Cfxy
+
+SKxy = Ky(xy) = y
+
+SKxyz = Ky(xy)z = yz
+
+K = proj1
+SK = proj2
+
+K will eliminate the 2nd of a list of args
+SK will eliminate the 1st of a list of args.
+SSK will place the 1st of two args onto the end of that args list.
+
+SSKxy = Sx(Kx)y = xy(Kxy) = xyx
+
+How to emulate function composition with combinators?
+Combinator M such that Mgfx = g(fx)
+But that's just the combinator B = (S(KS))K, right?
+
+Bgfx	= S(KS)Kgfx
+	= KSg(Kg)fx
+	= S(Kg)fx
+	= (Kgx)(fx)
+	= g(fx)
+
+B(SK)(SSK)xy 	= SK(SSKx)y
+		= Ky(SSKx)
+		= y
+woops! It only applies to the single argument
+
+Can we get Dgfxy = g(fxy) ?
+
+B(Bgfx)y = Bg(fx)y = g(fxy)
+BBgfxy = B(gf)xy = (gf)(xy) = gf(xy)
+Bgfxy = g(fx)y
+SBBgfxy = Bg(Bg)fxy = g(Bgf)
+SBgfxy = Bf(gf)xy = f(gfx)y
+B(SB)gfxy = SB(gf)xy = Bx(gfx)y = x(gfxy)
+
+
+ 
+
+
+
+B puts parentheses around the 2nd and 3rd args
+BB puts parentheses around args (1,2) and args (3,4)
+
+Interesting subclass of combinators: halting combinators whose normal forms only use
+ the arguments.
+
+Permutations:
+Identity:
+SKKx = Kx(Kx) = x
+
+This gives the identity permutation on arbitrary length arg lists
+SKKab..n = Ka(Ka)b...n = ab...n
+
+
+S(K(SI))Kxy	= K(SI)x(Kx)y
+		= SI(Kx)y
+		= Iy(Kxy)
+		= yx
+
+
+S(K(SI))Kabc...n	= K(SI)a(Ka)bc...n
+			= SI(Ka)bc...n
+			= Ib(Kab)c...n
+			= bac...n
+
+
+S(K(S((S(K(SI))K)(S(K(SI))K))))Kabc...n = K(S((S(K(SI))K)(S(K(SI))K)))a(Ka)bc...n
+					= S((S(K(SI))K)(S(K(SI))K))(Ka)bc...n
+					= S(K(SI))K(S(K(SI))K)b(Kab)c...n
+					= K(SI)(S(K(SI))K)(K(S(K(SI))K))b(Kab)c...n
+					= SI(K(S(K(SI))K))b(Kab)c...n
+					= Ib(K(S(K(SI))K)b)(Kab)c...n
+					= b(K(S(K(SI))K)b)(Kab)c...n
+					= b(S(K(SI))K)(Kab)c...n
+					= Stuck term!? Need it deparenthesized here.
+
+
+
+Every combinator has a fixed-point.
+For every term P there exists X such that PX = X
+
+W = \x.P(xx)
+X 	= WW
+	= (\x.P(xx))(\x.P(xx))
+	= P((\x.P(xx))(\x.P(xx)))
+	= P(WW)
+	= PX
+
+What about PX reducing to X? Can we always find such an X?
+
+
+
+
+
+
+Babc...n = a(bc)...n
+
+
+
+
+Do X then do Y
+MXYab... = Y(NF(Xab....))
+
+
+Self-reproducing combinator?
+
+SII(SII) = I(SII)(I(SII)) = SII(I(SII)) = SII(SII)
+
+SIIa = Ia(Ia) = a(Ia) = aa
+
+S(SKK)(SKK)x	= SKKx(SKKx) 
+		= Kx(Kx)(SKKx)
+		= x(SKKx)
+		= x(Kx(Kx))
+		= xx
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+Compiling lambda terms to SKI terms:
+H x = x, for every variable x
+H (P Q) = (H P) (H Q)
+H (\x.P) = \\x.(H P)
+
+
+Ex.
+H (\x.\y.y) 	= \\x.(H (\y.y))
+		= \\x.\\y.(H y)
+		= \\x.\\y.y
+		= \\x.(SKK)
+		= K(SKK)
+		= (\p.\q.p)((\a.\b.\c.a c (b c)) K K)
+		= (\p.\q.p)(\c.K c (K c))
+		= (\p.\q.p)(\c.c)
+		= \q.\c.c
+
+alpha-rename q -> x, c -> y, and we see have the same thing.
+
+Now for a formal proof that this works in general.
+
+Every lambda term is of the form:
+variables:	x
+applications:	P Q
+lambda terms:	\x.P
+
+H x = x, that's simply correct
+ * the fact that it's simply correct means that it can potentially
+   serve as the base case of an induction, if an inductive proof is
+   required
+
+H (P Q) = (H P) (H Q), this is correct, under the assumption that (H P)
+ and (H Q) are translated correctly.
+ * the fact that it's correct under assumption means that it can potentially 
+   be used in the inductive stype of an inductive proof 
+
+
+How do we define a "correct translation"?
+ * in what sense is H x = x "simply correct"?
+ * in what sense is H (P Q) = (H P) (H Q) "correct under assumption"?
+
+
+What might we induct on in an inductive proof?
+ * Depth of the syntax tree representing the lambda term
+ * Abstraction-depth
+ * Application-depth
+ * # of variables
+ * whatever gets us the answer :)
+
+
+	
+
+
+
+
+

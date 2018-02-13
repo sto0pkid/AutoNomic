@@ -1,0 +1,269 @@
+In intuitionstic propositional logic:
+
+Version 1:
+
+A prop        B prop
+--------------------- &-form
+    A & B prop
+
+
+ A     B
+---------- & intro
+  A & B
+
+
+ A & B
+--------- & elim1
+   A
+
+ A & B
+--------- & elim2
+   B
+
+
+
+
+Version 2:
+
+A prop         B prop
+-----------------------  & form
+    A & B prop
+
+
+  A     B
+-----------  & intro
+   A & B
+
+         A , B
+          ~ 
+A & B     C
+--------------
+    C
+
+
+
+
+
+
+Version 3:
+
+G |- A set     G |- B set
+-------------------------- &-form
+G |-  A & B set
+
+
+G |- A & B set    G |- a : A     G |- b : B
+-------------------------------------------- &-intro
+G |-  (a , b) : A & B
+
+
+ G |-  p : A & B
+------------------ &-elim1
+ G |-  fst p : A
+
+
+ G |-  p : A & B
+------------------ &-elim2
+ G |-  snd p : B
+
+
+
+Version 4:
+
+G |- A set        G |- B set
+------------------------------- &-form
+G |- A & B set
+
+
+G |- A & B set    G |- a : A      G |- b : B
+---------------------------------------------- &-intro
+G |- (a , b) : A & B
+
+
+G |- p : A & B         G, x : A, y : B |- c : C
+------------------------------------------------ &-elim
+G |- split p c : C
+
+
+
+Version 5:
+
+G |- A set          G |- B set
+------------------------------- &-form
+G |- A & B set
+
+
+G |- A & B set    G |- a : A       G |- b : B
+------------------------------------------------ &-intro
+G |- (a , b) : A & B
+
+
+G |- p : A & B
+----------------- &-elim1
+G |- fst p : A
+
+
+G |- p : A & B
+----------------- &-elim2
+G |- snd p : B
+
+
+
+G |- (a , b) : A & B  
+----------------------------- &-comp1
+G |- fst (a , b) = a : A
+
+
+G |- (a , b) : A & B    
+----------------------------- &-comp2
+G |- snd (a , b) = b : B
+
+
+
+Version 6:
+
+G |- A set           G |- B set
+--------------------------------- &-form
+G |- A & B set
+
+
+G |- A & B set       G |- a : A       G |- b : B
+-------------------------------------------------- &-intro 
+G |- (a , b) : A & B
+
+
+G |- p : A & B           G, x : A, y : B |- c : C 
+-------------------------------------------------- &-elim
+G |- split p c : C
+
+
+G |- (a , b) : A & B     G, x : A, y : B |- c : C
+-------------------------------------------------- &-comp
+G |- split (a , b) c = c[x\a,y\b] : C
+
+
+
+
+Version 7:
+
+G |- A set          G |- B Set
+--------------------------------- &-form
+G |- A & B set
+
+
+G |- A & B set      G |- a : A       G |- b : B
+------------------------------------------------- &-intro
+G |- (a , b) : A & B
+
+
+------------------------------------------- &-elim
+G |- &-elim : (A -> B -> C)-> A & B -> C
+
+
+
+Version 8:
+
+G |- A set          G |- B set
+----------------------------------- &-form
+G |- A & B set
+
+
+G |- A & B set      G |- a : A       G |- b : B
+------------------------------------------------ &-intro
+G |- (a , b) : A & B
+
+
+G |- p : A & B      G, x : A, y : B |- c : C
+--------------------------------------------- &-elim
+G |- split p {x,y}.c : C
+
+
+G |- (a , b) : A & B        G, x : A, y : B |- c : C
+----------------------------------------------------- &-comp
+G |- split (a , b) {x,y}.c = c[x\a,y\b] : C
+
+
+Version 9:
+
+G |- A set          G |- B set
+----------------------------------- &-form
+G |- A & B set
+
+
+G |- A & B set      G |- a : A       G |- b : B
+------------------------------------------------ &-intro
+G |- (a , b) : A & B
+
+
+G |- p : A & B      G, x : A, y : B |- c : C
+--------------------------------------------- &-elim
+G |- split p {x,y}.c : C
+
+
+G |- split (a , b) {x,y}.c : C
+----------------------------------------------------- &-comp
+G |- split (a , b) {x,y}.c = c[x\a,y\b] : C
+
+
+Version 10:
+
+
+
+
+
+
+Type-formation:
+
+A set        B set
+------------------
+  A AND B set
+
+{?A a Set. ?B a Set} => {?p a Set. ?p AND1 ?A. ?p AND2 ?B}
+
+
+
+
+Introduction:
+{?a a ?A. ?b a ?B} => {?p fst ?a. ?p snd ?b. 
+
+
+
+
+Elimination:
+
+ p : A AND B                  p : A AND B
+--------------- fst       ------------------- snd
+ fst p : A                    snd p : B
+
+{?A&B AND1 ?A. ?A&B AND2 ?B. ?p a ?A&B} => {?p fst ?a. ?a a ?A}
+{?A&B AND1 ?A. ?A&B AND2 ?B. ?p a ?A&B} => {?p snd ?b. ?b a ?B}
+
+
+
+
+Computation:
+ 
+ (a , b) : A AND B
+-----------------
+ fst (a , b) := a
+
+
+
+tomjack says:
+by analogy, in agda the version with fst/second is like defining conjunction with a record,
+the version with split is like defining conjunction with a data
+the problem with doing it with the data version is that pair-eta fails, i.e. you don't have
+ p == (fst p, snd p) judgementally
+
+negative types = behavioral = pragmatist 	= coinductive 	= fst/snd	= lazy evaluation
+ * coinductively defined by their elimination forms; correspond to limits
+positive types = structural = verificationist	= inductive	= split		= eager evaluation
+ * inductively defined by their introduction forms; correspond to colimits
+
+Reduction rules specify that elimination rules are post-inverse to introduction rules
+& behaves like a tensor product of proofs
+
+copatterns
+
+dolio:
+Lambda is just notation for the function copattern

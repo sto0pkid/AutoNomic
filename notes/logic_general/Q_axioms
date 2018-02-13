@@ -1,0 +1,13 @@
+1. Sx != 0
+2. (Sx = Sy) -> x = y
+3. y = 0 || exists x (Sx = y)
+4. x + 0 = x
+5. x + Sy = S(x+y)
+6. x*0 = 0
+7. x*Sy = (x*y) + x
+
+
+
+4 and 5 are the recursive definition of addition.
+6 and 7 are the recursive definition of multiplication.
+

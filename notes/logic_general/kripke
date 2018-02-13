@@ -1,0 +1,19 @@
+Modal operator [] = "necessarily"
+Modal operator <> = "possibly"
+
+<> is classically the dual of [], and may be
+defined in terms of necessity:
+<>A = ~([](~A))
+
+A Kripke frame is a pair (W,R) where W is a (possibly empty) set
+and R is a binary relation on W. Elements of W are called nodes
+or "worlds", and R is known as an "accessibility relation".
+
+A Kripke model is a triple (W,R,||-) where (W,R) is a Kripke frame
+and ||- is a relation between nodes of W and modal formulas, such that:
+
+* w ||- ~A iff not w ||- A
+* w ||- A -> B iff (not w ||- A) or w ||- B
+* w ||- []A iff u ||- A for all u such that w R u
+
+

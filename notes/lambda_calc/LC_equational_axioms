@@ -1,0 +1,50 @@
+1. 	(\x.M)N = M[x:=N] 		beta-conversion
+2.	M = M				reflexivity of equality
+3.	M = N => N = M			symmetry of equality
+4.	M = N, N = O => M = O		transitivity of equality
+5.	M = N => MZ = NZ		congruence of equality and application, 1
+6.	M = N => ZM = ZN		congruence of equality and application, 2
+7.	M = N => \x.M = \x.N		rule xi (greek letter xi)
+
+Ex.
+i) M = M' => M[x:=N] = M'[x:=N].
+
+i1. M = N 	=> \x.M = \x.M'						(Axiom 7)
+		=> (\x.M)N = (\x.M')N					(Axiom 5)
+
+i2. (\x.M)N = M[x:=N]							(Axiom 1)
+i3. (\x.M)N = M[x:=N] => M[x:=N] = (\x.M)N				(Axiom 3)
+i4. M[x:=N] = (\x.M).N, (\x.M)N = (\x.M')N => M[x:=N] = (\x.M')N	(Axiom 4)
+i5. (\x.M')N = M'[x:=N]							(Axiom 1)
+i6. M[x:=N] = (\x.M')N, (\x.M')N = M'[x:=N] => M[x:=N] = M'[x:=N]	(Axiom 4)
+QED
+
+
+
+
+ii) N = N' => M[x:=N] = M[x:=N']
+
+ii1. (\x.M)N = M[x:=N]		(Axiom 1)
+ii2. M[x:=N] = (\x.M)N		(Axiom 3) ii1
+ii3. (\x.M)N' = M[x:=N']	(Axiom 1)
+ii4. (\x.M)N = (\x.M)N'		(Axiom 6) hyp	<-- 	this might need to be made into
+							a proper inductive proof
+ii5. M[x:=N] = (\x.M)N'		(Axiom 4) ii2 ii4
+ii6. M[x:=N] = M[x:=N']		(Axiom 4) ii5 ii3
+QED.
+
+
+
+
+iii) M = M', N = N' => M[x:=N] = M'[x:=N']
+
+iii1. (\x.M)N = M[x:=N]			(Axiom 1)
+iii2. (\x.M')N' = M'[x:=N']		(Axiom 1)
+iii3. M[x:=N] = (\x.M)N			(Axiom 3) iii1
+iii4. (\x.M) = (\x.M')			(Axiom 7) hyp1
+iii5. (\x.M)N = (\x.M')N		(Axiom 5) iii4
+iii6. (\x.M')N = (\x.M')N'		(Axiom 6) hyp2
+iii7. M[x:=N] = (\x.M')N		(Axiom 4) iii3 iii5
+iii8. M[x:=N] = (\x.M')N'		(Axiom 4) iii7 iii6
+iii9. M[x:=N] = M'[x:=N']		(Axiom 4) iii8 iii2
+

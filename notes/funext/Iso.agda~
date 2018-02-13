@@ -1,0 +1,121 @@
+module Iso where
+
+data _==_ {A : Set} (x : A) : A → Set where
+ refl : x == x
+
+data Nat : Set where
+ zero : Nat
+ suc : Nat → Nat
+
+data Nat' : Set where
+ zero' : Nat'
+ suc' : Nat' → Nat'
+
+
+
+
+_+_ : Nat → Nat → Nat
+zero + y = y
+(suc x) + y = suc (x + y)
+
+_+'_ : Nat' → Nat' → Nat'
+zero' +' y = y
+(suc' x) +' y = suc' (x +' y)
+
+{-
+There is a trivial isomorphism between <Nat,zero,suc,+> and <Nat',zero',suc',+'>
+
+iso Nat --> Nat'
+iso zero --> zero'
+iso suc --> suc'
+iso _+_ --> _+'_
+
+iso Nat == Nat', check
+iso zero == zero', check
+(x y : Nat) -> suc x == y -> (iso suc) (iso x) == (iso y)), check
+(x y z : Nat) -> x + y == z -> (iso x) (iso +) (iso y) == (iso z), check
+
+Structure is preserved across the mapping, and it trivially invertible
+
+
+Now look what we can do based on this isomorphism:
+-}
+
+
+
+0+x==x : (x : Nat) → (zero + x) == x
+0+x==x x = refl
+
+
+0'+x'==x' : (x : Nat') → (zero' +' x) == x
+0'+x'==x' x = refl
+
+
+{-
+It doesn't suffice to just substitute Nat for Nat', we have to
+substitute Nat for Nat', zero for zero', suc for suc', and + for +',
+throughout the proposition and proof.
+
+That was kind of trivial though so let's look at something more
+complicated:
+-}
+
+Nat'' : Set → Set
+Nat'' A = A → (A → A) → A
+
+zero'' : {A : Set} → Nat'' A
+zero'' {A} z f = z
+
+suc'' : {A : Set} → Nat'' A → Nat'' A
+suc'' {A} n z f = f (n z f)
+
+one'' : {A : Set} → Nat'' A
+one'' = suc'' zero''
+
+one''-def : {A : Set} → (z : A) → (s : A → A) → one'' {A} == (λ z s → s z)
+one''-def {A} z s = refl
+
++'' : {A : Set} → Nat'' A → Nat'' A → Nat'' A
++'' x y z f = x (y z f) f
+
+
+{-
+Ok, quite a bit different from Nat and Nat', on the face of it, but then:
+
+Forall A : Set :
+
+iso Nat --> Nat'' A
+iso zero --> zero'' {A}
+iso suc --> suc'' {A}
+iso _+_ --> _+''_ {A}
+
+iso Nat == Nat'' {A}, check
+iso zero == zero'' {A}, check
+(x y : Nat) -> suc x == y -> (iso suc) (iso x) == (iso y)), check
+(x y z : Nat) -> x + y == z -> (iso x) (iso +) (iso y) == (iso z), check
+
+
+-}
+
+
+
+zero''+one''==one'' : {A : Set} → (+'' {A} zero'' one'') == one''
+zero''+one''==one'' {A} = refl
+
+
+
+
+{-
+Sure enough, if we use the isomorphism to substitute throughout a proof that only
+uses the operations & relations in the signatures that are related by the isomorphism,
+we get another true statement:
+-}
+0''+''x==x : {A : Set} → (x : Nat'' A) → (+'' {A} zero'' x) == x
+0''+''x==x x = refl
+
+
+{-
+This might not work in general in Agda, but the fact that it *should* work in general in logic
+is the point.
+
+-}

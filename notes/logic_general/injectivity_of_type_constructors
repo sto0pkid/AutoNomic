@@ -1,0 +1,5 @@
+Injectivity of type constructors is incompatible with:
+ * Univalence
+ * Impredicativity
+ * LEM
+

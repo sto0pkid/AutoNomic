@@ -1,0 +1,31 @@
+The cut rule:
+
+G |- A , D    G', A |- D'
+-------------------------
+G, G' |- D, D'
+
+Categorical semantics:
+
+Each sequent is interpreted as a morphism in some category.
+The cut rule asserts the existence of composition of morphisms.
+How?
+
+
+A |- A is interpreted as the identity morphism.
+
+
+Cut-elimination theorem:
+Every theorem that has a proof using the cut rule has a proof not using it.
+
+Modularity of type-theoretic connectives:
+Each connective is given by rules which involve only that
+connective and its arguments, and no other connectives.
+
+Subformula property:
+
+
+Relationship between cut-elimination and adjunction
+
+
+Elimination of cuts is dual to elimination of identities
+* Analogous to how beta is dual to eta

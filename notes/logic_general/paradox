@@ -1,0 +1,25 @@
+Liar:
+"This sentence is False".
+X = X is False
+X = not X
+
+Grelling:
+A word/phrase is "heterological" if it does not describe itself.
+"long"
+"cold"
+"German"
+
+Quine:
+'yields falsehood when applied to its quotiation' yields falsehood when applied to its quotation.
+
+The word "heterological" literally means 'yields falsehood when applied to its quotation', therefore Grelling paradox == Quine paradox.
+
+
+A slightly more precise formulation:
+'yields a false statement when applied to its quoation' yields a false statement when applied to its quotation.
+
+
+Findlay:
+The new sentence obtained by substituting the name of the sentence 'the new sentence obtained by substituting the name of the sentence x for the variable in it is false' for the variable in it is false.
+
+

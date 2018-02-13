@@ -1,0 +1,10 @@
+G |- p : A OR B
+
+
+
+G, q : A OR B |- C prop
+G, x : A |- c : C[q\(inl x)]
+G, y : B |- d : C[q\(inr y)]
+---------------------------------------- OR-elim
+G |- case p {x}.c {y}.d : C[q\p]
+

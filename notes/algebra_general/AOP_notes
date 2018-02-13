@@ -1,0 +1,17 @@
+Algebra of programming
+
+Adjunctions as beta/eta
+Universal property
+Fusion laws
+
+Elimination rules as folds/unfolds
+Folds for data
+Unfolds for codata
+
+F-algebras for datatypes
+Inductive types as initial F-algebras
+Coinductive types as terminal F-coalgebras
+
+http://www.cs.ox.ac.uk/ralf.hinze/LN.pdf
+http://www.cs.ox.ac.uk/ralf.hinze/SSGIP10/AdjointFolds.pdf
+

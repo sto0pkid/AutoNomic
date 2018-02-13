@@ -1,0 +1,98 @@
+DMxy = xMy
+
+x and M need to be rearranged
+
+Assume we can achieve it by placing M and x as 2nd and 3rd arg
+to S, respectively. Then we'll need some other term to serve as
+the 1st arg, so call it D':
+SD'Mxy = D'x(Mx)y
+
+This rearranges M and x, but, as expected, we have an extra
+occurrence of x now. But we could get rid of that by putting
+a K combinator in front of M, assuming that nothing else will
+clobber it. (Could anything else clobber it, if it's the first
+item inside a subterm?) 
+SD'(KM)xy = D'x(KMx)y
+
+Since the only thing that could clobber it in this expression
+would be D', we can set D' = I to make it a no-op:
+SI(KM)xy = Ix(KMx)y = x(KMx)y = xMy
+
+Ok cool, but, we need to collect args. Right now we don't have M
+applied to y, we have x applied to M as first arg, y as second arg.
+What we need is x(My), so let's substitute:
+D' = collect^2
+
+
+collect = I
+collect^2 = S(KS)K
+collect^n = S(KS)(S(KK)(collect^(n-1))), where n > 2
+
+Then
+S(collect^2)(KM)xy 	= (collect^2)x(KMx)y
+			= S(KS)Kx(KMx)y
+			= KSx(Kx)(KMx)y
+			= S(Kx)(KMx)y
+			= Kxy(KMxy)
+			= x(KMxy)
+			= x(My)
+
+And there we go.
+Let's call this expression:
+defer(m,n)[M] = defer the computation M to the m'th arg (by offset) in a
+		a list of n args, where 0 < n and 0 <= m.
+
+defer(0,n)[M] = M
+defer(1,n)[M] = S(collect^n)(KM)
+defer(m,n)[M] = ...?
+defer(m,n)[M] = I, when m >= n.
+
+Proof for defer(1,n)[M]:
+
+Without loss of generality, we want:
+defer(1,n)[M]ab...n = a(Mb...n)
+
+defer(1,n)[M]ab..n	= S(collect^n)(KM)ab..n
+			= (collect^n)a(KMa)b..n
+			
+There are n+1 elements in the list a(KMa)b..n
+There are n-1 elements in b..n
+And a(KMa) is 2 elements. (n-1) + 2 = n+1
+
+We've already proven that (collect^n)ab...n(n+1) = a(b...n(n+1)), so:
+
+(collect^n)a(KMa)b..n	= a((KMa)b..n)
+			= a(Mb..n)
+
+Done.
+
+Ok so. If we want to defer M off to further arguments, then we can
+recurse defer(1,n)[M] on itself, or hopefully anyway:
+
+When 1 < m < n:
+defer(m,n)[M] = S(collect^n)(K(defer(m-1,n-1)[M]))
+
+Test run:
+defer(2,3)[M]abc 	= S(collect^3)(K(defer(1,2)[M]))abc
+			= (collect^3)a(K(defer(1,2)[M])a)bc
+			= a((K(defer(1,2)[M])a)bc)
+			= a((defer(1,2)[M])bc)
+			= a(S(collect^2)(K(defer(0,1)[M]))bc)
+			= a((collect^2)b(K(defer(0,1)[M])b)c)
+			= a(b((K(defer(0,1)[M])b)c))
+			= a(b((defer(0,1)[M])c))
+			= a(b(Mc))
+			
+Almost works except it reverses the syntax tree structure.
+We want: ab...n(Mopq...), not a(b(...(n(Mopq...)))).
+
+
+
+What if we can make something that unparenthesizes the term?
+
+First let's prove that this actually does what it appears to.
+Since this is entirely centered around the syntax tree structure and
+it's getting less trivial to just say "yep that's it", let's go
+ahead and start working with the precise syntax tree structure now.
+
+

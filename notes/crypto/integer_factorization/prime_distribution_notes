@@ -1,0 +1,92 @@
+How many primes are there between 0 and N?
+
+100/2 = 50
+0	1	= (k/2) + 1
+2	2
+4	3
+...
+100		= (100/2) + 1 = 51
+
+101/2 = 50.5
+0
+2
+4
+...
+100		
+
+floor(N/2) + 1 multiples of 2 between 0 and N
+
+How many multiples of 2 between 1 and N?
+floor(N/2)
+
+
+call {2:N} the set of multiples of 2 between 1 and N,
+and {2:N}' the set of multiples of 2 between 0 and N
+obviously |{2:N}'| = |{2:N}| + 1
+
+How many primes in {k:N}? one at most, which will be k if
+there are any.
+
+Lemma 1:
+If x*y = z, and x' > x and y' > y, then x'*y' > z
+
+Proof, x' > x, y' > y => exists m, n != 0 such that x + m = x'
+and y + n = y'
+
+Then x'*y' = (x + m)*(y + n) = xy + my + xn + mn
+
+my, xn >= 0, and mn > 0, so xy + my + xn + mn >= xy + mn > xy
+
+Lemma 2:
+If x, y > sqrt(N), then x*y > N. Proof:
+N = sqrt(N)*sqrt(N), and so by lemma 1, x*y > sqrt(N)*sqrt(N) = N
+
+
+Lemma 3:
+If N >= x > sqrt(N), then either x is prime or x in {k:N} for k <= sqrt(N)
+
+Assume x is prime, then we're done.
+Assume x is not prime, i.e. there exist factors m,n > 1 such that
+x = m*n
+
+By definition, x in {m:N} and x in {n:N}
+
+If m, n > sqrt(N), then by lemma 2, x = m*n > N, which contradicts the
+assumption that N >= x.
+So if either m <= sqrt(N) or n <= sqrt(N), we're done, because we
+already know from the assumptions that x in {m:N} and x in {n:N}.
+
+Lemma 4:
+The number of non-primes between 0 and N is at most:
+|Union{{k:N} | 0 <= k <= sqrt(N) }|
+
+and at least:
+
+|Union{{k:N} | 0 <= k <= sqrt(N) }| - sqrt(N) + 2
+ *to account for each of the primes that could be in {k:N}
+  * besides for {0:N} and {1:N}
+
+|Union{{k:N} | 0 <= k <= sqrt(N) }| =
+Sum{|{k:N}| | 0 <= k <= sqrt(N) } - |Intersect{{k:N} | 0 <= k <= sqrt(N)}|
+
+2	
+x	3
+4	 		
+	x	5
+6	6
+		x	7
+8		
+	9
+10		10
+
+
+floor(10/2) = floor(5) = 5
+floor(10/3) = floor(3.333..) = 3
+floor(10/4) = floor(2.5) = 2
+floor(10/5) = floor(2) = 2
+floor(10/6) = floor(1.66...) = 1
+floor(10/7) = 1
+
+N/2
+N/2*3
+

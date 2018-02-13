@@ -1,0 +1,118 @@
+B = \x.\y.\z.x(yz)
+
+Bxyz = S(KS)Kxyz
+
+Test run:
+Bxyz	= S(KS)Kxyz
+	= KSx(Kx)yz
+	= S(Kx)yz
+	= Kxz(yz)
+	= x(yz)
+
+
+
+
+
+
+
+S(KK) = remove 3rd argument.
+S(KK)xyz 	= KKy(xy)z
+		= K(xy)z
+		= xy
+
+
+S(KK)G = remove 2nd argument and apply G to first argument.
+S(KK)Gxyz	= KKx(Gx)yz
+		= K(Gx)yz
+		= Gxz
+
+S(KS) = S deferred to arguments 2-4:
+S(KS)xyzwv 	= KSy(xy)zwv
+		= S(xy)zwv
+		= xyw(zw)v 
+		= x(Syzw)v
+
+S(KS)G = G applied to the result of S applied to the args
+S(KS)Gxyz	= KSx(Gx)yz
+		= S(Gx)yz
+		= Gxz(yz)
+		= G(Sxyz)
+
+If G = K, we get B.
+
+S(KS)(S(KK)G) = G applied to the result of B applied to the args
+S(KS)(S(KK)G)	= S(KK)Gxz(yz)
+		= KKx(Gx)z(yz)
+		= K(Gx)z(yz)
+		= Gx(yz)
+
+
+Alright now we can group arbitrarily many args:
+
+collect = I
+collect^2 = S(KS)K
+collect^n = S(KS)(S(KK)(collect^(n-1))), where n > 2
+
+Test run:
+(collect^3)xyzw 	= S(KS)(S(KK)(collect^2))xyzw
+			= KSx(S(KK)(collect^2)x)yzw
+			= S(S(KK)(collect^2)x)yzw
+			= S(KK)(collect^2)xz(yz)w
+			= KKx((collect^2)x)z(yz)w
+			= K((collect^2)x)z(yz)w
+			= (collect^2)x(yz)w
+			= S(KS)Kx(yz)w
+			= KSx(Kx)(yz)w
+			= S(Kx)(yz)w
+			= Kxw(yzw)
+			= x(yzw).
+
+Now we'd want an inductive proof that this actually works for all cases.
+
+How do we divide up the cases? We have a different case for every Nat > 0.
+
+We'll have to do this slightly informally until we build up some better
+descriptive framework for talking about syntax tree structures so that we
+can *prove* that the terms actually have the syntax tree structure we're
+after rather than just looking at the formula and saying "yep that's it"
+
+Base case `1`:
+(collect)xy	= Ixy
+		= xy
+
+Base case `2`:
+(collect^2)xyz	= S(KS)Kxyz
+		= KSx(Kx)yz
+		= S(Kx)yz
+		= Kxz(yz)
+		= x(yz)				<-- "yep, that's it"
+
+Inductive step:
+forall n, (forall x,a1,a2,...,an : (collect^n)x(a1)(a2)...(an) = x((a1)(a2)...(an))) -> (forall x,a1,a2,...,an : (collect^(n+1))x(a1)(a2)...(an)(a(n+1)) = x((a1)(a2)...(an)(a(n+1)))
+
+Without loss of generality:
+(collect^(n+1))xab...no 		=
+S(KS)(S(KK)(collect^n))xab..no		=
+KSx(S(KK)(collect^n)x)ab..no		=
+S(S(KK)(collect^n)x)abc..no		=
+S(KK)(collect^n)xb(ab)c..no		=
+KKx((collect^n)x)b(ab)c..no		=
+K((collect^n)x)b(ab)c..no		=
+(collect^n)x(ab)c..no
+
+But by our inductive hypothesis, with
+a1 = (ab), a2 = c, ..., a(n-1) = n, an = o
+
+we can conclude:
+(collect^n)x(ab)c..no = x((ab)c..no)
+
+and according to left-associativity, this is our desired result. 
+
+
+
+Once we formalize the syntax-tree manipulations then we can finalize 
+into a Haskell-style pattern-matching function to rigorously complete 
+the demonstration. We won't be able to do much with that as long as
+our only method of verifying the correctness of the formulas is to look
+and say "yep that's it".
+		

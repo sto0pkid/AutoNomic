@@ -1,0 +1,35 @@
+# Pastebin 1qGu13ez
+net)
+[2017-09-16 00:23:32] <augur> @{AS} regarding eta and estensionality, there are two things which get called eta rules which have different levels of extensionality-ness
+[2017-09-16 00:24:09] <augur> one is a kind of generalization of the other, really
+[2017-09-16 00:24:32] <augur> the distinction doesn't show up immediately for many purposes tho, so it's easily overlooked
+[2017-09-16 00:24:40] <augur> the canonical example of this difference is with disjunction
+[2017-09-16 00:24:47] <augur> consider disjunction defined as
+[2017-09-16 00:25:28] <augur> Γ ⊢ M : A   ===[∨-I-1]===>   Γ ⊢ left M : A ∨ B
+[2017-09-16 00:25:38] <augur> Γ ⊢ N : B   ===[∨-I-2]===>   Γ ⊢ right N : A ∨ B
+[2017-09-16 00:26:49] <augur> Γ ⊢ M : A ∨ B    Γ, x : A ⊢ N : C    Γ, y : B ⊢ P : C    ===[∨-E]===>    Γ ⊢ case M of { left x ↦ N ; right y ↦ P } : C
+[2017-09-16 00:27:15] <augur> this has two "eta" rules that i've seen
+[2017-09-16 00:27:48] <augur> one is:    given   M : A ∨ B   expand to   case M of { left x ↦ left x ; right y ↦ right y } : A ∨ B
+[2017-09-16 00:29:25] <augur> the other is:    given   M : A ∨ B   and a syntactic context K{} : C with a hole of type A ∨ B,    expand   K{M} : C    to    case M of { left x ↦ K{left x} ; right y ↦ K{right y} }
+[2017-09-16 00:30:42] <augur> the second one is the one that people talk more about as extensionality because it says that the behavior of M's is dependent entirely on its normal forms as left's or right's
+[2017-09-16 00:31:54] <augur> because we're permuting the analysis into cases out around the value. so like, K using M is the same as first looking at M to see what it is, and then K using the value, and so it shouldn't matter how M normalizes to its values
+[2017-09-16 00:32:14] <augur> but this is also highly dependent on the language having only referentially transparent syntactic contexts
+[2017-09-16 00:32:34] <augur> so like, this expansion doesn't always hold if your language has opaque contexts
+[2017-09-16 00:33:16] <augur> so you'd have to have comments on transparency. ie "for any referentially transparent syntactic context K{}" instead, or whatever
+[2017-09-16 00:34:24] <augur> eg consider the LISP-like quotational context   `K{ } = quote { }`.   `quote M` is definitely not the same as  `case M of { left x ↦ quote x ; right y ↦ quote y }`
+[2017-09-16 00:34:31] <augur> er..
+[2017-09-16 00:34:43] <augur> `case M of { left x ↦ quote (left x) ; right y ↦ quote (right y) }`
+[2017-09-16 00:35:19] <augur> also, when seen as an extensionality law, these are seen as equalities on programs
+[2017-09-16 00:35:58] <augur> M  =  case M of { left x ↦ left x ; right y ↦ right y }      and      K{M}  =  case M of { left x ↦ K{left x} ; right y ↦ K{right y} }
+[2017-09-16 00:36:52] <augur> whereas when viewed from the proof theoretic perspective, these arent equalities, they're just meta-theoretic lemmas about when things are provable
+[2017-09-16 00:37:28] <augur> when we're talking about computation, tho, we like to talk about behavioral equivalence of things
+[2017-09-16 02:19:25] <jonsterling> augur: that's a nice explanation of extensionality for sums; where did you hear of it expressed in those terms?
+[2017-09-16 02:20:32] <augur> jonsterling: how do you mean?
+[2017-09-16 02:21:09] <augur> the two eta rules are just the ones ive seen used. the simple one is Pfenningian, the complex one is Harperian
+[2017-09-16 02:21:37] <augur> the rest is my own attempt to reconstruct these things from people's claims about extensionality principles, etc
+[2017-09-16 02:21:49] <jonsterling> augur: ah, that is what I was wondering. it sounded like something Bob would say, but I had lost track of where he had written or spoken about that.
+[2017-09-16 02:22:38] <augur> i've never heard him explain extensionality, but i've heard him mention it in his type theory OPLSS
+[2017-09-16 02:22:43] <augur> esp. when he talks about categorical interpretations
+[2017-09-16 02:22:53] <jonsterling> yeah, frank's notion of eta rule is driven by local expansion in the context of proof-theoretic harmony; whereas bob uses 'eta' in a more categorical sense.
+[2017-09-16 02:23:25] <augur> thats another thing, too, right -- in category theory, these things really are equalities, coming from the universal mapping properties that define sums -- existence and *uniqueness* of copair giving us extensionality, basically
+

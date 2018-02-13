@@ -1,0 +1,421 @@
+Up arrow verification judgement
+
+Martin-Lof's meaning explanation
+
+The verification of a proposition should only depend on the verifications of its pieces (read: subformulas).
+
+
+This rule says that the verifications of A & B depend on some composition of the
+verifications of A and the verifications of B. A and B are both subformulas of 
+A & B, so, this satisfies that intuition.
+
+
+A ver.      B ver.
+------------------
+   A & B ver.
+
+
+
+This rule says that the verifications of B depend on some composition of the
+verifications of (A -> B) and the verifications of A, neither of which are
+subformulas of B. This does not satisfy the above intuition.
+
+(A -> B) ver.    A ver.
+------------------------
+        B ver.
+
+
+CONJUNCTION:
+
+A ver.      B ver.
+------------------
+   A & B ver.
+
+
+
+
+DISJUNCTION:
+
+
+  A ver.	    B ver.
+-----------	-------------
+A OR B ver.	  A OR B ver.
+
+
+
+
+TRUE
+
+------------
+ True ver.
+
+
+
+
+IMPLICATION
+
+   ---x
+    A use.
+    .
+    .
+    .
+    B ver.
+--------------
+ A -> B ver.
+
+
+
+Completeness of IPL
+
+
+CONJUNCTION:
+
+ A AND B use	 A AND B use
+-------------	-------------
+   A use	   B use
+
+
+
+DISJUNCTION:
+
+		-----x		-----y
+		A use.		B use.
+ 		  .		  .
+		  .		  .
+		  .		  .
+A OR B use      C ver.		C ver.
+----------------------------------------
+           C ver.
+
+
+FALSE
+
+False use
+-----------
+ C ver.
+
+
+IMPLICATION:
+
+
+ A -> B use		A ver
+---------------------------------
+	 B use
+
+
+
+Ok let's test it out:
+
+------ x       ------- y
+ A use          A use
+----------------------- ?????
+      A ver
+   ------------ -> Intro (y)    
+    A -> A ver 
+------------------ ->Intro (x)
+A -> (A -> A) ver
+
+
+
+Need the following rule:
+
+ A use
+-------- switch
+ A ver
+
+
+So now we can do:
+
+
+------ x           ------- y
+ A use              A use
+---------- switch
+    A ver
+   ------------ -> Intro (y)
+    A -> A ver
+------------------ ->Intro (x)
+A -> (A -> A) ver
+
+
+But we could also do
+
+------ x     ------- y
+ A use        A use
+         ------------- switch
+          A ver
+   ------------ -> Intro (y)
+    A -> A ver
+------------------ ->Intro (x)
+A -> (A -> A) ver
+
+
+Compare with:
+
+bool : {A : Set} -> A -> A -> A
+bool1 x y = x
+bool2 x y = y
+
+Nothing else!
+
+Only two functions of this type.
+Only two proofs of this proposition.
+This is a parametricity result / "free theorem".
+
+Consider if we weren't using the use/ver thing, then we'd be able
+to have at least as many proofs of our proposition as there are
+provable propositions in our logic. Assume we're looking at the
+proofs of A. Since A is provable, B -> A is provable for any B.
+For any provable B, we can rederive A as follows:
+
+ B -> A        B
+------------------
+        A
+
+
+
+Proving consistency:
+If we're consistent then we should not be able to prove False.
+(Really we should not be able to prove A and ~A, but we'll get to that).
+
+False use.
+-----------
+False ver.
+
+
+Gentzen said: what if instead of allowing proofs from both directions,
+we start from the conclusion and only work into the premises (backward chaining
+reasoning).
+
+In natural deduction:
+We can think elimination rules go "downwards" (premises to conclusion, if you're
+drawing your proof-trees as upside-down trees like I do here), and introduction
+rules go "upwards" (conclusions to premises), and they meet in the middle.
+
+premises
+----x
+elims
+ |
+ |
+ |
+ v
+------------------------------
+                      	^
+                      	|
+			|
+			|
+		      intros
+                -------------------
+		   conclusion
+
+
+
+In sequent calculus:
+We switch up the picture and now both elimination and introduction rules go
+upwards. "Inverses of eliminators" now correspond to "left sequents" and introduction
+rules correspond to "right sequents".
+
+Both go upwards until they meet at "identity".
+The left and the right must be made identical.
+
+
+
+---------------------------------------- id
+  ^				^
+  |				|
+  | elims^-1 ~ L		| intros ~ R
+  |				|
+  |				|
+ premises     ==>	     conclusions	
+antecedents		     succedents
+
+
+----------------------- id
+{A1, ...., An} ===> C
+
+
+Think of this as
+
+ A, ....., An use
+     .
+     .
+     .
+     .
+     C ver
+
+
+USE/VER RULE:
+
+------------ id
+G, A => A
+
+
+CONJUNCTION RIGHT RULE:
+
+G => A      G => B
+----------------------- &R
+G => A & B
+
+
+
+G, A & B, A => C
+----------------- &L1
+G, A & B => C
+
+
+
+G, A & B, B => C
+----------------- &L2
+G, A & B => C
+
+
+
+
+
+DISJUNCTION RIGHT RULES:
+
+G => A			 G => B
+------------ vR1	------------- vR2
+G => A OR B		 G => A OR B
+
+
+
+
+G, A OR B, A => C      G, A OR B, B => C
+------------------------------------------- vL
+G, A OR B => C
+
+
+IMPLICATION RULES:
+
+G, A => B
+--------------  ->R
+G => B
+
+
+G, A -> B => A    G, A -> B, B => C
+------------------------------------- ->L
+G, A -> B => C
+
+
+
+TRUE RIGHT RULE:
+
+------------- TR
+G => True
+
+
+
+
+Theorem 1: Given a sequent calculus proof of something, there is a verification of the RHS.
+
+Theorem 2: A is true iff. A is a verification.
+
+These are the global analogs of the local soundness and completeness theorems.
+
+At this point, not implying False implies consistency. How do we get this exactly?
+What are the implications of it?
+
+There's no right rule for False, therefore it can't be derived. Is it that simple?
+We need a more rigorous demonstration. Formalize the syntax of the language and prove
+by induction over the terms.
+
+
+If we have a proof of * => A v B, then we *must* have a proof of * => A or a proof
+of * => B, because the only right rule for A v B is
+
+G => A    G => B
+-----------------
+G => A v B
+
+
+Can't prove A v (~A). 
+
+           nope, there's no right rules for False!
+          ----------------
+nope       G, A => False
+------     -------------------
+G => A     G => (A => False)
+------------------------------
+G => A v (~A)
+
+
+The point, sequent calculus *should* be easier to reason about.
+
+
+THEOREM:
+
+If:
+G use |- A ver		Natural Deduction
+
+Then:
+G => A			Sequent Calculus
+
+
+AND:
+If:
+G, A use |- C, and
+G, A => C
+Then:
+G => C
+
+
+Break into cases, induct over structure.
+
+
+
+CONTRACTION:
+
+G, A, A => C
+-------------
+G, A => C
+
+WEAKENING:
+G  => C
+-----------
+G, G' => C
+
+SUBSTITUTION:
+
+G, A => C     G => A
+-----------------------
+G => C
+
+EXCHANGE:
+
+G, A, B => C
+--------------
+G, B, A => C
+
+
+Prove contraction is valid
+Prove weakening is valid
+Prove substitution is valid
+Prove exchange is valid
+ (by induction on cases)
+
+Given the rule:
+
+A ver
+------
+A use
+
+
+It "should be easy to see" that the two systems are equivalent (natural deduction
+and verification calculus). Because A ver and A use become interchangeable everywhere,
+making it essentially equivalent to standard ND modulo some extra conversion steps.
+
+If (ND) truth corresponds to (sequent) verification, then the cut rule should be 
+redundant. Enter cut elimination. Gentzen's "Hauptsatz" ("main theorem"). Gentzen invented
+the sequent calculus just for the purposes of this proof.
+
+Pfenning13
+Pfenning14
+Check out the lecture notes.
+
+
+Theorem: Admissibility of the cut rule.
+
+
+
+
+

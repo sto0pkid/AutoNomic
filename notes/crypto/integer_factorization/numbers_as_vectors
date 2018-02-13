@@ -1,0 +1,65 @@
+n = p1^k1 * p2^k2 * p3^k3 * ...
+
+A vector space over a field F is a set V together with two operations
+satisfying 8 axioms.
+
+Primes are the basis vectors
+Exponentiation is scalar multiplication?
+
+Vector addtion
+
+n' + m' = p1^(k1 + j1) * p2^(k2 + j2) * ...
+
+ = (p1^k1 * p2^k2 * ...) * (p1^j1 * p2^j2 * ...)
+
+Multiplication is vector addition?
+
+Associativity? Yes because of commutativity/associative of regular addition & multiplication.
+
+n' + (m' + o') 	= (p1^k1 * p2^k2 * ...) * ((p1^j1 * p2^j2 * ..) * (p1^i1 * p2^i2 * ...))
+		= (p1^k1 * p2^k2 * ...) * (p1^(j1 + i1) * p2^(j2 + i2) * ...)
+		= p1^(k1+(j1+i1)) * p2^(k2+(j2+i2)) * ...
+		= p1^((k1 + j1) + i1) * p2^((k2+j2)+i2) * ...
+		= ...
+
+Commutativity? Yes because multiplication is commutative.
+
+Identity element? 1
+Inverse elements? Hrm...
+ * no we'd have to include the rationals.
+ If we include (1/p) for each prime p then we get inverses.
+
+Compatibility of scalar multiplication with field multiplication:
+
+a(bn') = (ab)n' 
+
+Field multiplication = regular multiplication
+Scalar multiplication = exponentiation
+
+a(bn') = (n'^b)^a = n'^(ba) = n'^(ab) = (ab)n'
+
+Identity element of scalar multiplication? 1
+Distributivity of scalar multiplication wrt vector
+ addition:
+a(n' + m') = an' + am'?
+ yes
+
+a(n' + m') = (p1^(k1+j1) * p2^(k2+j2) * ...)^a = (p1^(k1+j1))^a * (p2^(k2+j2)^a * ...
+		= p1^(a*(k1+j1)) * p2^(a*(k2+j2)) * ...
+		= p1^(ak1 + aj1) * p2^(ak2 + aj2) * ...
+		= (p1^ak1 * p2^ak2 * ...) * (p1^aj1 * p2^aj2 * ...)
+		= (p1^k1 * p2^k2 * ...)^a * (p1^j1 * p2^j2 * ...)^a
+		= an' + am'
+
+
+
+Distributivity of scalar multiplication with respect
+to field addition:
+ (a + b)*n' = an' + bn'
+  yep
+
+
+
+Coprime numbers are like linearly independent vectors
+gcd then a kind of linear-independence test
+

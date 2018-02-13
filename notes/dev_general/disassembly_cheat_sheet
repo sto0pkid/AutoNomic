@@ -1,0 +1,99 @@
+http://wiki.osdev.org/Opcode_syntax
+
+
+Prefixes:
+$ = immediate operands
+% = registers
+
+ModR/M reg field
+ModR/M r/m field
+SIB index field
+SIB base field
+
+http://www.c-jump.com/CIS77/CPU/x86/X77_0060_mod_reg_r_m_byte.htm
+
+Instruction format
+----------------------
+http://www.c-jump.com/CIS77/images/x86_instruction_format.png
+
+Instruction prefix
+Address-size prefix
+Operand-size prefix
+Segment override
+OpCode
+ Bit 0: specifies the size of the operands
+  0 = 8 bit registers
+  1 = 16 or 32 bit registers
+ Bit 1: specifies direction
+  0 = register -> memory
+  1 = memory -> register
+Mod-R/M
+ * Mode
+ * Reg/OpCode
+ * R/M
+SIB
+ * SS
+ * Index
+ * Base
+Displacement
+Immediate
+
+ModR/M.REG field:
+000	al	ax	eax
+001	cl	cx	ecx
+010	dl	dx	edx
+011	bl	bx	ebx
+100	ah	sp	esp
+101	ch	bp	ebp
+110	dh	si	esi
+111	bh	di	edi
+
+ModR/M.R/M field:
+000	DS:[BX+SI]
+001	DS:[BX+DI]
+010	SS:[BP+SI]
+011	SS:[BP+DI]
+100	DS:[SI]
+101	DS:[DI]
+110	SS:[BP]
+111	DS:[BX]
+
+
+REX prefixes
+
+Registers:
+%rax
+%rbx
+%rip
+%rsp
+%rflags
+
+%r8
+%r9
+%r10
+%r11
+%r12
+%r13
+%r14
+%r15
+
+%xmm8
+%xmm9
+%xmm10
+%xmm11
+%xmm12
+%xmm13
+%xmm14
+%xmm15
+
+
+Instructions:
+sub
+
+XOR general
+001100dw
+
+XOR immediate
+1000000w
+
+

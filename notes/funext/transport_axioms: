@@ -1,0 +1,43 @@
+Thanks tomjack!
+
+Not really axioms but:
+
+transport (\x -> P x -> Q x) p f = \u.transport Q p (f (transport P (p^-1) u))
+ * makes sense
+   p says x == y
+   f is an assumption of P x -> Q x
+   u will be an assumption of P y
+   transport back based on y == x i.e. p^-1 to get P x from P y
+   apply f to P x to get Q x
+   apply transport again to get Q y, thus completing our full transport.   
+
+transport (\x -> C) p c = c, if x not free in C
+ * makes sense
+   p says x == y
+   if x not free in C then C won't vary based on x, so if we have a proof c : C
+   then we can return that regardless of what y is
+
+transport (\A -> A) (ua iso) x = iso(x)
+ * makes sense
+   ua iso says that this isomorphism iso can be a proof of equality when we use the ua
+   constructor
+   it's gonna be an isomorphism/equality between some types A and B
+   the proposition P A is just A, and P B is just B
+   so x : P A is just x : A, so just apply the isomorphism to x to get iso x : B
+
+transport (\x -> P (f x)) p u = transport P (ap f p) u
+ * makes sense
+   p says x == y
+   u : P (f x)
+   transport P (ap f p) u : P (f y)
+   (ap f p) : (f x) == (f y)
+
+
+{-
+How is ap really defined here?
+-}
+
+ap : {A B : Set} -> (f : A -> B) -> {x y : A} -> (p : x == y) -> f x == f y
+ap f p = ...?
+
+

@@ -1,0 +1,85 @@
+HYPOTHESIS RULE:
+
+------------------- hyp
+G, x : A |- x : A
+
+
+-------------------- hyp-prop
+G, A prop |- A prop
+
+
+-------------------------- hyp-eq
+G, x = y : A |- x = y : A
+
+
+
+* purelytheoretical.com/papers/ATCHC.pdf
+  * pg 9: "We also have to add one axiom for hypothesis nodes (where the order on the LHS of x : A
+    relative to the context G is irrelevant).
+
+
+Here now it's actually irrelevant:
+
+---------------------- hyp
+G, x : A, G' |- x : A
+
+
+
+
+
+SUBSTITUTION RULE:
+
+G, x : A, G' |- b : B
+-------------------------
+G, G' |- b[x\a] : B[x\a]
+
+
+G, x : A, G' |- B prop
+-----------------------
+G, G' |- B[x\a] prop
+
+
+G, A prop, G' |- b : B
+------------------------
+G, G' |- ?
+
+
+G, A prop, G' |- B prop
+-----------------------
+G, G' |- ?
+
+
+WEAKENING:
+G |- x : A
+----------------
+G, G' |- x : A
+
+
+G |- A prop
+-----------------
+G, G' |- A prop
+
+
+G |- x = y : A
+-------------------
+G, G' |- x = y : A
+
+
+Active hypothesis
+Inactive hypothesis
+Discharging hypothesis
+Hypothesis names
+Substitution
+Capture-avoidance
+Serialization of proof-trees
+ *v1 : page 7 of purelytheoretical.com/papers/ATCHC.pdf
+ * serialized proof trees -> lambdas
+ 
+Free variables
+Bound variables
+Binders
+Cut rule
+Cut-free sequent calculus
+Sequent calculus with cuts
+Cut-elimination theorem
+Recursors vs. iterators

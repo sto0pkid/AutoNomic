@@ -1,0 +1,33 @@
+Paper "Unifiers as Equivalences"
+
+present unification problems as a "telescope": a list of
+types where each type can depend on values of the previous types
+Each type in this telescope corresponds to one equation of the
+unification problem, and the dependencies reflect the fact that the
+type of each equation can depend on the solutions of previous equations.
+This allows to keep track of dependencies between equations precisely.
+
+Second, unification rules are presented as *equivalences* between
+two telescopes of equations. For example, injectivity of the constructor
+suc : Nat -> Nat is represented by an equivalence between the equations
+suc m == suc n and m == n.
+
+Heterogenous equations vs. homogeneous equations
+
+Turning a heterogeneous equation between terms of the same type
+into a homogeneous one requires the K axiom which is equivalent to
+UIP.
+
+It is unsound to postpone an equation and continue with the next
+one when working with heterogenous equations.
+
+Telescope mappings (functions between telescopes) can be thought of
+as substitutions:
+
+f : G -> G'
+
+Given:
+G' |- u : A, then
+
+G |- u[G'\(f G)] : A[G'\(f G)]
+

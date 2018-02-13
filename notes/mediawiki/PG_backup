@@ -1,0 +1,12 @@
+Check `LocalSettings.php` for {db-name} and {owner-user}
+
+
+Dump:
+$ -u postgres pg_dump {db-name} > {dump-file}
+
+Create:
+$ -u postgres createdb -O {owner-user} {db-name}
+
+Load:
+$ -u postgres psql {db-name} < {dump-file}
+

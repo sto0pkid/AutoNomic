@@ -1,0 +1,23 @@
+General logic	Prop. logic	Set logic	Set logic 2	Type logic		Arithmetic 1
+---------------	--------------	-----------	------------	-----------		------------
+false		F		Empty set	??		Empty type		0
+true		T		Full set	??		Unit type		1
+conjunction	&		Intersection			Cartesian product 	x*y
+disjunction	|		Union				Disjoint union		x+y
+implication	->		subset-of	superset-of	Function types		y^x ?
+exists		infinite |'s					Sigma type		??
+forall		infinite &'s					Pi type			??
+negation	~		set-complement			Implication of False	??
+identity	XNOR						Identity types?		??
+
+
+Arithmetic 2	Lattice logic	Probability 	Topologies
+--------------	---------------	------------	-----------
+0		Bottom		0		Empty set
+1		Top		1		Full set
+xy		Meet		x*y		Intersection
+x+y-xy		Join		x+y-x*y		Union
+1-x+xy		??		1-x+xy		??
+		??		
+		??		
+1-x		Complement	1-x		Complement?	

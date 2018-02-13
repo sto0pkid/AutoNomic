@@ -1,0 +1,81 @@
+We want to prove A -> (A -> B) -> B
+
+|- ?p : A -> (A -> B) -> B
+
+
+Look at the -> intro rule, it says
+
+G |- \x.b : A -> B
+--------------------
+G, x : A |- b : B
+
+
+
+So matching with the -> intro rule we get:
+
+|- \x.?q : A -> (A -> B) -> B
+-------------------------------- -> intro
+x : A |- ?q : (A -> B) -> B
+
+
+The outer connective in (A -> B) -> B is again "->", so we can use the -> intro rule again.
+
+
+|- \x.\f.?b : A -> (A -> B) -> B
+----------------------------------- -> intro
+x : A |- \f.?b : (A -> B) -> B
+----------------------------------- -> intro
+x : A, f : (A -> B) |- ?b : B
+
+
+How do we get this proof-term "?b" though?
+
+Well, if we could apply f to x, then we would get a proof of B, so let's try that, this is
+the -> elim rule:
+
+
+G |- (f x) : B
+--------------------------------- -> elim
+G |- f : (A -> B)     G |- x : A
+
+
+So matching with the -> elim rule we get:
+
+|- \x.\f.(?g ?a) : A -> (A -> B) -> B
+--------------------------------------- -> intro
+x : A |- \f.(?g ?a) : (A -> B) -> B
+--------------------------------------- -> intro
+x : A, f : (A -> B) |- ?g ?a : B
+----------------------------------------------------------------------------------- -> elim
+x : A, f : (A -> B) |- ?g : (A -> B)                 x : A, f : (A -> B) |- ?a : A
+
+
+Ok but now we actually need to get the proofs ?g : (A -> B) and ?a : A, where can we get those?
+Pull them out of the context using the context-rule:
+
+G, x : A |- x : A
+------------------ hyp
+
+
+
+So applying the hyp rule we get:
+
+|- \x.\f.(f x) : A -> (A -> B) -> B
+--------------------------------------- -> intro
+x : A |- \f.(f x) : (A -> B) -> B
+--------------------------------------- -> intro
+x : A, f : (A -> B) |- f x : B
+----------------------------------------------------------------------------------- -> elim
+x : A, f : (A -> B) |- f : (A -> B)                 x : A, f : (A -> B) |- x : A
+------------------------------------ hyp           ------------------------------- hyp
+
+
+There's no proof-terms left to be filled out (the ones prefixed with "?"), so that 
+completes our proof.
+
+You have to interpret the "hyp" rule to be able to pull the assumptions from anywhere in the
+context, but, you can make this precise by rephrasing the rule as:
+
+G, x : A, G' |- x : A
+------------------------- possibly-better-hyp
+

@@ -1,0 +1,60 @@
+Translating SKI combinators into BCKW combinators:
+
+Reference:
+Sxyz	= xz(yz)
+Kxy	= x
+Ix	= x
+
+Bxyz	= x(yz)
+Cxyz	= xzy
+Kxy	= x
+Wxy 	= xyy
+
+
+
+Translations:
+I = WK
+K = K
+S = B(BW)(BBC)
+
+----------------------------------------------------------------------------------
+Proofs of translations:
+
+
+1) I
+
+I = WK
+Ix 	= WKx
+	= Kxx
+	= x
+
+
+
+
+
+
+
+2) K
+
+K = K
+
+
+
+
+
+
+
+
+3) S
+
+S = B(BW)(BBC)
+Sxyz 	= B(BW)(BBC)xyz
+	= BW(BBCx)yz
+	= W(BBCxy)z
+	= BBCxyzz
+	= B(Cx)yzz
+	= Cx(yz)z
+	= xz(yz)
+
+
+

@@ -1,0 +1,265 @@
+http://www.cs.vu.nl/~tcs/trs/terese-lambda.pdf
+10.1.10
+
+If x !=y, and x not in FV(L), then
+
+M[x:=N][y:=L] = M[y:=L][x:=N[y:=L]]
+
+Case M = x:
+x[x:=N][y:=L] = N[y:=L]
+x[y:=L] = x
+x[y:=L][x:=N[y:=L]] = x[x:=N[y:=L]] = N[y:=L].
+
+
+
+
+Case M = y:
+y[x:=N] = y
+y[x:=N][y:=L] = y[y:=L] = L
+y[y:=L][x:=N[y:=L]] = L[x:=N[y:=L]]
+x not in FV(L), so L[x:=N[y:=L]] = L.
+
+
+
+Case M = z:
+z[x:=N][y:=L] = z
+z[y:=L][x:=N[y:=L]] = z
+
+
+
+
+
+Case M = (\x.M'):
+(\x.Q)[x:=R] = (\x.Q), for all Q and R
+
+(\x.M')[x:=N] = (\x.M')
+(\x.M')[x:=N][y:=L] = (\x.M')[y:=L] = (\x.M'[y:=L])
+
+Since we know x not in FV(L):
+  we don't have to worry about var capture in (\x.M)[y:=L).
+
+(\x.M'[y:=L]) = (\x.M'[y:=L])[x:=N[y:=L]] = (\x.M')[y:=L][x:=N[y:=L]]
+
+
+
+
+
+Case M = (\y.M'):
+
+(\y.Q)[y:=R] = (\y.Q)
+
+Inductive hypothesis: M'[x:=N][y:=L] = M'[y:=L][x:=N[y:=L]]
+
+(\y.M')[x:=N][y:=L]
+
+This gets tricky because of variable clobbering heh
+If y in FV(N), what happens to those y's when we substitute N into (\y.M')?
+
+If y in FV(N), then (\y.M')[x:=N] = (\z.M'[y:=z][x:=N])
+(\y.M')[x:=N][y:=L] = (\z.M'[y:=z][x:=N])[y:=L] = (\z.M'[y:=z][x:=N][y:=L])
+
+M'[y:=z][x:=N][y:=L] =?= M'[y:=z][y:=L][x:=N[y:=L]]
+
+M'[y:=z][y:=L] = M'[y:=z]
+
+M'[y:=z][x:=N][y:=L] =?= M'[y:=z][x:=N[y:=L]] ?
+
+Switch this over to induction based on tree-height:
+New inductive hypothesis:
+For every M' of height n, M'[x:=N][y:=L] = M'[y:=L][x:=N[y:=L]]
+
+Now try again:
+(\y.M')[x:=N][y:=L] = (\z.M'[y:=z][x:=N][y:=L])
+
+but M'[y:=z] is a term of height n, so 
+M'[y:=z][x:=N][y:=L] = M'[y:=z][y:=L][x:=N[y:=L]]
+
+(\z.M'[y:=z][x:=N][y:=L]) 	= (\z.M'[y:=z][y:=L][x:=N[y:=L]])
+				= (\z.M'[y:=z])[y:=L][x:=N[y:=L]]
+				= (\y.M')[y:=L][x:=N[y:=L]]
+
+
+Cool.
+
+
+
+If y not in FV(N), then N = N[y:=L]
+
+ 
+(\y.M')[x:=N] = (\y.M'[x:=N])
+(\y.M')[x:=N][y:=L] 	= (\y.M'[x:=N])[y:=L] 
+			= (\y.M'[x:=N])
+			= (\y.M'[x:=N[y:=L])
+			= (\y.M')[x:=N[y:=L]]
+			= (\y.M')[y:=L][x:=N[y:=L]	
+
+Case M = (\z.M'):
+** Note: this is the only part of the proof that's shown in the PDF.
+
+Inductive hypothesis: M'[x:=N][y:=L] = M'[y:=L][x:=N[y:=L]]
+
+(\z.M')[x:=N][y:=L]	= (\z.M'[x:=N][y:=L])
+			= (\z.M'[y:=L][x:=N[y:=L]]), by inductive hypothesis
+			= (\z.M')[y:=L][x:=N[y:=L]]
+
+
+Case M = (PQ):
+
+Inductive hypotheses:
+P[x:=N][y:=L] = P[y:=L][x:=N[y:=L]]
+Q[x:=N][y:=L] = Q[y:=L][x:=N[y:=L]]
+
+
+(PQ)[x:=N][y:=L] 	= (P[x:=N][y:=L])(Q[x:=N][y:=L])
+			= (P[y:=L][x:=N[y:=L])(Q[y:=L][x:=N[y:=L]])
+			= (PQ)[y:=L][x:=N[y:=L]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------
+Forall M, if x not in FV(M), then M[x:=N] = M
+
+Case M = x:
+ x[x:=N] = N, but x in FV(x), so this case is irrelevant.
+ *In Agda we would satisfy the case by deriving a contradiction from the
+	assumptions `M=x` and `x not in FV(M)` and then use the principle
+	of explosion, i.e. False -> everything.
+
+Case M = y:
+ x not in FV(y).
+ y[x:=N] = y
+
+Case M = (\x.M')
+ x not in FV(\x.M')
+ (\x.M')[x:=N] = (\x.M')
+
+Case M = (\y.M')
+
+Inductive hypothesis: 
+ if x not in FV(M'), then M'[x:=N] = M'.
+
+(\y.M')[x:=N] = (\y.M'[x:=N])
+if x in FV(M'), then x in FV(\y.M'), and so this would be an invalid case.
+if x not in FV(M'), then apply the inductive hypothesis.
+
+
+(\y.M'[x:=N]) = (\y.M')
+
+Case M = (PQ)
+Inductive hypotheses:
+if x not in FV(P), then P[x:=N] = P
+if x not in FV(Q), then Q[x:=N] = Q
+
+
+(PQ)[x:=N] = (P[x:=N])(Q[x:=N])
+
+if x in either FV(P) or FV(Q), then x in FV(PQ), and so this would be an
+invalid case.
+The only valid case is the one such that x in neither FV(P) nor FV(Q).
+But then both inductive hypotheses apply:
+(P[x:=N])(Q[x:=N]) = (PQ)
+
+
+----------------------------------------
+
+x not in FV(M[x:=y])
+
+Case M = x:
+x[x:=y] = y
+x not in FV(y)
+
+
+Case M = z:
+z[x:=y] = z
+x not in FV(z)
+
+Case M = (\x.M'):
+(\x.M')[x:=y] = (\x.M)
+x not in FV(\x.M)
+
+Case M = (\z.M'):
+Inductive hypothesis: x not in FV(M'[x:=y])
+(\z.M')[x:=y] = (\z.M'[x:=y])
+if x not in FV(M'[x:=y]) then x not in FV(\z.M'[x:=y])
+
+Case M = (PQ):
+Inductive hypotheses:
+x not in FV(P[x:=y])
+x not in FV(Q[x:=y])
+
+(PQ)[x:=y] = (P[x:=y])(Q[x:=y])
+
+since x not in FV(P[x:=y]) and x not in FV(Q[x:=y]), then
+x not in FV(P[x:=y]Q[x:=y])
+
+
+-----------------------------------------------
+
+If y in FV(N) and y not in FV(M), then M[x:=N][y:=L] = M[x:=N[y:=L]]
+
+Case M = x:
+x[x:=N][y:=L] = N[y:=L] = x[x:=N[y:=L]]
+
+
+Case M = y:
+y in FV(y)
+
+Case M = z:
+z[x:=N][y:=L] = z[y:=L] = z = z[x:=N[y:=L]]
+
+Case M = (\x.M'):
+(\x.M')[x:=N][y:=L] = (\x.M')[y:=L] = (\x.M'[y:=L])
+
+if y in FV(M') then y in FV(\x.M') so this would be an invalid case.
+if y not in FV(M') then M'[x:=L] = M' and 
+(\x.M'[y:=L]) = (\x.M') = (\x.M')[x:=N[y:=L]]
+
+Case M = (\y.M'):
+(\y.M')[x:=N][y:=L] = (\z.M'[y:=z][x:=N][y:=L])
+Now we're back to this again...
+note that the height of the tree doesn't change....
+easy to mix tree-height induction with structural induction
+* call it tree-height induction, and then in the inductive step you start
+  with all terms of a given height and then break into cases for each of the
+  ways you can construct a term with that height + 1
+	* i.e. abstractions and applications
+
+Now we can take our inductive hypothesis as:
+For every M' of height n, if y not in FV(M') then M'[x:=N][
+
+
+
+
+Case M = (\z.M'):
+Inductive hypothesis: if y not in FV(M'), then M'[x:=N][y:=L] = M'[x:=N[y:=L]]
+(\z.M')[x:=N][y:=L] = (\z.M'[x:=N][y:=L])
+
+if y in FV(M') then y in FV(\z.M') and this would be an invalid case.
+if y not in FV(M') then the inductive hypothesis applies:
+(\z.M'[x:=N][y:=L]) = (\z.M'[x:=N[y:=L]]) = (\z.M')[x:=N[y:=L]]
+
+Case M = (PQ):
+Inductive hypotheses:
+if y not in FV(P), then P[x:=N][y:=L] = P[x:=N[y:=L]]
+if y not in FV(Q), then Q[x:=N][y:=L] = Q[x:=N[y:=L]]
+
+(PQ)[x:=N][y:=L] = (P[x:=N][y:=L])(Q[x:=N][y:=L])
+
+if y in either FV(P) or FV(Q) then this is an invalid case
+if y in neither FV(P) nor FV(Q) then the inductive hypotheses apply and
+we have:
+(P[x:=N][y:=L])(Q[x:=N][y:=L]) = (P[x:=N[y:=L]])(Q[x:=N[y:=L]])
+ = (PQ)[x:=N[y:=L]]
+
+
+

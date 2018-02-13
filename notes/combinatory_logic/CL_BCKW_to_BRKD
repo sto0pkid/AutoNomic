@@ -1,0 +1,100 @@
+Translation of BCKW combinators to BRKD combinators
+
+Reference:
+Bxyz	= x(yz)		Parenthesize
+Rxy	= yx		Rearrange
+Kxy	= x		Remove
+Dx	= xx		Repeat
+
+
+
+Bxyz	= x(yz)		Parenthesize
+Cxyz	= xzy		Rearrange
+Kxy	= x		Remove
+Wxy	= xyy		Repeat
+
+
+
+Translations:
+B	= B
+C	= B(R(BBR))(BBR)
+K	= K
+W	= B(R(BD(BBR)))(BBR)
+
+
+
+
+-------------------------------------------------------------------
+Proofs of translations:
+
+1) B
+
+B is just B.
+
+
+2) C
+
+B(R(BBR))(BBR)xyz       = R(BBR)(BBRx)yz
+                        = BBRx(BBR)yz
+                        = B(Rx)(BBR)yz
+                        = Rx(BBRy)z
+                        = BBRyxz
+                        = B(Ry)xz
+                        = Ry(xz)
+                        = xzy
+
+
+
+
+
+
+3) K
+
+K is just K.
+
+
+4) W
+
+W = B(R(BD(BBR)))(BBR)
+
+B(R(BD(BBR)))(BBR)xy    = R(BD(BBR))(BBRx)y
+                        = BBRx(BD(BBR))y
+                        = B(Rx)(BD(BBR))y
+                        = Rx(BD(BBR)y)
+                        = BD(BBR)yx
+                        = D(BBRy)x
+                        = BBRy(BBRy)x
+                        = B(Ry)(BBRy)x
+                        = Ry(BBRyx)
+                        = BBRyxy
+                        = B(Ry)xy
+                        = Ry(xy)
+                        = xyy
+
+
+
+
+NOTES:
+It's difficult to repeat variables usefully. You can only repeat
+a variable if it exists in subterm immediately following R, when
+R is in the first position in the combinator.
+
+If you try:
+Rx{rest}, you get xx{rest} and you're done. More combinators have to
+be placed in the subterm so that they can end up in the first position
+in order to do more useful things:
+R(Mx){rest}, you get Mx(Mx).
+
+The problem with this is that the combinators are strictly parametrically
+polymorphic, which means that if you duplicate Mx, each occurrence of (Mx) will
+behave exactly the same, you can't act on (Mx) with other combinators
+to change its behavior, all you can do is use it's behavior by applying
+these combinators to different things to get different things out of them.
+This can partly be seen by the fact that once you have a term like (Mx), 
+there's no way to stick anything else before M inside those parentheses, you
+can only things append things to the end, i.e. you can get from (Mx) to (Mxy)
+but there's no way to get from (Mx) to (NMx). 
+
+So, once you have this (Mx) in an argument position, you're stuck with it
+(aside from appending more arguments to the end of it) until you can place it
+into the function position in the combinator. 

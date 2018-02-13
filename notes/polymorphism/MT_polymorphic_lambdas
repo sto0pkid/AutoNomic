@@ -1,0 +1,5 @@
+Set theoretic model fails for polymorphic lambda calculus.
+ * Shown by Reynolds
+Is this just because of impredicativitly / Type : Type?
+Seems a predicative set hierarchy works just fine.
+

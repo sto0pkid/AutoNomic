@@ -1,0 +1,17 @@
+F2 = Second-order polymorphic lambda calc
+
+Girard: representation theorem
+* Every function on natural numbers that can be proved total in
+  second order intuitionistic predicate logic P2 can be represented
+  in F2.
+
+  Projection of P2 to F2.
+
+Reynolds: abstraction theorem
+*
+ 
+  Embedding of F2 into P2.
+
+Composition of Girard-projection & Reynolds embedding is the identity.
+
+

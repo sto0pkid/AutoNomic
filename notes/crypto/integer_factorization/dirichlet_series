@@ -1,0 +1,60 @@
+A Dirichlet series is any series of the form:
+
+Sum{ n = 1 ... inf | a_n / n^s}
+
+where s is a complex number and a_n is a complex sequence.
+
+
+Suppose A is a set with a function w : A -> N, assigning a weight
+to each of the elements of A, and suppose additionally that the set
+{x : A | w(x) = n} is finite for every n. 
+Suppose further that a_n = |{x : A | w(x) = n}|
+
+Then we define the formal "Dirichlet generating series for A" with 
+respect to w as:
+
+D[w,A](s) = Sum { a : A | 1/w(a)^s } = Sum {n=1...inf | a_n/n^s}
+
+Sum { a : A, w(a) = n | w(a)^s } = a_n*(n^s)
+Sum { a : A, w(a) = n | 1/w(a)^s} = a_n/n^s
+
+Sum {a : A | 1/w(a)^s} = sum{n=1...inf | sum{a : A, w(a) = n | 1/w(a)^s}}
+			= sum{n=1...inf | a_n/n^s}
+
+
+Z(s) 		= 1 + 1/2^s + 1/3^s + 1/4^s + 1/5^s + ....
+		= sum(i=1...inf){1/i^s}
+
+(1/2^s)Z(s) 	= 1/2^s + 1/4^s + 1/6^s + 1/8^s + 1/10^s + ...
+		= (1/2^s)*sum(i=1...inf){1/i^s}
+		= sum(i=1...inf){1/(2^s)(i^s)
+		= sum(i=1...inf){1/(2i)^s} 	
+
+(1 - 1/2^s)Z(s) = 1 + 1/3^s + 1/5^s + 1/7^s + 1/9^s + ....
+	
+(1 - 1/3^s)(1 - 1/2^s)Z(s) = sum(i=1...inf, ~(2|i) & ~(3|i)){1/i^s}
+
+prod(p in prim){1 - 1/p^s}Z(s) = 1
+
+Z(s) 	= 1/(prod(p in prime){1 - 1/p^s})
+	= prod(p in prime){1/(1 - 1/p^s)}
+
+1/(1 - 1/p^s) 	= 1/(1-p^(-s)}
+
+
+Z(s) 	= prod(p in prime){1/(1 - p^(-s))}
+
+
+Z(1) 	= harmonic series
+	= 1 + 1/2 + 1/3 + 1/4 + ....
+
+Z(1) 	= prod(p in prime){1/(1 - 1/p)}
+	= prod(p in prime){1/((p-1)/p)}
+	= prod(p in prime){p/(p-1)}
+
+Note this leads directly to the infinitude of the primes.
+harmonic series is known to be divergent, therefore the
+numerator in prod(p in prime){p/(p-1)} must grow infinitely
+large.
+
+

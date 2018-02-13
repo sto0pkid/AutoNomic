@@ -1,0 +1,6 @@
+Given two proofs p and q of a == b, should p and q necessarily be identical?
+Traditional models of type theory validate this property, i.e. uniqueness of
+identity proofs.
+
+Hofmann & Streicher showed that it's not implies by the typical axioms of
+type theory, by means of a countermodel in which types are groupoids.

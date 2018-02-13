@@ -1,0 +1,37 @@
+True/unit type:
+
+
+Type formation:
+
+--------------
+ True : Set
+
+
+{} => {True a Set}
+
+Introduction:
+
+----------------
+ unit : True
+
+
+{} => {Unit a True}
+
+
+Elimination :
+
+c : True        d : C(unit)
+----------------------------
+  True-rec(c,d) : C(c)
+
+
+
+
+Computation :
+
+  d : C(unit)
+-----------------------
+ rec(*,d) = d : C(*)
+
+
+

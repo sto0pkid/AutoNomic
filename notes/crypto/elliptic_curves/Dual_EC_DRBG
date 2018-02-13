@@ -1,0 +1,55 @@
+NIST Special Publication 800-90
+DRBG = deterministic random bit generator
+
+Elliptic curve discrete logarithm problem
+
+Berry Schoenmakers and Andrey Sidorenko
+"Cryptanalysis of the Dual Elliptic Curve Pseudorandom Generator"
+
+DEC = Dual Elliptic Curve
+PRG = Pseudo-random generator
+
+
+Barker-Kelsey DEC-PRG
+
+www.schneier.com/blog/archives/2007/11/the_strange_sto.html
+"The Strange Story of Dual_EC_DRBG"
+
+
+Appendix E of NIST standard describes a workaround to the issue
+pointed out by Schoenmakers & Sidorenko.
+
+NSA "Bullrun" decryption program.
+
+RSA Security
+BSAFE software library
+* used Dual_EC_DRBG, allegedly per request (and compensation?) by the NSA
+
+Microsoft SChannel
+OpenSSL FIPS module
+
+SSL/TLS
+
+
+Dan Shumow, Niels Ferguson
+"On the possibility of a backdoor in the NIST SP800-90 Dual EC Prng"
+rump20007.cr.yp.to/15-shumow.pdf
+
+
+Stephen Checkoway, Matthew Fredrikson, Ruben Niederhagen, Adam Everspaugh,
+Matthew Green, Tanja Lange, Thomas Ristenpart, Daniel J. Bernstein, Jake
+Maskiewicz, Hovav Shacham
+"On the practical exploitability of Dual EC in TLS implementations"
+
+dualec.org/DualECTLS.pdf
+
+
+
+projectbullrun.org
+
+Certicom passive-aggressively files patents on Dual EC exploitation:
+projectbullrun.org/dual-ec/patent.html
+
+
+NIST Cryptographic Module "Validation" Program
+

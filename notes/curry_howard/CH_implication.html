@@ -1,0 +1,92 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<body>
+Implications and functions.
+<br><br>
+Given two propositions, A and B, we can construct the proposition:
+<br><br>
+&quot;A implies B&quot;
+<br><br>
+Usually written as &quot;A -&gt; B&quot;
+<br><br>
+This basically means &quot;If A is true, then B is true&quot;.
+<br><br>
+This can be rewritten as &quot;If A has a proof, then B has a proof&quot;.
+<br><br>
+This can be rewritten as &quot;Given a proof of A, you can provide a proof of B&quot;
+<br><br>
+If for every proof of A, you can provide a proof of B, then what you have is a function from the set of proofs of A to the set of proofs of B.
+<br><br>
+A fuction from a set A to a set B is an assignment of an object in set B to an object in set A. This can be represented as a set of pairs (a,b) where &quot;a&quot; is an object in A and &quot;b&quot; is an object in B, exactly one of these pairs for each object in A.
+<br><br>
+Example:
+<br><br>
+If A = {0,1} and B = {2,3,4}, a function from A to B might be:
+<br><br>
+{[0,2],[1,4]}
+<br><br>
+We might give this function a name, like "f", and describe it in terms of which object of B it assigns each object of A to:
+<br><br>
+f(0) = 2<br>
+f(1) = 4
+<br><br>
+So to give a proof of &quot;A -&gt; B&quot;, you provide such a function that maps proof of A to proofs of B. 
+<br><br>
+This is all well and good for functions between finite sets, you can simply list out all the assignment pairs and define your function exhaustively, case-by-case. However this approach breaks down when you consider functions between infinite sets, particularly when the set of input values is infinite, like for example with the &quot;simple&quot;&slash;standard counting numbers (usually called the &quot;natural numbers&quot; in standard math language and just called &quot;Nat&quot; by type theorists),  since there has to be an assignment for each distinct object in the input set. 
+<br><br>
+We can try to write out a function that takes Nats and returns Nats by writing out the assignment pairs, like, consider a function "addOne" that adds 1 to whatever number you provide as input.
+<br><br>
+addOne(0) = 1<br>
+addOne(1) = 2<br>
+addOne(2) = 3<br>
+...<br>
+<br><br>
+We can see that this would go on forever because we have to make an assignment for each natural number, and there are infinitely many of them. Therefore, in order to define the function, we must somehow finitize the representation.
+<br><br>
+We can do that by defining a representation for the counting numbers that we're capable of performing operations on, and defining a generic sequence of operations that will transform a given input into the required output that it's assigned to. This generic sequence of operations is also known as an &quot;algorithm&quot;. Such a representation might be:
+<br><br>
+0 is represented as &quot;0&quot;<br>
+1 is represented as &quot;(1+0)&quot;<br>
+2 is represented as &quot;(1+(1+0))&quot;<br>
+etc..
+<br><br>
+Then, given some counting number in this representation, call it x, I can assign it to the output value (1+x). So we can finitize the representation of the function like so:
+<br><br>
+addOne(x) = (1+x)
+<br><br>
+Taking it for a test run, the number 3 would be represented as &quot;(1+(1+(1+0)))&quot;, so:
+<br><br>
+addOne((1+(1+(1+0)))) = (1+(1+(1+(1+0))))
+<br><br>
+Which is the representation of the number 4, which is what we intended.
+<br><br>
+This generic operation we've defined is essentially just a compression of the set of pairs of assignments of the addOne function, with an associated decompression achieved by applying the operation to input values to retrieve the value assigned to them, and so such an algorithm can serve as the witness for the truth of an implication. Given a proof of A, the algorithm will operate on it to produce the required proof of B. Under constructive logic, we have a further constraint, we only accept a function as a proof of implication if there is actually such an algorithm that computes the assignments.
+<br><br>
+It's interesting to note that there are functions that aren't computable, or in other words, such that there is no algorithm that will compute their assignment. Consider a hypothetical function &quot;Halts&quot; that pairs every program with the answer to whether or not it halts. Hypothetically such a function exists, if we believe that there actually is an answer to the question of whether a given program halts, for all programs, and that this isn't somehow &quot;undetermined&quot;. So you can take that line of reasoning and tell me that for every program, there is a truth-value (&quot;true&quot; or &quot;false&quot;) corresponding to the correct answer to whether or not that program halts.
+<br><br>
+However, there is a deep result in computer science that says that the halting problem is undecidable for general programs (assuming you accept the Church-Turing thesis), which means that there is no program that will take other programs as input and run and eventually stop with the correct answer as to whether or not that program halts. 
+<br><br>
+So, unless you have some counterexample disproving the limitations on computability claimed by the Church-Turing thesis, then, whatever you provide me as this Halts function, it's all well and good that you tell me that this function exists, but now, what if I'm to give you a program and ask for the truth-value that corresponds to whether or not it halts? Due to the undecidability of the halting problem, you will either give me the wrong answer for some programs, or fail to deliver an answer for some programs.
+<br><br>
+We assumed that your function &quot;Halts&quot; is correct on all cases, so, therefore your algorithm to compute it must fail to deliver an answer for some programs.
+<br><br>
+Going back to the setting of proofs, if you tell me that &quot;A implies B&quot; and as proof of this you demonstrate a function that takes proofs of A and assigns to each one a proof of B, but this function is not computable, then there may be some cases where I can provide a proof of A, but you are not able to deliver the corresponding proof of B. This would not be constructive, as you would be claiming that B is true (due to the proof of A that I provide, along with the implication &quot;A -&gt; B&quot; that you are claiming) but failing to deliver proof of it when asked for, due to the uncomputability of your function.
+<br><br>
+Therefore, in constructive logic, a demonstration of an implication &quot;A -&gt; B&quot; must not only be a function assigning proofs of A to proofs of B, it must be a *computable* function, an algorithm that takes proofs of A as input and runs and eventually halts with a proof of B as its output.
+<br><br>
+
+
+
+<br><br><br><br><br>
+TODO: <br>
+* &quot;If A is true, then B is true&quot; can't exactly just be rewritten as &quot;If A has a proof, then B has a proof&quot; as this is crossing the boundary between the semantic model theory and the syntactic proof theory
+<br>
+* Generalize functions to arbitrary relations.
+<br>
+* Generalize computable functions to computable relations.
+<br>
+* Use the picture of functions as graphs
+
+
+</body>
+</html>

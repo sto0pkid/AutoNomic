@@ -1,0 +1,18 @@
+Intuitionistic can be included in classical logic by forgetting some distinctions between
+propositions. Example, A -> A, A v ~A, and ~~A -> A can be seen as "refinements" of the
+classical proposition A v ~A, since they all become equivalent when interpreted in classical
+logic.
+
+Double negation is the same as the CPS translation of types, mapping
+types to their continuation monads.
+
+Running programs in CPS is the same as combining double-negation and
+A-translation.
+
+
+Negation == type-constructor for non-returning computations (continuations)
+
+Anticatch/antithrow/call-with-eventual-value = call/ev / Y-combinator
+Guy L. Steele Jr.
+
+

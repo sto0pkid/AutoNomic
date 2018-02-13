@@ -1,0 +1,13 @@
+Lambda-beta calculus has the diamond property, aka confluence:
+
+For every lambda expression a, if a --beta-->> b and a --beta-->> c, then
+there exists an expression d such that b -- beta-->> d and c --beta-->> d, 
+where --beta-->> is the reflexive transitive closure of --beta-->.
+
+Original proof by Church and Rosser.
+Proof by Tait & Martin-Lof.
+Proof by Takahashi.
+Randy Pollack:
+http://homepages.inf.ed.ac.uk/rpollack/export/HarvardCS252r/ChurchRosserSlides.pdf
+
+

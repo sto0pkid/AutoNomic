@@ -1,0 +1,28 @@
+The logical constants True and False
+
+In propositional logic:
+True 	= T
+False 	= F
+
+Just some constants, that obey the truth-table relations.
+
+
+In set theory logic:
+True	= set of all elements
+False	= empty set
+
+
+In constructive logic:
+True	= singleton set
+False	= empty set
+
+
+In category-theoretic logic:
+True	= terminal object
+False	= initial object
+
+
+In lattice logic:
+True	= Top
+False	= Bottom
+

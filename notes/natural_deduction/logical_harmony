@@ -1,0 +1,517 @@
+Verificationist perspective.
+
+
+Local soundness: shows that the elimination rules are not too strong; no
+matter how we apply elimination rules to the result of an introduction we
+cannot gain any new information. We demonstrate this by showing that we
+can find a more direct proof of the conclusion of an elimination than one
+that first introduces and then eliminates the connective in question. This
+is witnessed by a "local reduction" of the given introduction and
+subsequent elimination.
+
+Local completeness: shows that the elimination rules are not too weak:
+there is always a way to apply elimination rules so that we can reconstitute
+a proof of the original proposition from the results by applying introduction
+rules. This is witnessed by a "local expansion" of an arbitrary given derivation
+into one that introduces the primary connective.
+
+
+Conjunction:
+Local soundness:
+D		E
+A true		B true
+----------------------- &-intro
+   A & B true			
+----------------------- &-elim1		 r	D
+    A true				===> 	A true
+
+
+
+D		E
+A true		B true
+----------------------- &-intro
+   A & B true
+----------------------- &-elim2		 r	E 
+    B true				===>	B true
+
+
+Local completeness:
+			D			D
+			A & B true		A & B true
+			------------ &-e1	------------ &-e2
+			 A true			 B true
+  D		e	-------------------------------- &-intro
+  A & B true  ===>		 A & B true
+
+
+
+
+For brevity:
+Local soundness:
+&-e1(&-i(A,B)) = A
+&-e2(&-i(A,B)) = B
+
+Local completeness:
+&-i(&-e1(P),&-e2(P)) = P
+
+
+DISJUNCTION:
+
+
+Harmony does not ensure normalizability
+Harmony does not ensure the conservative extension property
+Harmony does not ensure consistency
+
+
+Better way to do harmony:
+TRUE:
+  [C]
+-------			T-intro
+   T
+
+         
+T has no intros.
+
+T   C
+--------------------
+
+
+FALSE:
+
+F has no intros.
+
+
+
+  F
+-----			F-elim
+  C
+
+
+
+It seems there should be a symmetry here. Just like we have
+F ==> C, we should have C ==> T.
+
+What about the elim rule for T? We can make a sensible one:
+
+T        C
+----------		T-elim ?
+     C
+
+
+How is this justified?
+
+
+What implies True? everything
+ A1    A2     A3   
+---- ------ ------ .....
+True  True   True
+
+
+So what should be derivable from True? only something derivable from everything:
+True       (A1 -> C)    (A2  -> C)   (A3 -> C)  ....
+-----------------------------------------------------
+                       C
+
+
+How do we finitize these? Well
+
+ C : Type
+----------
+   C
+----------
+  True
+
+
+
+True       (forall C. C -> D)
+------------------------------
+            D
+
+
+The only non-trivial solution to "forall C . C -> D" for D is [D:=C],
+yielding:
+
+
+True       (forall C. C -> C)
+-----------------------------
+            C
+
+
+Now, it looks like we've made a substitution that induced variable capture
+and subtly changed the meaning, and further, how is the C appearing in
+the conclusion if it seems apparently scoped to this forall? 
+
+But, this (forall C . C -> C) must necessarily correspond to more proof-tree
+structure:
+
+
+                C : Type
+              -------------
+True             C -> C
+-----------------------------
+             C
+
+and that (C -> C) corresponds to more proof-tree structure:
+
+
+                C : Type
+              -------------
+                   C
+               ------------
+True               C
+-----------------------------
+             C
+
+
+This should normalize to 
+
+
+                  C : Type
+                ----------
+True                C  
+-----------------------------
+           C
+
+
+But what justifies that normalization?
+
+Relationship between True, eliminator for True, Identity type, and
+polymorphic identity function?
+
+Alternative definition for True:
+"Exists (A : Set) , A"
+
+
+
+
+But if we had this, then by symmetry F should have an intro rule.
+
+C        F
+----------
+     F
+
+we still shouldn't ever be able to prove this, because the connective
+depends on itself directly, would require an infinitely long proof.
+
+
+
+
+What about:
+
+C       ~C
+-----------
+     F
+
+
+
+
+
+
+CONJUNCTION:
+A     B
+-------			&-intro
+ A & B
+
+
+	 [A]
+          ~
+A & B	  C
+-----------		&-elim1
+     C
+
+
+
+A : Type    B : Type
+---------------------
+    A & B : Type
+
+
+
+ A & B : Type      a : A    b : B
+--------------------------------------------
+          (a,b) : A & B
+
+
+                                a : A
+                               --------
+(a,b) : A & B     C : Type      c : C    
+---------------------------------------
+                 c : C
+
+
+
+
+
+
+
+A -> A, and therefore:
+
+           [A]
+	    ~
+A & B       A  
+--------------
+      A
+
+
+and we can just write:
+A & B
+------
+  A
+
+
+
+
+
+         [B]
+	  ~	 
+A & B     C
+-----------		&-elim2
+     C
+
+
+Polymorphic encoding:
+forall C. (A -> B -> C) -> C
+
+
+DISJUNCTION:
+   A
+-------			+-intro1
+ A + B
+
+
+   B
+-------			+-intro2
+ A + B
+
+	  [A]    [B]
+	   ~      ~
+A + B	   C      C
+-------------------	+-elim
+       C
+
+Polymorphic encoding:
+forall C. (A -> C) -> (B -> C) -> C
+
+
+
+
+IMPLICATION:
+  [A]
+   ~
+   B
+--------		->-intro
+ A -> B
+
+
+
+	       [A]
+		~
+		B
+                ~
+A -> B          C
+------------------	->-elim
+        C
+
+
+Ok so let's see how this reduces to the standard
+elim rule modus ponens:
+
+[A]
+ ~
+ B
+ ~
+ C      ===>   (A -> B) -> C
+
+B -> B, so from this elim rule we can deduce B, setting C = B.
+
+               [A]
+                ~
+                B
+                ~
+A -> B          B
+------------------      ->-elim
+        B
+
+
+((A -> B) -> B) -> (A -> B) -> B
+
+This is just the identity, so, this is definitely
+a valid rule. Now, the proof can normalize
+
+B under the assumption of (B under the assumption of X) is the same as B under the assumption of X, so:
+
+
+
+                [A]
+                ~
+A -> B          B
+------------------      ->-elim
+        B
+
+
+And again:
+
+A -> B		A
+------------------	->-elim / mp
+	B
+
+
+
+Let's look at this another way:
+
+               [A]
+                ~
+ [A]            B
+  ~             ~ 
+  B             C  
+----------------------
+         C
+
+
+                [A]
+                 ~
+ [A]             B
+  ~              ~
+  B              B
+----------------------
+         B
+
+
+
+
+
+
+                    C:Type
+                   -------
+	              C
+	           -------
+ True                 D
+-------------------------
+            D
+
+                    C:Type
+                   -------
+C0 : Type             C
+---------          -------
+   C0                 D
+-------------------------
+            D
+
+
+
+                    C:Type
+                   -------
+C0 : Type             C
+---------          -------
+   C0                 C
+-------------------------
+           C
+
+
+
+
+
+
+EXISTS:
+
+
+               [a : A]
+		  ~
+A : Type       P : Type
+-----------------------
+   Exists A P : Type
+
+              x : A           ?
+             ---------- 
+ x : A        p : P x  
+-----------------------
+ (x,p) : Exists A P
+
+
+                               x : A
+                               -----
+(x,p) : Exists A P               C 
+------------------------------------
+                 C
+
+                               x : A
+                            -----------
+                              p : P x
+                             ----------
+(x,p) : Exists A P              C
+------------------------------------
+                 C
+
+
+
+
+IDENTITY:
+      
+-------------------			Id-intro
+    Id a a
+
+
+                             [a : A]
+			        ~
+a = b : Id A a b	      c : C
+-----------------------------------
+              c : C
+
+Hrm...
+
+NEGATION:
+
+ [A]
+  ~
+  C
+-------
+
+
+
+BOOL:
+
+--------
+true : Bool
+
+
+---------
+false : Bool
+
+             true : Bool       false : Bool
+              -------          ------------
+b : Bool         C                 C
+-------------------------------------
+                 C
+
+
+Hrm...
+
+
+              x : Bool
+             ----------         
+b : Bool      C : Type     C[x := true]        C[x := false]
+---------------------------------------------------
+                      C[x := b]
+
+
+
+NAT:
+
+----------
+0 : Nat
+
+n : Nat
+----------
+suc n : Nat
+
+
+	      [n: Nat]
+	         ~
+suc n : Nat      C
+---------------------
+         C
+
+
+
+
+(1) https://www.cs.cmu.edu/~fp/courses/15317-f09/lectures/03-harmony.pdf

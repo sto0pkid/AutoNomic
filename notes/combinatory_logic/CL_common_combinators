@@ -1,0 +1,27 @@
+Some common combinators:
+--------------------------------------
+
+Ix 	= x
+Dx	= xx
+
+Kxy	= x
+Hxy	= y
+Txy	= yx
+Rxy	= yx
+Wxy	= xyy
+
+Sxyz 	= xz(yz)
+Bxyz	= x(yz)
+Cxyz	= xzy
+Uxyz	= y(xyz)
+
+Jxyzw	= xy(xwz)
+
+
+
+Common bases:
+-------------------------------------
+SKI
+SK
+BCKW
+BRKD

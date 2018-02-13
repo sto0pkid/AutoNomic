@@ -1,0 +1,56 @@
+Booleans:
+
+T = \x.\y.x 			*note that this is the K combinator
+F = \x.\y.y			*and this is the H combinator
+
+and = \a.\b.abF
+
+Prove:
+and T T --> T
+and T F --> F
+and F T --> F
+and F F --> F
+
+(\a.\b.abF) T T = TTF = (\x.\y.x)TF = T
+(\a.\b.abF) T F = TFF = F
+(\a.\b.abF) F T = FTF = (\x.\y.y)TF = F
+(\a.\b.abF) F F = FFF = F
+
+
+and2 = (\a.\b.bab)
+(\a.\b.bab) T T = TTT = T
+(\a.\b.bab) T F = FTF = F
+(\a.\b.bab) F T = TFT = F
+(\a.\b.bab) F F = FFF = F
+
+or = (\a.\b.abT) ?
+(\a.\b.abT) T T = T T T = T
+(\a.\b.abT) T F = T F T = T
+nope
+
+(\a.\b.baT) T T = T T T = T 
+(\a.\b.baT) T F = F T T = T
+(\a.\b.baT) F T = T F T = F
+nope
+
+(\a.\b.aTb) T T = T T T = T
+(\a.\b.aTb) T F = T T F = T
+(\a.\b.aTb) F T = F T T = T
+(\a.\b.aTb) F F = F T F = F
+yep
+
+(\a.\b.bTa) T T = T T T = T
+(\a.\b.bTa) T F = F T T = T
+(\a.\b.bTa) F T = T T F = T
+(\a.\b.bTa) F F = F T F = F
+yep
+
+not = (\a.aFT)
+(\a.aFT) T = T F T = F
+(\a.aFT) F = F F T = T
+
+ite = \x.x
+(\x.x) T M N = T M N = M
+(\x.x) F M N = F M N = N
+
+

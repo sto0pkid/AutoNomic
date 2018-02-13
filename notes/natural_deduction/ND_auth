@@ -1,0 +1,260 @@
+G |- a : A
+------------------
+G |- auth a : * A
+
+
+G |- p : * A
+-------------------
+G |- unauth p : A
+
+
+A function f using authenticated types is compiled to two different versions fV and fP, for the 
+verifier and prover, respectively.
+
+Data of type *A stored at the prover is like a regular object of type A augmented with digests,
+while data of type *A stored at the verifier is simply a compact digest.
+
+Auth/unauth coercions at the prover facilitate proof-generation
+Auth/unauth coercions at the verifier facilitate proof-checking
+
+Lambda-auth exploits the observation that proof-generation and proof-checking can be made
+structurally identical by piggybacking off the "ideal" (read: standard, normal, regular old MLTT)
+computation of f.
+
+Example:
+
+# note how we don't auth the definition, just the recursive premises of its constructors.
+data Tree : Set where
+ Tip : String -> Tree
+ Node : * Tree -> * Tree -> Tree
+
+data List (A : Set) : Set where
+ [] : List A
+ _::_ : A -> List A -> List A
+
+data Bit : Set where
+ L : Bit
+ R : Bit
+
+
+
+
+let rec fetch (idx : List Bit) (t : * Tree) : String where
+ match idx, unauth t with
+ | [], Tip a -> a
+ | (L :: idx), Node l r -> fetch idx l
+ | (R :: idx), Node l r -> fetch idx r
+
+{-
+what about:
+ | [], Node l r -> ?
+ | (L :: idx), Tip a -> ?
+ | (R :: idx), Tip a -> ?
+
+should this have been a "Maybe String"?
+-}
+ 
+
+
+
+Correctness: when the prover P executes a query f over a tree t correctly, then the verifier
+ 		V gets the same result as if it had just computed f(t) directly.
+
+Security: a cheating prover P* cannot cause V to accept an incorrect answer. 
+ * The basis of this property is the use of collision-resistant hash functions.
+ * In order for the cheating prover P* to cause V to accept an incorrect answer, it
+	must find a hash-collision.
+ * Finding hash-collisions in collision-resistant hash functions is assumed to be hard.
+
+
+For fP, values of type *T consist of pairs <h,v>, where v has type T and h is its digest,
+which is the hash of the "shallow projection" of v.
+
+Shallow projection:
+The shallow projection of a value is just the value itself for all types T that do not
+consist of any authenticated types *T0. The shallow projection of an authenticated value
+<h,v> is just its digest h.
+
+For fV, values of type *T consist solely of the digest h of some value of type T. In
+general, values in fV are the shallow projections of their corresponding values in fP.
+
+For both fV and fP, auth v computes the hash h of the shallow projection of v. The prover
+pairs h with v, while the verifier retains only h.
+
+For the prover, unauth is called with <h,v> and returns v. In addition it computes the
+shallow projection of v and adds it to the proof-stream, which is just a list of such
+shallow projections.
+
+For the verifier, unauth is called with a digest h of some value of type T, and it compares
+h to the hash of the element s at the head of the proof-stream, which should be the 
+shallow projection. If they don't match, fail, if they do match, return s.
+
+
+
+
+
+LAMBDA-AUTH SYNTAX:
+
+Types T 	:= 0 | 1 | T -> T | T v T | T x T | ua.T | a | *T
+
+Values V 	:= () | x | \x.E | rec x.\y.e | inl V | inr V |  (V , V) | roll V
+
+Exprs E 	:= V | let x = E in E | V V | case V V V | fst V | snd V | unroll V | auth V | unauth V
+
+
+LAMBDA-AUTH TYPING RULES:
+
+G |- a : A    	
+------------------- +-intro1	
+G |- inl a : A + B
+
+
+G |- b : B
+------------------- +-intro2
+G |- inr b : A + B
+
+
+....
+
+all the same except for:
+
+G |- a : A
+-------------------
+G |- auth a : * A
+
+
+G |- p : * A
+-------------------
+G |- unauth p : A
+
+
+
+
+STANDARD SINGLE-STEP & MUTLI-STEP EVALUATION RULES:
+
+
+OPERATIONAL RULES FOR AUTHENTICATED VALUES:
+
+
+SHALLOW PROJECTIONS:
+
+=======================================================
+# note how we don't auth the definition, just the recursive premises of its constructors.
+data Tree : Set where
+ Tip : String -> Tree
+ Bin : * Tree -> * Tree -> Tree
+
+data List (A : Set) : Set where
+ [] : List A
+ _::_ : A -> List A -> List A
+
+data Bit : Set where
+ L : Bit
+ R : Bit
+
+
+let rec fetch (idx : List Bit) (t : * Tree) : String where
+ match idx, unauth t with
+ | [], Tip a -> a
+ | (L :: idx), Bin l r -> fetch idx l
+ | (R :: idx), Bin l r -> fetch idx r
+
+
+
+
+Some data:
+		Bin(_,_)
+		   /   \
+                  /     \
+                 /       \
+         Bin(_,_)         Bin(_,_)
+            /   \             /   \
+           /     \           /     \
+          /       \         /       \
+   Tip(str1)  Tip(str2) Tip(str3)  Tip(str4)
+
+
+t = Bin(Bin(Tip(str1),Tip(str2)),Bin(Tip(str3),Tip(str4)))
+
+
+And we're gonna run "fetch [R;L] t"
+
+
+v1 = Tip(str1)	h1 = hash(sp(Tip(str1))) = hash("Tip(str1)")
+v2 = Tip(str2)	h2 = hash(sp(Tip(str2))) = hash("Tip(str2)")
+v3 = Tip(str3)  h3 = hash(sp(Tip(str3))) = hash("Tip(str3)")
+v4 = Tip(str4)  h4 = hash(sp(Tip(str4))) = hash("Tip(str4)")
+
+
+v1P = <h1,v1>
+v2P = <h2,v2>
+v3P = <h3,v3>
+v4P = <h4,v4>
+
+v1V = h1
+v2V = h2
+v3V = h3
+v4V = h4
+
+v12 = Bin(Tip(str1),Tip(str2))
+v34 = Bin(Tip(str3),Tip(str4))
+
+v12P = Bin(<h1,v1>, <h2,v2>)>	h12 	= hash(serialize(sp(Bin(<h1,v1>, <h2,v2>))))
+						= hash(serialize(Bin(sp(<h1,v1>), sp(<h2,v2>))))
+						= hash(serialize(Bin(h1,h2)))
+						= hash("Bin(h1,h2)")
+
+v34P = Bin(<h3,v3>, <h4,v4>)>	h34	= hash("Bin(h3,h4)")
+
+v = Bin(Bin(Tip(str1),Tip(str2)),Bin(Tip(str3),Tip(str4)))
+
+vP = <h, Bin(<h12, v12P>,<h34,v34P>)>
+
+vV = h
+
+h = hash("Bin(h12,h34)")
+		
+	
+
+
+
+1) V calls unauth t. well, t is just the hash of the shallow projection of t, which is h.
+2) V queries the prover.
+3) Prover startes with proof-stream Pi = []
+4) Prover calls unauth t on <h, Bin(<h12,v12P>,<h34,v34P>)>
+5) This evaluates to Bin(<h12,v12P>,<h34,v34P>)
+6) Compute shallow projection of this: sp(Bin(<h12,v12P>,<h34,v34P>))
+7) sp(Bin(<h12,v12P>,<h34,v34P>)) = Bin(sp(<h12,v12P>),sp(<h34,v34P>)) = Bin(h12,h34)
+8) Add this to the proof stream; Pi = [Bin(h12,h34]
+9) The value in the list is R, so this matches the 3rd case
+10) Call fetch [L] <h34,v34P>
+11) P calls unauth <h34,v34P>
+12) unauth <h34,v34P> evaluates to v34P = Bin(<h3,v3>,<h4,v4>)
+13) Compute shallow projection of this = Bin(h3,h4)
+14) Add this to the proof stream; Pi = [Bin(h12,h34) :: Bin(h3,h4)]
+15) The value in the list is L, so this matches the 2nd case.
+16) Call fetch [] <h3,v3>
+17) P calls unauth <h3,v3>
+18) unauth <h3,v3> evaluates to v3 = Tip(str3)
+19) Compute shallow projection of this = Tip(str3)
+20) Add this to the proof stream; Pi = [Bin(h12,h34) :: Bin(h3,h4) :: Tip(str3)]
+21) The list is empty and the value is Tip(str3), this matches the 1st case.
+22) Unfold the stack and return the proof stream
+23) V receives the proof stream and continues with unauth
+24) Compare h to hash("Bin(h12,h34)") = h, success, return Bin(h12,h34)
+25) pop it off the front of the stream; Pi = [Bin(h3,h4) :: Tip(str3)]
+26) The value in the list is R, and our tree value is Bin(h12,h34), this matches the 3rd case
+27) Call fetch [L] h34
+28) V calls unauth h34
+29) Compare h34 to hash("Bin(h3,h4)") = h34, success, return Bin(h3,h4) 
+30) pop it off the front of the stream; Pi = [Tip(str3)]
+31) The value in the list is L, and our tree value is Bin(h3,h4), this matches the 2nd case
+32) Call fetch [] h3
+33) V calls unauth h3
+34) Compare h3 to hash("Tip(str3)") = h3, success, return Tip(str3)
+35) pop it off the front of the stream; Pi = []
+36) The list is empty and our tree value is Tip(str3), this matches the 1st case
+37) Return str3, we know it's the right string!
+
+
+

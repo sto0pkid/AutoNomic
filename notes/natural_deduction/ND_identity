@@ -1,0 +1,37 @@
+Formation:
+
+ A set         a : A          b : A
+--------------------------------------
+     Id_A(a,b) : Set
+
+
+Introduction:
+         a : A
+----------------------------------
+     refl(a) : Id_A(a,a)
+
+
+Elimination:
+                               x : A
+                                 ~
+p : Id_A(a,b)              d(x) : C(x,x,r(x))
+---------------------------------------------
+        J(a,b,p,d) : C(a,b,p)
+
+
+Computation rule:
+
+a : A           d(x) : (C,x,x,r(x))
+--------------------------------------
+  J(a,a,r(a),d) = d(a) : C(a,a,r(a))
+
+
+
+
+
+HoTT?
+Uniqueness of identity principle?
+Leibniz equality principle?
+Path transport?
+Substitution of equals for equals?
+

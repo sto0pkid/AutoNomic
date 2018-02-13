@@ -1,0 +1,15 @@
+First approximation:
+dP/dt = k(S - D)
+
+d(sinx)/dx = cosx
+d(cosx)/dx = -sinx
+d(-sinx)/dx = -cosx
+d(-cosx)/dx = sinx
+
+d^2(sinx)/dx^2 = -sinx
+d^2(cosx)/dx^2 = -cosx
+
+y = a(sinx) + b(sinx)
+is the solution set for
+
+y + y'' = 0

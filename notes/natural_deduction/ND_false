@@ -1,0 +1,47 @@
+False/empty type:
+
+
+Formation:
+
+----------------
+  False : Set
+
+
+ {} => {False a Set}
+
+
+
+
+Introduction:
+
+...
+hrm
+
+
+Elimination :
+                c : False
+                 ~
+  c : False     C set
+-------------------------
+False-rec(c) : C(c)
+
+
+{?c a False} => {?c ?C ?t. ?c False-rec ?omega. ?omega a ?t}
+
+{?c a False. ? } => {?t app1 ?C. ?t app2 ?c. ?c False-rec ?omega. ?omega a ?t}
+
+
+
+Computation :
+
+...
+hrm
+
+
+
+Polymorphic type:
+(C : Set) -> C
+
+(A : Set) -> (C : A -> Set) -> (a : A) -> C a
+
+

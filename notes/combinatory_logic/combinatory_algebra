@@ -1,0 +1,37 @@
+Applicative structures:
+An applicative structure (A,*) is a set A together with a binary operation "*".
+
+It's not necessarily associative. As a convention we follow left-associativity.
+
+A polynomial in a set of variables {x1,...,xn} with coefficients in A is a formal
+expression built from variables and elements of A by means of the application operation, *.
+
+In other words, the set of polynomials is given by the following grammar:
+
+T,S := x | A | TS.
+
+If A = {S,K,I}, this gives us the grammar for the SKI combinator calculus.
+
+
+
+How to produce an A such that Aabc..n converts to X?
+
+Intuitive combinatory completeness:
+First, A must remove from abc...n all variables which do not occur in x.
+ * This can be done with K and B.
+Next, A must repeat variables as often as they occur in X;
+ * This can be done using W and B.
+Next, A must rearrange the variables into the order in which they occur in X;
+ * This can be done using C and B.
+Finally, A must insert the parentheses that occur in X.
+ * This can be done using B.
+
+Rigorously prove how this covers "all computation".
+
+
+
+
+Lambda theories
+Unique smallest lambda theory, called the "pure theory".
+Closed term algebras for lambda theories
+

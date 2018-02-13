@@ -1,0 +1,60 @@
+A* 		= ~~A	for atomic formulas A
+(A ^ B)*	= ~~(A* ^ B*)		= (A* ^ B*)
+(A v B)*	= ~~(A* ^ B*)
+(A => B)*	= ~~(A* => B*)		= (A* => B*)
+(all x:A.B(x))	= ~~(all x:A.B*(x))	= (all x:A.B*(x))
+(ex  x:A.B(x))  = ~~(ex x:A.B*(x))
+
+
+Note that for the products:
+A
+A ^ B
+A => B
+(all x:A.B(x))
+
+We can drop the outer double-negation.
+
+One could say that the only difference between the meanings of
+classical and constructive logic is the interpretation of
+disjunction/negation, i.e. the sums:
+
+(A v B)
+(ex x:A.B(x))
+
+
+If a formula does not contain => or (all), then A* <=> ~~A
+
+Such formulas are called geometric because their truth values
+are preserved by so-called geometric functors in topos theory.
+
+Note that:
+_|_* = ~~_|_ = <=> _|_
+
+
+If A holds intuitionistically, we can defend A in any dialog.
+If A holds classically, we can defend A* in any dialog.
+ * And we can defend A in any dialog with jumps back in time
+	allowed.
+
+
+Generalized negation
+
+~~A
+(A -> _|_) -> _|_
+
+(A -> r) -> r = ~r~rA
+
+Call-by-name CPS transformation
+Call-by-value CPS transformation
+
+Generalize from ~~ to arbitrary monads
+
+A => []A
+[][]A => []A
+[](A ^ B) = []A ^ []B	
+
+
+((A v ~A) -> r) -> r
+
+(A -> A) -> A
+

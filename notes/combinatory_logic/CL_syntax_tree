@@ -1,0 +1,145 @@
+Working with syntax trees mathematically:
+
+How do we logically characterize the syntax trees of the form:
+ab...n(Mopq..z)
+
+_____ .... _____a
+ | |        | |_b
+ | |        |_c
+ | |_n
+ |___ .... _____M
+   |        | |_o
+   |        |_p
+   |_z   
+
+
+The only operator we have to build tree-structure with is App, which is a 
+binary operation, so we are restricted to building (strict) bin-trees, i.e.
+taking the domain as the nodes in the tree:
+forall x, children(x) == 0 | children(x) == 2.
+
+What are the parameters to the shape of the tree?
+Two parameters:
+* 1st = # of objects {a...n} = m
+* 2nd = # of objects {o...z} = k
+
+Assume either m > 0 or k > 0.
+
+Let's call the basic structure of our tree T and try to describe it as a
+class of objects in
+data Tree = Leaf | Node Tree Tree
+
+(as we've already proven that the trees are necessarily bin-trees, our
+data structure is fine here and we don't have to worry about internal nodes 
+with more or less children than 2).
+
+
+
+T m 0 = first-part m		, under the assumption that m > 0.
+T 0 k = second-part k		, under the assumption that k > 0.
+
+When m, k > 0:
+T m k = (Node (first-part m) (second-part k))
+
+
+Intuitively, both the first-part and the second-part are from the same
+class of shapes, so let's call that T'.
+
+T m k = (Node (T' m) (T' k))
+
+Later we can make this intuition more precise by talking about the precise
+mapping from strings to trees, i.e. the parsing function.
+
+T' 1 = Leaf
+T' n = (Node (T' (n-1)) Leaf), where n > 1.
+
+It's a bit easier to talk about the structure of the trees without having
+to worry about the details of which labels are going where, and now that
+we have the structure in mind, we can map a list of labels into it.
+
+data LeafLabeledTree : Set where
+ Leaf : Obj -> LabeledTree
+ Node : LeafLabeledTree -> LeafLabeledTree -> LeafLabeledTree
+
+
+
+
+Can we say a bit more qualitatively what we're looking for in the tree
+rather than just building it algorithmically? Can we characterize it with
+a logical proposition on the nodes of the tree? Can we construct a theory
+such that the only models of the theory are these trees? What would an
+appropriate signature be?
+
+[S,{sucL\2, sucR\2, label\2}]
+
+isRoot(x) 	= forall y, ~(y sucL x || y sucR x)
+
+isInternal(x) 	= exists w, exists y, exists z, 
+		    (w sucL x || w sucR x) & (x sucL y && x sucR z)
+
+isLeaf(x) 	= forall y, ~(x sucL y)
+
+
+General bin-tree axioms:
+every node either has 2 children or 0 children.
+1. forall x, ((exists y, exists z, (x sucL y && x sucR z)) || ~((exists y, x sucL y) || (exists z, x sucR z)))
+
+sucL & sucR are partial functions:
+2. forall x, (exists y, exists z, (x sucL y && x sucL z) -> y = z)
+3. forall x, (exists y, exists z, (x sucR y && x sucR z) -> y = z)
+
+sucL & sucR are injective:
+4. forall x, (exists y, exists z, (y sucL x && z sucL x) -> y = z)
+5. forall x, (exists y, exists z, (y sucR x && z sucR x) -> y = z)
+ 
+A tree is a non-empty undirected graph such that any two nodes x and y are connected by
+exactly one path.
+A tree is an acyclic undirected graph.
+A tree is a connected undirected graph which will become disconnected if any edge is removed.
+A tree is an acyclic undirected graph that will form a simple cycle if any edge is added.
+These last two definitions are equivalent.
+
+If we consider the graph to have n nodes, then:
+A tree is a connected undirected graph with (n-1) edges.
+A tree is an acyclic undirected graph with (n-1) edges.
+
+
+A rooted tree is a tree with some node specified as "root".
+
+A directed rooted out-tree is a non-empty directed graph such that for any node x other than the root node,
+there is exactly one path from the root node to x.
+A directed rooted in-tree is a non-empty directed graph such that for any node x other than the root node,
+there is exactly one path from x to the root node.
+
+We have ordered rooted leaf-labelled undirected trees.
+
+Hrm, ultimately our intuitions are not starting from trees but instead
+function applications.
+
+abc...n --> comp abc...n
+	--> comp (App a b) c ... n
+	--> comp (App (App a b) c) ... n
+	--> ...
+	--> (App (...(App (App a b) c) ...) n)
+
+When x, y != "(" | ")"
+parse (x :: y :: rest) = parse (("App x y" :: rest))
+
+
+
+What about: 
+a(b(...(n(Mopq..z))))
+
+___a
+ |___b
+   |___c
+     |
+       .
+         .
+           .___n
+             |___ ... _____M
+               |       | |_o
+               |       |_p
+               |_z
+
+

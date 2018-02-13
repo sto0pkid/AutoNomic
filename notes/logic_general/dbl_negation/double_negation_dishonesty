@@ -1,0 +1,19 @@
+1) Exists a, b in the Reals such that a and b are irrational, but 
+   a^b is rational.
+
+   Note that sqrt(2) is irrational.
+
+Proof:
+ Consider a = b = sqrt(2), then a^b = sqrt(2)^(sqrt(2)). 
+
+ Case 1: sqrt(2)^sqrt(2) is rational. Then we're done!
+ Case 2: sqrt(2)^sqrt(2) is irrational. Then choose
+ 	a = (sqrt(2)^sqrt(2)) and b = sqrt(2), then
+	a^b 	= (sqrt(2)^sqrt(2))^sqrt(2) = sqrt(2)^(sqrt(2)*sqrt(2))
+		= sqrt(2)^2 = 2, is rational.
+
+So what's the right choice, (sqrt(2), sqrt(2)), or (sqrt(2)^sqrt(2), sqrt(2))?
+
+
+
+

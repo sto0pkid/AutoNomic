@@ -1,0 +1,65 @@
+IMPLICATION:
+
+
+Version 1
+
+
+So we think of "->" as being *used* like this:
+ A     A -> B
+-----------------
+     B
+
+
+But how is it introduced?
+
+    A u
+    .
+    .         <-- proof under assumption of A
+    . 
+    B        
+-----------
+  A -> B
+
+
+
+Version 2
+
+---------------
+G, x : A |- x : A
+
+
+G, x : A |- b : B 
+------------------- 
+G |- \x.b : A -> B
+
+
+G |- f : A -> B      G |- x : A
+--------------------------------
+G |- f x : B
+
+
+
+Version 3
+
+
+----------------- hyp
+G, x : A |- x : A
+
+
+G, x : A |- b : B
+---------------------
+G |- \x.b : A -> B
+
+
+G |- f : A -> B        G, (G, x : A |- b : B) |- c : C
+--------------------------------------------------------
+G |- c : C
+
+
+
+
+
+Deduction theorem
+
+dolio:
+Lambda is just notation for the function copattern

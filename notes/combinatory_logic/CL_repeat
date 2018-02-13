@@ -1,0 +1,55 @@
+I: 	repeat once
+Ix	= x
+
+SII: 	repeat twice
+SIIx	= Ix(Ix)
+	= xx
+
+So if we switched out one of these I's for (SII), we could
+repeat the arg again:
+
+Repeat 3 times?
+SI(SII)x	= Ix(SIIx)
+		= x(SIIx)
+		= x(Ix(Ix))
+		= x(x(Ix))
+		= x(xx)
+
+Uh oh, it gave us the right nodes but with the wrong syntax tree structure.
+How about the other one:
+S(SII)Ix	= SIIx(Ix)
+		= Ix(Ix)(Ix)
+		= x(Ix)(Ix)
+		= xx(Ix)
+		= xxx
+
+And there we go, so let's define:
+rep^1		= I
+rep^n		= S(rep^(n-1))I, where n > 1
+
+
+Test run:
+rep^3 = S(rep^2)I = S(S(rep^1)I)I = S(SII)I
+and we already saw this worked, so, onto the generalized proof:
+
+
+We've already got 3 base cases to start our induction with, so, onto the
+inductive step:
+
+forall n, ((rep^n)x = x^n) -> ((rep^(n+1))x = x^(n+1))
+
+Ok so:
+(rep^(n+1))x 	= S(rep^n)Ix
+		= (rep^n)x(Ix)
+
+Alright but we assume from the inductive hypothesis that
+(rep^n)x = x^n, so
+
+(rep^n)x(Ix)	= x^n(Ix)
+		= (x^n)x
+		= x^(n+1)
+
+Done.
+
+
+

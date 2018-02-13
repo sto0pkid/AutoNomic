@@ -1,0 +1,33 @@
+Formation:
+
+               x : A
+		~
+A set         B(x) set
+--------------------------
+ (Forall x : A, B(x)) set
+
+
+
+Introduction:
+              x : A
+               ~
+          b(x) : B(x)
+---------------------------------------
+(\x : A . b(x)) : (Forall x : A, B(x))
+
+
+Elimination:
+
+f : (Forall x : A, B(x))         a : A
+----------------------------------------
+       app(f,a) : B(a)
+
+
+
+Computation:
+
+ x : A
+   ~
+b(x) : B(x)                 a : A
+-----------------------------------
+app((\x : A . b(x)), a) = b(a) : B(a)

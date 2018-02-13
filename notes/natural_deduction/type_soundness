@@ -1,0 +1,2 @@
+Type preservation: evaluation of expressions does not cause their type to change
+Progress: evaluation of a term stops at a value

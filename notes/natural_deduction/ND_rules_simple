@@ -1,0 +1,368 @@
+HYPOTHESIS RULE:
+
+------------------- hyp
+G, x : A |- x : A
+
+
+G, x : A |- b : B           G |- a : A
+--------------------------------------- sub
+G |- b[x\a] : B[x\a]
+
+
+G |- a : A
+------------------ hyp-ext
+G, b : B |- a : A
+
+
+
+FALSE:
+
+----------------------------- False-form
+G |- False prop
+
+
+G |- p : False   
+G, x : False |- C prop
+----------------------------- False-elim
+G |- False-elim p :  C[x\p]
+
+
+
+
+
+TRUE:
+
+---------------------- True-form
+G |- True prop
+
+
+------------------------- True-intro
+G |- True-intro : True
+
+
+G |- p : True
+G, x : True |- C : Set prop  
+G |- c : C[x\True-intro]
+-------------------------------- True-elim
+G |- True-rec p {}.c : C[x\p]
+
+
+G, x : True |- C prop  
+G |- c : C[x\True-intro]
+-------------------------------------------------------- True-comp
+G |- True-rec True-intro {}.c = c[] : C[x\True-intro]
+
+
+
+
+IMPLICATION:
+
+G |- A prop         
+G |- B prop
+---------------------- -> form
+G |-  A -> B prop
+
+             
+G |- A -> B prop     
+G, x : A |- b : B 
+-------------------------   -> intro
+G |- {x}.b : A -> B
+
+
+G |- f : A -> B   
+G |- a : A
+-------------------------- -> elim
+G |- (app f a) : B 
+
+
+G |- {x}.b : A -> B         
+G |- a : A
+-------------------------------------------- -> comp
+G |- (app {x}.b a) = b[x\a] : B
+
+
+
+
+
+CONJUNCTION (NEGATIVE):
+
+
+G |- A prop     
+G |- B prop
+---------------------------------------------- &-form
+G |- A & B prop
+
+
+G |- A & B prop
+G |- a : A          
+G |- b : B
+------------------------------- & intro
+G |- (a , b) : A & B
+
+
+G |- p : A & B
+--------------- & elim1
+G |- fst p : A
+
+
+G |- p : A & B
+--------------- & elim2
+G |- snd p : B
+
+
+G |- (a , b) : A & B
+-------------------------- &-comp1
+G |- fst (a , b) = a : A
+
+
+G |- (a , b) : A & B
+-------------------------- &-comp2
+G |- snd (a , b) = b : B
+
+
+
+
+CONJUNCTION (POSITIVE):
+
+G |- A prop         
+G |- B prop
+------------------------------ &p-form
+G |- A & B prop
+
+
+G |- A & B prop    
+G |- a : A          
+G |- b : B
+-------------------------------- &p-intro
+G |- (a , b) : A & B
+
+
+G |- p : A & B
+G, q : A & B |- C prop   
+G, x : A, y : B |- c : C[q\(x,y)]
+----------------------------------- &p-elim
+G |- split p {x,y}.c : C[q\p]
+
+
+G |- (a , b) : A & B
+G, q : A & B |- C prop 
+G, x : A, y : B |- c : C
+------------------------------------------------------- &p-comp
+G |- split (a , b) {x,y}.c = c[x\a,y\b] : C[q\(a , b)]
+
+
+
+
+DISJUNCTION :
+
+G |- A prop        
+G |- B prop
+-----------------------------------OR-form
+G |- A OR B prop
+
+
+G |- A OR B prop    
+G |- a : A 
+----------------------------- OR-intro1
+G |- (inl a) : A OR B
+
+
+G |- A OR B prop   
+G |- b : B
+----------------------------------------- OR-intro2
+G |- (inr b) : A OR B
+
+
+G |- p : A OR B       
+G, q : A OR B |- C prop  
+G, x : A |- c : C[q\(inl x)]          
+G, y : B |- d : C[q\(inr y)]
+---------------------------------------- OR-elim
+G |- case p {x}.c {y}.d : C[q\p]
+
+
+G |- (inl a) : A OR B
+G, q : A OR B |- C prop
+G, x : A |- c : C[q\(inl x)]
+G, y : B |- d : C[q\(inr y)]
+------------------------------------------------------ OR-comp1
+G |- case (inl a) {x}.c {y}.d = c[x\a] : C[q\(inl a)]
+
+
+G |- (inr b) : A OR B
+G, q : A OR B |- C prop
+G, x : A |- c : C[q\(inl x)]
+G, y : B |- d : C[q\(inr y)]
+------------------------------------------------------ OR-comp2
+G |- case (inr b) {x}.c {y}.d = d[y\b] : C[q\(inr b)]
+
+
+
+
+EXISTENTIAL QUANTIFICATION:
+
+G |- A : prop         
+G, x : A |- B prop
+------------------------------------------- EQ-form
+G |- Exists A {x}.B prop
+
+
+G |- Exists A {x}.B prop    
+G |- a : A        
+G |- b : B[x\a]
+------------------------------------ EQ-intro
+G |- pair a b : Exists A {x}.B
+
+
+
+G |- p : Exists A {x}.B       
+G, q : Exists A {x}.B |- C prop   
+G, a : A, b : B[x\a] |- c : C[q\(pair a b)]
+------------------------------------------- EQ-elim
+G |- Exists-rec p {a,b}.c : C[q\p]
+
+
+G, p : Exists A {x}.B |- C prop
+G |- Exists-rec (pair x y) {a,b}.c : C[q\(pair x y)]
+-------------------------------------------------------------- EQ-comp
+G |- Exists-rec (pair x y) {a,b}.c = c[a\x,b\y] : C[q\(pair x y)]
+
+
+
+
+
+
+UNIVERSAL QUANTIFICATION:
+
+G |- A prop      
+G, x : A |- B prop
+------------------------------------------------------ UQ-form
+G |- Forall A {x}.B prop
+
+
+G |- Forall A {x}.B prop   
+G, x : A |- b : B
+-------------------------------- UQ-intro
+G |- {x}.b : Forall A {x}.B
+
+
+G |- f : Forall A {x}.B          
+G |- a : A
+-------------------------------- UQ-elim
+G |- (App f a) : B[x\a]
+
+
+G |- (App {x}.b a) : B[x\a]
+-------------------------------------- UQ-comp
+G |- (App {x}.b a) = b[x\a] : B[x\a]
+
+
+
+IDENTITY:
+
+G |- A prop  
+G |- x : A     
+G |- y : A
+------------------------------- Id-form
+G |- Id A x y prop
+
+
+G |- A prop    
+G |- x : A
+------------------------------- Id-intro
+G |- refl : Id A x x
+
+
+G |- p : Id A x y       
+G, r : Id A x y |- C prop    
+G, refl : Id A x x |- c : C[r\refl]
+--------------------------------------- Id-elim
+G |- Id-elim p c : C[r\p]
+
+
+G |- refl : Id A x y 
+------------------------------------- Id-comp
+G |- Id-elim refl c = c : C[r\refl]
+
+   
+
+BOOL:
+
+-------------------- Bool-form
+G |- Bool prop
+
+
+-------------------- Bool-intro1
+G |- true : Bool
+
+
+-------------------- Bool-intro2
+G |- false : Bool
+
+
+G |- p : Bool     
+G, x : Bool |- C prop
+G |- c : C[x\true]         
+G |- d : C[x\false]
+-------------------------------------- Bool-elim
+G |- if p then {}.c else {}.d : C[x\p]
+
+
+
+G, x : Bool |- C prop
+G |- c : C[x\true]
+G |- d : C[x\false]
+--------------------------------------------------- Bool-comp1
+G |- if true then {}.c else {}.d = c[] : C[x\true]
+
+
+G, x : Bool |- C prop
+G |- c : C[x\true]
+G |- d : C[x\false]
+------------------------------------------------------ Bool-comp2
+G |- if false then {}.c else {}.d = d[] : C[x\false]
+
+
+
+
+
+
+
+NAT:
+
+------------------------ Nat-form
+G |- Nat prop
+
+
+------------------------- Nat-intro1
+G |- zero : Nat
+
+
+G |- n : Nat
+------------------------- Nat-intro2
+G |- (suc n) : Nat
+
+
+G |- n : Nat          
+G, x : Nat |- C prop     
+G |- cz : C[x\zero]        
+G, m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]
+-------------------------------------------------- Nat-elim
+G |- nat-rec n {}.cz {m,cm}.cm' : C[x\n]
+
+
+G, x : Nat |- C prop  
+G |- cz : C[x\zero]
+G |- m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]
+------------------------------------------------------- Nat-comp1
+G |- nat-rec zero {}.cz {m,cm}.cn' = cz[] : C[x\zero]
+
+
+G, x : Nat |- C prop
+G |- n : Nat 
+G |- cz : C[x\zero]
+G, m : Nat, cm : C[x\m] |- cm' : C[x\(suc m)]
+G |- nat-rec n {}.cz {m,cm}.cn' = y : C[x\n]
+--------------------------------------------------------------------- Nat-comp2
+G |- nat-rec (suc n) {}.cz {m,cm}.cn' = cn'[m\n,cm\y] : C[x\(suc n)]
+

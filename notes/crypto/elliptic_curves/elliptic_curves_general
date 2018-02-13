@@ -1,0 +1,21 @@
+An elliptic curve can be defined as a plane curve defined by a polynomial
+equation of the form
+
+y^2 = x^3 + ax + b
+
+where a and b are real numbers. This type of equation is called a 
+Weierstrass equation.
+
+The definition further requires that the curve be non-singular, i.e. has
+no cusps, self-intersections, or isolated points. Algebraically, this
+holds iff. the discriminant: 
+
+ D = -16(4a^3 + 27b^2) is not equal to zero.
+
+
+These are also called "p-functions"
+
+The p-functions constitute "branched double coverings" of the Riemann
+sphere by the torus, ramified at four points.
+
+

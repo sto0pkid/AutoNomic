@@ -1,0 +1,19 @@
+Model theory.
+
+So, we have some scribbles written on a page, like
+"a : A"
+"G, x : A |- B"
+etc..
+
+I give you "A" and tell you it's a "type". You think, "Oh ok,
+types are basically like sets."
+
+Wrong, types are a class of syntactic objects in this language,
+they aren't necessarily anything other than scribbles on the
+page that are allowed to fit in certain syntactic configurations
+with the other symbols.
+
+When you think that types are sets, what you're doing is providing
+an interpretation or "model" for those scribbles.
+
+

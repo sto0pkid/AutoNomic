@@ -1,0 +1,116 @@
+F-algebras:
+
+If C is a category, and F : C -> C is an endofunctor of C, then an F-algebra is a tuple
+(A,f), where A is an object of C and f is a C-morphism F(A) -> A. The object A is called
+the "carrier" of the algebra.
+
+A homomorphism from an F-algebra (A,f) to an F-algebra (B,g) is a C-morphism h : A->B
+such that h.f = g.F(h)
+
+         f
+   F(A)------>A
+    |         |
+F(h)|         |h
+    |         |
+    V         V
+   F(B)------>B 
+          g
+
+Equipped with these morphisms, F-algebras constitute a category.
+ *Requires proof.
+
+
+
+--------------------------------------------------------------------------------------
+data Nat : Set where
+ 0 : Nat
+ suc : Nat -> Nat
+
+data NatF (A : Set) : Set where
+ 0 : NatF
+ suc : A -> NatF
+
+data Fix (f : Set -> Set) : Set where
+ Fx : (f (Fix f)) -> Fix f
+
+val : Fix NatF
+val = Fx _
+
+_ must have type NatF (Fix NatF)
+
+What is NatF (Fix NatF) ?
+
+data NatF (Fix NatF) : Set where
+ 0' : NatF (Fix NatF)
+ suc' : (Fix NatF) -> NatF (Fix NatF)
+
+So we can use the object "0".
+
+val : Fix NatF
+val = Fx 0'
+
+Alright, now we've got 0:
+
+val1 : Fix NatF
+val1 = Fx (suc' (Fx 0'))
+
+And from here we can get everything else.
+*Needs a proof
+
+
+alg-Nat : NatF Nat -> Nat
+alg-Nat 0' = 0
+alg-Nat (suc' n) = suc n
+
+Algebra : (F : Set -> Set) -> (A : Set) -> Set
+Algebra F A = (F A) -> A
+
+myNat : Set
+myNat = Algebra NatF Nat
+
+NatF-init : Set
+NatF-init = Algebra NatF (Fix NatF)
+	  = NatF (Fix NatF) -> Fix NatF
+
+
+ex_init_alg : NatF-init
+ex_init_alg : NatF (Fix NatF) -> Fix NatF
+ex_init_alg = Fx
+ 
+ex_init_alg (suc' (Fx 0')) = Fx (suc' (Fx 0'))
+
+
+
+hom : Fix NatF -> a
+alg : NatF a -> a
+
+
+
+
+TODO:
+* Use Y-combinator for fixed-point
+* Prove that NatF is actually a functor
+* Prove that this algebra is actually initial.
+* Level-polymorphic fixed-point?
+
+
+--------------------------------------------------------------------------------------
+Example, groups:
+
+Groups are pairs (G,*) where G is a set and * : G -> G -> G is a binary operation
+on G, satisfying:
+
+1. Associativity:
+forall x,y,z : x*(y*z) == (x*y)*z
+
+2. Existence of identity:
+exists e : e*x == x & x*e == x
+
+3. Existence of inverses:
+forall x, exists y: x*y == e & y*x == e
+
+--------------------------------------------------------
+
+https://www.schoolofhaskell.com/user/bartosz/understanding-algebras
+
+

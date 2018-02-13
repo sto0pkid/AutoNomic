@@ -1,0 +1,64 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<body>
+Universal quantification.
+<br><br>
+Given some domain of objects A, and some proposition P about those objects, you can form the statement
+<br><br>
+"For every object in A, the proposition P holds about that object"
+<br><br>
+P is actually not just one single proposition, like, "The sky is blue", it's a family of propositions, like "x is blue", where "x" is a variable that can take on values in A.
+<br><br>
+So we can say something like:
+<br><br>
+"For every blueberry x, x is blue"
+<br><br>
+This family of propositions P (also known as a "type family") can be regarded
+as a function taking objects in type A and returning a proposition specialized
+to that object. So in this example it's a function that takes a blueberry as
+input and gives back as output a proposition that asks whether or not that
+blueberry is blue:
+<br><br>
+P(x) = x is blue
+<br><br>
+So, given some blueberry, call it "my_blueberry", we can apply this function 
+to it to get a proposition asking whether "my_blueberry" is blue:
+<br><br>
+P(my_blueberry) = "my_blueberry is blue"
+<br><br>
+So we can write our statement above like so:
+"For every blueberry x, P(x)"
+<br><br>
+In standard math language this would be written something like:
+∀ x ∈ blueberry , P(x)
+<br><br>
+In type theory languages like Agda this might be written something like:
+"(x : Blueberry) -&gt; P x"
+<br>
+<br>
+In constructive logic, if you want to prove that every blueberry is
+blue, you have to construct a proof that x is blue, for every blueberry
+x.
+<br><br><br><br><br>
+
+
+
+TODO:
+<br>
+* Universal quantification is like a generalization of implication
+<br>
+* Evidence for the truth of a universal quantification can be witnessed by a dependent function
+<br>
+* Dependent function is like all the pairs in a dependent product, whereas the dependent product is just one of the pairs
+<br>
+  * Use the picture of a graph of a function
+<br>
+  https://en.wikipedia.org/wiki/Function_(mathematics)#Definition
+<br>
+  * A computable function is like a compression of the pair-space  
+<br>
+* Relationship to fiber-bundles/fibrations
+<br>
+  * Again, use pictures, you get it when you can visualize it
+</body>
+</html>  

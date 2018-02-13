@@ -1,0 +1,16 @@
+catamorphism -- fold
+anamorphism  -- unfold
+hylomorphism -- anamorphisms followed by catamorphisms
+paramorphism
+apomorphism
+homomorphism
+
+endofunctors
+F-algebras
+initial F-algebra
+initial & terminal objects
+
+algebra of types
+
+List X = 1 + A*X
+

@@ -1,0 +1,15 @@
+Glivenko's theorem, 1929
+
+If P is a propositional formula, then P is a classical tautology
+iff. ~~P is an intuitionistic tautology.
+
+If T is a set of propositional formulas, T* a set consisting of the
+double-negated formulas of T, and P a propositional formula, then
+T |- P in classical logic iff. T* |- ~~P in intuitionistic logic.
+
+In particular, a set of propositional formulas is intuitionistically
+consistent iff. it is classically satisfiable.
+
+By the Curry-Howard correspondence, we see that intuitionistic
+proofs have computational content. By the double-negation elimination,
+we see that classical proofs also have computational content.

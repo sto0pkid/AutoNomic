@@ -1,0 +1,22 @@
+SKI combinatory logic:
+
+I x 	= x
+K x y	= x
+S x y z	= x z (y z)
+
+T : CL -> LC
+T(I) = \x.x
+T(K) = \x.\y.x
+T(S) = \x.\y.\z.x z (y z)
+T(AB) = T(A)T(B)
+
+
+Trivial.
+
+
+http://www.cs.vu.nl/~tcs/trs/terese-lambda.pdf
+Definition 10.1.20
+
+Proposition 10.1.22: For t,t' in CL, t --NF_CL--> t' implies T(t) --NF_LC-->T(t').
+
+

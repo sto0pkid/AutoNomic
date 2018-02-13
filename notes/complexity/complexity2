@@ -1,0 +1,74 @@
+Possibility 1:
+Algebra of programming in agda
+Hylomorphisms
+??
+
+
+Possibility 2:
+Prove things about complexity in models of computation
+How does this apply back up to proof-normalization?
+
+
+Possibility 3:
+Allow the proof-system to reason about intensional properties
+of programs. How to do it without breaking function extensionality?
+
+
+Possibility 3.1:
+Attempt to reconcile function extensionality and univalence with the desire
+to reason about intensional properties of programs.
+
+Possibility 3.1.1:
+Attempt to separate functions from their implementations so that they can
+be reasoned about separately. Problematic, the separation is difficult because
+function extensionality is global, typically.
+
+Possibility 3.1.2:
+Break the globality of function extensionality and univalence, i.e.
+signature/context-restricted univalence.
+
+
+
+Possibility 3.2:
+Reject function extensionality, allow the proof-system to reason
+about intensional properties of programs. How then to interface 
+back to real-world logic and abstraction?
+
+Possibility 4:
+Disable automatic normalization.
+Solves the problem, but introduces other ones. In order to use
+the output of a function for some input you must prove that the
+function has that output for that input, without relying on
+automatic normalization. This might be okay for some things, what
+about work verification though?
+
+
+Possibility 5:
+Reason externally about program complexity.
+When/how does this actually give any "guarantees"?
+
+
+Possibility 6:
+Impose inherent restrictions on the complexity of programs
+that can even be written in the language, cf. Pola, for
+polynomial-time complete functional programming.
+Polynomial coefficients and exponents can still be unfeasibly
+large!
+This breaks the expressiveness of the logic, as both a logic
+and a programming language.
+
+
+Possibility 7:
+Rather than proving complexity of functions directly, prove things
+about the complexity of *problems* relative to the algorithms that
+can solve them, leave it up to the users to choose their implementations,
+operate under the assumption that users aren't going to purposefully
+slow themselves down by choosing known-to-be-sub-optimal algorithms.
+
+
+Possibility 8:
+Built-in mechanism to bound the number of normalization steps during
+type-checking based on consensus of the network, i.e. a global
+maxStepCount.
+
+

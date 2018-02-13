@@ -1,0 +1,15 @@
+Homotopy fiber:
+
+f : A -> B, b : B |- hfiber(f, b) := Sigma (a : A), (f a == b)
+
+f : A -> B |- isEquiv(f) := Pi (b : B) isContr(hfiber(f,b))
+
+isContr(X) := Sigma(x : X).Pi(y : X).(y == x)
+
+f : A -> B |- isEquiv(f) := Pi (b : B).Sigma(x : hfiber(f,b)).Pi(y : hfiber(f,b)).(y == x)
+
+f : A -> B |- isEquiv(f) := Pi (b : B).Sigma(x : Sigma(a : A),(f a == b)).Pi(y : Sigma(a : A).(fa == b)).(y==x)
+
+
+
+

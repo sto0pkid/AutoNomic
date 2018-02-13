@@ -1,0 +1,60 @@
+Nat type
+
+www1.maths.leeds.ac.uk/~pmtng/Slides/lecture1.pdf
+
+Type Formation:
+
+-----------------
+ Nat : Type
+
+
+{} => {Nat a Set}
+
+
+
+
+Introduction:
+				n : Nat
+------------------	----------------------
+ 0 : Nat			suc n : Nat
+
+
+{} => {0 a Nat}
+{?n a Nat} => {?n suc ?s. ?s a Nat}
+
+
+
+Elimination:
+
+                                x : Nat, y : C(x)
+					~            <-- is this proof-under assumption what the e:findall is used for?
+c : Nat      d : C(0)           e(x,y) : C(suc x)
+---------------------------------------------------
+              natrec(c,d,e) : C(c)
+
+
+and C is a predvar... hrm
+
+
+
+{?c a Nat. 0 ?C ?C0. ?d a ?C0. ..?e.. ?c ?C ?Cc} => {?x natrec1 ?c. ?x natrec2 ?d. ?x natrec3 ?e. ?x a ?Cc}
+
+
+
+Computation:
+
+		x : Nat, y : C(x)
+		       ~
+d : C(0)    	e(x,y) : C(suc x)
+---------------------------------------
+      natrec(0,d,e) = d : C(0)
+
+
+				x : Nat, y : C(x)
+				      ~
+n : Nat      d : C(0)		e(x,y) : C(suc x)
+--------------------------------------------------
+natrec(suc n, d, e) = e(n, natrec(n,d,e)) : C(suc n)
+
+
+      

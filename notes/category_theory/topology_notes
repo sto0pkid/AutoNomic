@@ -1,0 +1,165 @@
+In a world where everything is continuous....
+
+
+The problem with LEM in topological models of type theory is
+that it might not hold *continuously*, e.g. a subspace U in X
+and its complement X\U will together contain all the points of
+X, but the map from their coproduct U + (X\U) to X does not
+have a *continous* section because the topology on the domain is
+different. 
+
+Add discontinuity?
+
+Lawvere & Menni: axiomatization of categories of cohesive spaces
+in terms of adjoint functors and their properties.
+
+
+If all functions N^N -> N are continuous, then 0 = 1
+
+1. Continuity, choice and extensionality are together impossible
+2. No extensional modulus-of-continuity functional M
+3. But here we are in *intensional* MLTT
+4. No *continuous* modulus-of-continuity functional M
+5. Used hypothetical M to produce a non-continuous function f and
+	thus proved M wrong.
+6. This is exactly what's happening in the topological topos
+	* All functions are continuous
+	* But there is no continuous way of finding moduli of continuity
+	* No finite amount of information about f suffices to determine
+	  its modulus
+
+
+If you try to say that f : X -> Y is a surjection by saying:
+
+Pi (y : Y) Sigma (x : X), f x = y
+
+You are actually saying that f has a section Y -> X.
+If E is a fiber bundle over a base space B, i.e. pi : E -> B
+then a section of that fiber bundle is a continuous map
+sig : B -> E, such that pi(sig(x)) = x, for all x in B.
+
+Dependent product is a universal construction in cat theory,
+it generalizes the internal hom, and hence indexed products,
+to the situation where the codomain may depend on the domain,
+hence it forms sections of a bundle.
+
+Cartesian product of sets makes sense for any family of sets.
+Category-theoretic product makes sense for any family of objects.
+However, both are indexed by sets, how to make them indexed by
+objects?
+
+First describe a family of objects indexed by an object.
+Interpret this as a bundle, that is, an arbitrary morphism g : B -> A
+A is the index object / base space, g is a bundle, B is the total
+space. The fiber of the bundle over the element x in A would be the
+set indexed by x. The fiber is the collection of points in B that
+are mapped to x by g.
+
+Dependent function type is right-adjoint to the base change functor
+Dependent product type is left-adjoint to the base change functor
+
+Can regard dependent function as an ordinary function with codomain
+the union of the various codomains, but besides for losing information
+the function we get does not respect the underlying symmetries.
+
+Tuples are dependent functions.
+
+Homotopic interpretation of parameters vs. indices, parameters are like
+holding a point in the space fixed and asking a question relative to that
+point, and indices are asking for an arbitrary point.
+
+(x : A) |- B(x) : Type
+
+If the types B(x) are the fibers B -->> A, their dependent sum should
+be the object B: 
+
+
+(x : A) |- B(x) : Type		B -->> A -->> 1
+
+|- (Sig (x : A) . B(x)) : Type		B -->> 1
+
+Dependent sums corresponds to composition of "display maps"?
+Dependent products corresponds to exponentiation of display maps
+
+In the context of HoTT, display maps are fibrations.
+
+Let G and D be contexts such that
+
+G = x0 : A0, x1 : A1(x0), ... xn : An(x0,x1,...,x(n-1))
+D = y0 : B0, y1 : B1(y0), ... yn : Bn(y0,y1,...,y(n-1))
+
+
+A morphism G -> D in the category of contexts Con(T), for some type theory T
+consists of a sequence of terms
+
+G |- t0 : B0
+G |- t1 : B1(t0)
+.
+.
+.
+G |- tn : Bn(t0,t1,...,t(n-1))
+
+
+Con(T) is not just a "structured category", it gives a "split model of type
+theory".
+
+Given a context G and a type X, there is a new context [G, x:X]
+Given a term t : X, there is a "canonical" morphism G -> [G, x:X]
+ which "picks" that term in X. The base-change functor along this
+ morphism [t/x]* : Con(T)/[G,x:X] -> Con(T)/G
+
+is the operation of substitution of variables. It sends a dependent type
+G, x : X |- P(x) to G |- P(t)
+
+There is also the "canonical" morphism of contexts:
+x' : [G, x : X] -> G, which simply forgets x.
+
+The base-change along this morphism is the context-extension functor:
+x'* : Con(T)/G -> Con(T)/[G,x:X]
+
+Its right adjoint is the dependent product functor Pi(x:X) giving the
+universal quantifier forall(x:X) and its left adjoint is the dependent
+sum functor Sigma(x:X) giving the existential quantifier.
+
+In the category Set, a pullback is a subset of the cartesian product of
+two sets. Given f : A -> C, and g : B -> C
+
+         B
+         |
+         |g
+         |    
+         v 
+A -----> C 
+    f
+
+The pullback of this diagram is the subset X in A*B consisting of pairs
+(a,b) such that the equation f(a) = g(b) holds. A pullback is therefore
+the categorical semantics of an equation..?
+
+In type theory, a pullback P in 
+
+P ------>B
+|        |
+|        |g
+|        |
+v        v
+A------->C
+    f
+
+corresponds to Sigma (x : A). Sigma(y : B). (f(x) == g(y))
+
+
+You should instead say:
+
+Pi (y : Y) || Sigma (x : X), f x = y||
+
+
+
+
+Kleene-Kreisel functionals
+
+If we assume that all functions 2^N -> N are continuous, then 
+we can show constructively that the full type hierarchy is
+equivalent to the Kleene-Kreisel continuous hierarchy.
+
+

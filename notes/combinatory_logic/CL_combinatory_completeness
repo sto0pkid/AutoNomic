@@ -1,0 +1,77 @@
+Combinatory completeness means you can implement all combinators of the lambda calc with
+your chosen subset of them.
+
+Ingredients for combinatory completeness:
+1. Remove args
+2. Repeat args
+3. Rearrange args
+4. Group args
+
+* probably with a mechanism for deferred computation to make it simple & modular.
+* probably with a mechanism for recursion
+* probably with a mechanism for sequencing
+
+ 
+--------------------------------------------------------------------------------------------
+
+
+Consider SK combinators:
+
+K x y = x.
+
+K removes the 2nd argument, but:
+K doesn't repeat any arguments
+K doesn't rearrange any arguments
+K doesn't parenthesize any arguments
+
+
+So, K by itself can't have combinatory completeness.
+
+
+S x y z = x z (y z)
+
+S repeats the 3rd argument
+S rearranges the 2nd and 3rd arguments
+S parenthesizes the 2nd and 3rd arguments, but:
+S doesn't remove any arguments
+
+So S by itself can't have combinatory completeness either.
+
+But together, they have all the necessary ingredients.
+
+--------------------------------------------------------------------------------------------
+
+Consider BCKW combinators:
+
+Bxyz = x(yz)		Parenthesizes
+Cxyz = xzy		Rearranges
+Kxy  = x		Removes
+Wxy  = xyy		Repeats
+
+Completeness of the BCKW basis can be demonstrated by a translation of
+the SK basis into BCKW.
+This translation is demonstrated in `notes/CL_SKI_to_BCKW`
+
+
+--------------------------------------------------------------------------------------------
+
+Consider BRKD combinators:
+
+Bxyz = x(yz)		Parenthesizes
+Rxy  = yx		Rearranges
+Kxy  = x		Removes
+Dx   = xx		Repeats
+
+Completeness of the BRKD basis can be demonstrated by a translation of
+the BCKW basis into BRKD.
+This translation is demonstrated in `notes/CL_BCKW_to_BRKD`.
+
+
+--------------------------------------------------------------------------------------------
+
+TODO:
+* Proof of combinatory completeness for SK
+* Does every set of combinators that can perform these 4 operations have combinatory completeness?
+* Can rearranging be done with just parenthesization, removal, and repetition?
+
+

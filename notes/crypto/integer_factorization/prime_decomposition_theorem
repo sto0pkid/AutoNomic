@@ -1,0 +1,21 @@
+Every natural number >= 2 is equal to some product of powers of primes.
+Further, this product is unique.
+
+2 = 2^1.
+
+If all numbers between 2 and n (inclusive) factor into a product of primes, 
+then n+1 factors into a product of primes.
+Assume (n+1) does not have any factors other than 1 or itself, then it's
+prime and so the decomposition as a product of primes is (n+1) = (n+1)^1, and
+we're done.
+
+Otherwise, assume (n+1) has factors p,q such that 1 < p < (n+1) and
+1 < q < (n+1). 
+
+Then p factors into a product of primes, prod{i=1...inf}{p_i^s_i} and so does 
+q, as prod(i=1...inf}({p_i^t_i}
+
+so, p*q = prod(i=1...inf){p_i^(s_i + t_i)}
+
+Which is a product of primes.
+

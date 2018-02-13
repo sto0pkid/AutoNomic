@@ -1,0 +1,95 @@
+Markov's principle: for a quantifier free formula P
+
+MP1:
+~~Ex x . P  => Ex x . P
+
+
+in Heyting Arithmetic (HA)
+
+
+
+MP2:
+[All x [P v Q]], [~ All x P] => [Ex x . Q]
+
+
+MP2 -> MP1
+
+
+Friedman translation:
+
+
+P*		= P v (Ex x.Q)
+(B v C)*	= B* v C*
+(B ^ C)*	= B* ^ C*
+(B => C)*	= B* => C*
+(all x . B)*	= all x . B*
+(ex x . B)*	= ex x . B*
+_|_*		= Ex x.Q
+
+
+If B is provable in HA, then so is B*:
+
+Case 1:
+ If P is provable in HA, then so is P* = P v (Ex x.Q).
+ Use the proof of P as the left disjunct for P v (Ex x.Q)
+
+Case 2:
+ If (B v C) is provable in HA, and
+  * hyp1 = if B is provable in HA then so is B*
+  * hyp2 = if C is provable in HA then so is C*
+ then so is (B v C)* = (B* v C*)
+ If (B v C) is provable in HA then either B is provable or
+ C is provable. Assume it's B, then B* is provable by hyp1
+ and so we can use that as the left disjunct for (B* v C*).
+ Assume instead that it was C, then C* is provable by hyp2
+ and so we can use that as the right disjunct for (B* v C*).
+
+Case 3:
+ If (B ^ C) is provable in HA, and
+  * hyp1 = if B is provable in HA then so is B*
+  * hyp2 = if C is provable in HA then so is C*
+ then so is (B ^ C)* = (B* ^ C*)
+ If (B ^ C) is provable in HA then both B and C are provable.
+ By hyp1 and hyp2, both B* and C* are provable and thus
+ by ^-intro we can prove (B* ^ C*)
+
+Case 4:
+ If (B => C) is provable in HA, and
+  * hyp1 = if B is provable in HA then so is B*
+  * hyp2 = if C is provable in HA then so is C*
+ then so is (B => C)* = B* => C*.
+ If B => C is provable then C is provable under the assumption that
+ B is provable. If C is provable under the assumption that B is provable
+ then C* is provable under the assumption that B is provable. 
+ If we assume B is provable, then by hyp1 we can assume B* is provable.
+ And then we get C* is provable under the assumption that B* is provable?
+  * seems I'm fudging some details there
+
+Case 5:
+ If (all x . B) is provable in HA, and
+  * hyp1 = if B is provable in HA then so is B*
+ then so is (all x . B)* = (all x . B*)
+ If (all x . B) is provable then ....
+
+
+Case 6:
+ If (ex x . B) is provable in HA, and
+  * hyp1 = if B is provable in HA then so is B*
+ then so is (ex x. B)* = (ex x . B*)
+ If (ex x . B) is provable then ....
+
+
+Case 7:
+ If _|_ is provable in HA then Ex x. Q is provable in HA
+ If we have a proof of _|_, then apply principle of explosion
+ and get the proof of Ex x. Q
+
+
+
+
+If B = ~(all x . ~Q) then B <-> (Ex x . Q)
+
+If ~(all x .~Q) is provable in HA, with Q quantifier-free, then 
+so is (ex x . Q).
+
+

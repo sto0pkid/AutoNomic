@@ -1,0 +1,130 @@
+data Nat : Set where
+ 0 : Nat
+ suc : Nat -> Nat
+
+_+_ : Nat -> Nat -> Nat
+0 + n = n
+(suc m) + n = suc (m + n)
+
+Alright, how do we prove the correctness of this?
+How do we map the informal concept of "number" into the concrete
+terms of our language? One place to start would be to make the
+concept of number more formal, not by providing a concrete datatype
+but by providing a logical characterization of what we mean by
+"number" or what behaviors & characteristics we want "numbers" to
+have.
+
+x + y should be characterized by, if |X| = x, and |Y| = x, then
+ |disjoint_union(X,Y)| = x + y.
+
+
+
+
+
+_*_ : Nat -> Nat -> Nat
+0 * n = 0
+(suc m) * n = n + (m * n)
+
+x * y should be characterized by, if |X| = x, and |Y| = y, then
+ |cartesian_product(X,Y)| = x * y.
+
+
+
+
+
+
+
+_^_ : Nat -> Nat -> Nat
+n ^ 0 = (suc 0)
+n ^ (suc m) = n * (n ^ m)
+
+x ^ y should be characterized by, if |X| = x, and |Y| = y, then
+ |Y -> X| = x ^ y
+
+
+pred : Nat -> Nat
+pred 0 = 0
+pred (suc n) = n
+
+pred is left-inverse to suc:
+pred (suc n) = n
+
+pred.suc = id
+
+
+
+
+sub : Nat -> Nat
+sub 0 		0 		= 0
+sub 0 		(suc n) 	= 0
+sub (suc m)	0		= (suc m)
+sub (suc m) 	(suc n) 	= sub m n
+
+
+sub _ n is left-inverse to add _ n:
+sub (add m n) n = m
+(sub _ n).(add _ n) = id
+
+
+fact : Nat -> Nat
+fact 0 		= 1
+fact (suc n) 	= (suc n) * (fact n)
+
+
+
+data Int : Set where
+ 0 : Int
+ pos : Nat -> Int
+ neg : Nat -> Int
+
+
+_+_ : Int -> Int -> Int
+0 		+ 0 		= 0
+0		+ (pos y)	= pos y
+0		+ (neg y)	= neg y
+(pos x)		+ 0		= pos x
+(neg x)		+ 0		= neg x
+
+(pos 0) 	+ (pos y) 	= pos (suc y)
+(pos (suc x))	+ (pos y)	= (pos x) + (pos (suc y))
+(pos 0)		+ (neg y)	= neg y
+(pos (suc x))	+ (neg 0)	= pos x
+(pos (suc x))   + (neg (suc y))	= (pos x) + (neg y)
+
+(neg 0)		+ (pos 0)	= 0
+(neg (suc x))	+ (pos 0)	= neg x
+(neg 0)		+ (pos (suc y))	= pos y
+(neg (suc x))	+ (pos (suc y))	= (neg x) + (pos y)
+
+Should come with a proof that it covers all cases.
+Or just write it better so that it obviously covers all cases...
+ But then still prove it!
+Also a proof of "correctness". (A precise characterization of correctness
+is becoming increasingly difficult to pin down.)
+
+
+_*_ : Int -> Int -> Int
+0		* y		= 0
+(pos 0)		* y		= y
+(pos (suc x))	* 0		= 0
+(pos (suc x))	* (pos y)	= (pos y) + ((pos x) * (pos y))
+(pos (suc x))	* (neg 0)	= neg (suc x)
+(pos (suc x))	* (neg (suc y))	= ((pos (suc y)) + ((pos x) * (pos (suc y)))) * (neg 0)
+(neg 0)		* 0		= 0
+(neg 0)		* (pos y)	= neg y
+(neg 0)		* (neg y)	= pos y
+(neg (suc x))	* 0		= 0
+(neg (suc x))	* (pos 0)	= neg (suc x)
+(neg (suc x))	* (pos (suc y))	= ((pos (suc y)) + ((pos x) * (pos (suc y)))) * (neg 0)
+
+How can we do case-matching better? We're kind of stuck with this arbitrary
+structuring until we have more fine-tuned control over which cases we use, how
+we actually make the selection for an input, and how we demonstrate that all
+cases are covered.
+
+But that might belong at a higher level in some kind of wrapper around functions
+that can encapsulate that notion using the existing mechanics, rather than changing
+something all the way down in this pattern-matching for regular functions.
+
+
+

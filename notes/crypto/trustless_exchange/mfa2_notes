@@ -1,0 +1,13 @@
+Possibility 2:
+
+Party A and party B set up a 2-of-2 multi-factor authentication wallet.
+Both Party A and party B send the assets they want to exchange to this
+wallet. B communicates to A where they want the coins to be sent, and
+A signs a multi-output tx sending B's asset to A's wallet and A's asset
+to B's wallet. B signs this tx and sends it through.
+
+All good, trustless exchange.
+
+The only problem: the black-hole & extortion problem.
+
+

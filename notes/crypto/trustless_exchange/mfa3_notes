@@ -1,0 +1,51 @@
+Possibility 3:
+
+Party A and Party B create a multi-sig "escrow" address together.
+
+Party A creates a tx, txA, to send her asset to the escrow address, and
+so Party B does likewise with his, call it txB.
+
+Based on these tx's. Party A creates a "refund" tx, call it rtxA, which has
+the output of txA as its input, for the amount that txA should be sending, and
+which has as its output another address under Party A's sole control. This
+will allow Party A the ability to pull out of the transaction.  Party B does 
+likewise, call his refund transaction rtxB.
+
+At this point, Party A and Party B share rtxA and rtxB. They will each
+be able to see how much the other is expecting to be able to withdraw as
+a refund. This isn't a guarantee that they actually send it to the escrow
+address in the first place, but they will almost surely send either this 
+amount or nothing at all. Each party should sign the other's refund tx in 
+order for the overall transaction to move forward.
+
+When either of the parties has their refund tx's signed by both parties,
+they can safely transfer their assets to the escrow address and they
+will be able to recover them without risk of the other party being able
+to steal it
+
+So at that stage, both parties broadcast their txA and txB.
+
+When both parties have gotten their assets into the escrow address then 
+either party can initiate the final "exchange" tx, which will be a single 
+tx with multiple outputs sending the output of txA to an address under B's 
+sole control, and the output of txB to an address under A's sole control. 
+
+If either refund tx is sent, it will invalidate the exchange tx, and
+likewise if the exchange tx is sent, it will invalidate both refund txs.
+
+Risk-free trustless exchange between Omni and Bitcoin layer, modulo
+the low-level details?
+
+
+FROM	INPUT	  TX	       TX_OUT	   TO		SHARED?
+-------------------------------------------------------------------
+A  	[AGRS]	  --- tx1 ---> tx1_out0  / ESCROW	unshared
+ESCROW  tx1_out0  --- rtx1 --> rtx1_out0 / A		shared
+
+B	[BTC]	  --- tx2 ---> tx2_out0  / ESCROW	unshared
+ESCROW  tx2_out0  --- rtx2 --> rtx2_out0 / B		shared
+
+ESCROW 	tx1_out0  --- extx --> extx_out0 / B		shared
+	tx2_out0  --- extx --> extx_out1 / A		shared
+
+

@@ -1,0 +1,47 @@
+Solve equations of the form:
+
+x = y1 (mod k1)
+x = y2 (mod k2)
+...
+x = yN (mod kN)
+
+whenever the k_i are pairwise coprime.
+
+Further, the solution is unique, modulo the product of k_i.
+
+Start with:
+
+			mod k1		mod k2		...	mod kN
+x		=	k2*...*kN  +	k1*k3*..kN	+	k1*k2*...k(N-1)
+
+x mod k1	=	k2*...*kN  +	0		+	0
+x mod k2	=	0	   +	k1*k3*..kN	+	0
+...
+x mod kN	=	0	   +	0		+ 	k1*k2*...k(N-1)
+
+Now we want to find c1, ..., cN such that:
+
+y1 mod k1	=	c1*k2*...*kN
+y2 mod k2	= 	c2*k1*k3*...*kN
+...
+yN mod kN	= 	cN*k1*k2*...*kN
+
+
+yi mod ki	= 	ci*k1*k2*...*k(i-1)*k(i+1)*...*kN
+
+remainder(ki/yi) = 	ci*k1*k2*...*k(i-1)*k(i+1)*...*kN
+
+
+Bezout's identity: For any nonzero integers a and b, for which gcd(a,b) = d, then
+there exists integers x and y such that ax + by = d
+
+gcd(ki,k1*k2*...*k(i-1)*k(i+1)*...*kN) = 1
+
+Therefore by Bezout's identity, there exists integers x and y such that 
+
+x*ki + y*k1*k2*...*k(i-1)*k(i+1)*...*kN = 1
+
+
+First do the case with two moduli and then extend to 
+the general case.
+

@@ -1,0 +1,15 @@
+phi(n) counts the positive integers up to a given integer n that are
+relatively prime to n.
+
+phi is a multiplicative function; that is:
+phi(mn) = phi(m)*phi(n) if m and n are relatively prime.
+
+phi gives the order of the multiplicative group of integers modulo n
+
+
+
+phi(n) = n * prod({p in prime | (p div n)}){1 - 1/p}
+
+If a and b are coprime, then gcd(n,ab) = 1 iff. gcd(n,a) = gcd(n,b) = 1.
+
+

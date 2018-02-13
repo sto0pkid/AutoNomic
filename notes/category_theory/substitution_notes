@@ -1,0 +1,39 @@
+In the categorical semantics of type theory:
+
+ * Terms are interpreted as *morphisms*
+ * Substitution of a term into another term is interpreted by composition of the relevant morphisms
+ * Propositions are interpreted by subobjects
+ * Substitution of a term t into a proposition P is interpreted by pullback or inverse image
+	of the subobject interpreting P along the morphism t.
+ * Dependent types are interpreted as display maps
+ * Substitution of a term t into a dependent type B is interpreted as pullback of the display map
+	interpreting B along the morphism t.
+ * Dependent types also correspond to classifying morphisms into a type of types.
+   * Substitution then corresponds to composition of these classifying morphisms.
+
+
+Andrej Bauer: "Substitution is Pullback"
+
+Suppose we have an expression t(x) which describes a function A -> B mapping x to t(x),
+and a predicate on B, i.e. an expression P(y) which tells us whether any given y in B
+has a given property. The we can define a new predicate Q(x) on A by
+	Q(x) = P(t(x))
+
+No big deal right?
+
+We substituted the term t(x) into the expression P(y)
+
+t(x) corresponds to some function A -> B
+P corresponds to some subset of B, those objects in B satisfying the property expressed by P
+Q corresponds to some subset of A, namely:
+	Q = {x : A | t(x) in P}
+
+
+Apparently this Q is the "pullback" of the inclusion P.sub.B along t.
+
+Category of contexts and substitutions
+
+The category of contexts in a theory forms its "syntactic category"
+ * Objects in the category are contexts in the type theory
+ * Morphisms between contexts are substitutions/interpretations of variables
+

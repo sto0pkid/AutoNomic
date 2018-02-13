@@ -1,0 +1,17 @@
+1.
+There exist transcendental numbers (numbers that are not the roots of any polynomials with coefficients in the integers). 
+
+Nonconstructive proof:
+Thanks to Cantor in 1874
+The polynomials with coefficients in the integers are countable.
+ * Requires subproof
+Therefore the set of algebraic numbers is countable.
+ * Requires subproof
+However the reals are not countable
+ * Hence there must be reals which are not algebraic, and hence transcendental.
+ * Further there must be uncountably many transcendental numbers.
+
+This is non-constructive because it claims the existence of transcendental numbers
+without actually demonstrating one.
+
+

@@ -1,0 +1,183 @@
+Extensionality of lambda-beta-eta calculus:
+Adding eta-reduction lambda-calculus yields an "extensional" system, that is:
+for terms M, N, and free variable x, Mx = Nx under beta-eta implies M = N under beta-eta. 
+
+Yes, this is indeed saying "and free variable x" rather than, "and for all terms x".
+Under the axioms xsi, cong & beta, MA = NA is true for all terms iff. Mx = Nx where x is a fresh variable. How do we demonstrate this?
+
+beta:
+
+---------------
+(\x.M)N --B--> M[x:=N]
+
+
+
+Ex.
+
+------------------------
+(\x.x)a --B--> x[x:=a]
+
+
+Note, x[x:=a] is literally just "a"
+
+
+
+cong1:
+
+X --B--> Y
+--------------
+XZ --B--> YZ
+
+Ex.
+
+---------------------  by beta
+ (\x.x)a --B--> a
+-------------------------------- by cong1
+((\x.x)a)(\y.y) --B--> a(\y.y)
+
+
+
+
+
+cong2:
+N --B--> N'
+--------------
+MN --B--> MN'
+
+
+Go for it :)
+
+(\x.x)((\y.y)z) --B--> (\x.x)z ?? yp that's right, dammit i can't type XD haha
+
+\x.x(\y.y) --B--> \y.y ?
+
+
+
+
+
+
+xsi:
+M --B--> M'
+--------------
+(\x.M) --B--> (\x.M')
+ 
+why is it not: (\x.M) --B--> M ?
+That would change the semantics of the term
+
+so like
+
+(\x.x) --B--> x? no.
+so, xi, reduces the body of the outer lam? doesn't touch the structure of it though, of the outer lam, that is.
+exactly
+rad
+
+so, if the rules could apply to inner expressions rather than *only* the outer expressions, then
+we wouldn't need the xi rule because we could just apply beta and cong1 and cong2 and w/e else we have
+directly to the body
+
+but since they do apply *only* to the outer expression, those other rules won't unpack the lambda body
+for us and so we need this rule to basically extract M and ask for a derivation of (a reduction for) it 
+in the premises of the rule, and then you can apply the other rules to derive M --B--> M'
+
+so when applying those other rules to try to derive this, M becomes the outer expression and that ties
+everything together allowing you to apply the rules to subterms as you recurse down through the structure.
+
+Example:
+
+ 
+---------------------------- beta
+ (\y.y)a --B--> a			now (\y.y)a is the outer expression, so beta applies to it
+---------------------------- xi
+(\x.(\y.y)a) --B--> (\x.a)		(\x....) is the outer expression, nothing to reduce here
+
+
+
+(\x.(\y.y)a) --XI-B--> (\x.a)
+er, xi, then beta
+ah
+i see what you're saying
+since these uhm 'reduction'(?) rules can be applied in chains
+so, the --B--> is a binary relation;
+considering the lambda calc as a rewrite systemo,I thought that stood fo..sry
+beta reduction, yes
+or, beta equivalence, maybe i should say
+so, rewrite systems are graphs with nodes (the terms) and edges (the rewrite relation)
+for lambda calc the nodes are lambda exprs and the rewrite relation is called beta
+which is slightly confusing because they double up that name for the "beta rule"
+
+so, when they toss in different rules to the system, these rules are basically
+describing the rewrite relation of the system, when considering it as a rewrite system.
+
+so normally the rewrite relation is just written as an arrow --->
+but then including different rules changes the rewrite relation, so in literature
+you'll see them specifying which rewrite relation they're actually referring to
+like --->B for a rewrite system that only has the beta rule
+--->B,XI for ...
+
+but since i don't have fancy subscripts and greek characters i just write
+--B-->
+
+It makes more sense to me written like that. --_-->
+
+in the literature they can do all kinds of more fancy typesetting stuff like make the B and XI small
+and stick them above or below the arrow, but, no such luck in vim on terminal :)
+
+Latex and all. emacs agda-mode h as that. will that render (well) on terminal though? terminal
+doesn't even like my use of unicode chars heh
+
+
+
+
+
+Define beta-reduction to be the smallest relation on lambda terms satisfying those
+axioms.
+
+Define --B-->> as the reflexive-transitive closure of --B-->, i.e. the smallest
+reflexive transitive relation containing --B-->. i.e. 
+M --B-->> M' if M' can be reached from M through 0 or more steps of --B-->.
+
+
+Consider f and f' = (\x.fx), then forall terms y, fy = f'y
+
+Proof: f'y = (\x.fx)y = fy.
+
+
+ext-forall :
+
+forall A, MA = M'A
+------------------
+  M = M'
+
+
+ext:
+
+Mx = Nx, where x not in FV(M, N)
+----------------------------
+ M = N
+
+
+eta:
+
+------------------------
+M = (\x.Mx), where x not in FV(M)
+
+
+1) (ext) + (beta) --> (eta)
+Mx = (\x.Mx)x, if x not in FV(M); x certainly is not in FV(\x.Mx)
+But according to (beta), (\x.Mx)x = Mx
+And according to (ext), which applies because x not in FV(M,\x.Mx), this implies M = (\x.Mx).
+
+2) (eta) + (xsi) --> (ext)
+Assume Mx = M'x for some terms M and M' such that x not in FV(M,M').
+Then according (xsi), (\x.Mx) = (\x.M'x)
+But according to (eta), M = (\x.Mx), and (\x.M'x) = M'
+By transitivity of equality, we arrive at M = M', thus demonstrating (ext).
+
+
+
+eta is independent of beta; in particular:
+f =/= \x.fx under (beta) without (eta).
+
+
+
+
