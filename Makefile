@@ -1,4 +1,4 @@
-CXX=clang++-libc++ -stdlib=libc++ 		
+CXX=clang++-11 -stdlib=libc++ 		
 ASAN=   -Xclang -fcolor-diagnostics -ferror-limit=10 -fsanitize=address -fsanitize=integer -fsanitize=unsigned-integer-overflow -fsanitize=undefined -ggdb -gline-tables-only # -fsanitize-undefined-trap-on-error 
 DEBUG=  -DDEBUG -O0  -fno-omit-frame-pointer -fno-optimize-sibling-calls 
 DBG= $(ASAN) -g -ggdb $(DEBUG)
