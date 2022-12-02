@@ -10,7 +10,9 @@ A p2p nomic game.
 ```apt-get install -y build-essential autoconf automake libtool```
 
 #### For the n3 parser:
-```apt-get install libboost-regex-dev apt-get install clang-3.6 libc++-dev```
+```apt-get install libboost-regex-dev```
+
+```apt-get install clang-3.6 libc++-dev```
 
 C++ Compiler has to support C++11, gcc-4.9 and clang++-3.6 are known to work.
 
