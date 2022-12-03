@@ -1,13 +1,13 @@
-#include <stdio.h>
-#include <sstream>
-#include <tuple>
+#include <cassert>
 #include <iostream>
+#include <locale>
 #include <queue>
-#include <stack>
 #include <set>
+#include <sstream>
+#include <stack>
 #include <stdexcept>
-#include <locale>	// std::locale, std::tolower
-#include <cassert>	// assert()
+#include <stdio.h>
+#include <tuple>
 
 #include "univar.h"
 
@@ -16,10 +16,6 @@
 #ifdef with_marpa
 #include "marpa_an.h"
 #endif
-
-//#include <boost/algorithm/string/predicate.hpp>
-//#include <boost/lexical_cast.hpp>
-//#include <boost/algorithm/string.hpp>
 
 #include "pstreams-0.8.1/pstream.h"
 
@@ -34,7 +30,6 @@
 // to hold a kb/query string
 string qdb_text;
 
-enum Mode {COMMANDS, KB, QUERY, SHOULDBE, OLD, RUN};
 
 string format = "";
 string base = "";
@@ -89,18 +84,22 @@ bool done_anything = false;
 
 results_t cppout_results;
 
+/*
+ * The structure is essentially the interface for a stack with an undoable
+ * "pop". 
+ *
+ */
 
 class Input
 ;
+
+enum Mode {COMMANDS, KB, QUERY, SHOULDBE, OLD, RUN};
 std::stack<Input *> inputs;
 #define INPUT (inputs.top())
-
-
 
 class Input
 {
 public:
-//Structure
 	bool interactive = false;
 	bool do_reparse = true;
 	bool do_cppout = false;
@@ -129,6 +128,7 @@ public:
 		}
 	}
 };
+
 
 class ArgsInput : public Input
 {
@@ -301,6 +301,7 @@ void set_mode(Mode m)
 }
 
 void help(){
+	done_anything = true;
 	//FIXME : make this more robust by sticking these strings in vars and removing duplication
 	//FIXME : then generalize this so it's just a couple lines
 	//FIXME : make this a better help command heh
@@ -643,11 +644,19 @@ void do_run(string fn)
 		inputs.push(new StreamInput(fn, is));
 	}
 }
-//err
+
+
+
+//err...
 void run()
 {
 	set_mode(RUN);
 }
+
+
+
+
+
 
 void do_query(qdb &q_in)
 {
@@ -658,6 +667,10 @@ void do_query(qdb &q_in)
 }
 
 
+/*
+ * Process a query input.
+ *
+ */
 void cmd_query(){
 	if(kbs.size() == 0){
 		dout << "No kb; cannot query." << endl;
@@ -677,6 +690,10 @@ void cmd_query(){
 }
 
 
+
+
+
+
 void add_kb(string fn)
 {
 	qdb kb;
@@ -686,6 +703,12 @@ void add_kb(string fn)
 }
 
 
+
+
+/*
+ * Process a kb input.
+ *
+ */
 void cmd_kb(){
 	if(INPUT->end()){
 		clear_kb();
@@ -712,6 +735,13 @@ void cmd_kb(){
 		}	
 	}
 }
+
+
+
+
+
+
+
 
 
 //print the prompt string differently to
@@ -781,7 +811,12 @@ bool try_to_parse_the_line__if_it_works__add_it_to_qdb_text() //:)
 
 
 
-
+/*
+ * Gets run when:
+ * 1) An Input is done()
+ * 2) The COMMAND is "-"
+ * 3) The RUN fn is "-"
+ */
 void emplace_stdin()
 {
 	inputs.push(new StreamInput("stdin", std::cin));
@@ -799,51 +834,138 @@ void passthru(string s)
 	m.close();
 }
 
+void check_inputs_done()
+{
+
+	dout << "check_inputs_done()" << std::endl;
+	auto popped = inputs.top();
+	inputs.pop();
+	/*if there werent any args, drop into repl*/
+	if (dynamic_cast<ArgsInput*>(popped))
+		if (!done_anything)
+			emplace_stdin(); 
+
+	//if (!inputs.size())
+		//goto end;
+	//	return false;
+	//return true;
+
+}
 
 
 int main ( int argc, char** argv)
 {
-	//This should probably go logically with other initialization stuff.
-	//Initialize the prover strings dictionary with hard-coded nodes.
+	//Initialize the prover strings dictionary with built-in nodes.
+	dout << "AutoNomic. " << std::endl << std::endl;
+
 	dict.init();
 
 
-	inputs.emplace(new ArgsInput(argc, argv));
+	dout << "Arg count: " << argc << std::endl;
+	dout << "Args:" << std::endl;
+	for(int i = 0; i < argc; i++){
+		dout << "\t" << argv[i] << std::endl;
+	}
+	dout << std::endl;
 
-	//stick the inside of this loop into a function for better readability?
-	while (true) {
-		//
+	auto args_input = new ArgsInput(argc, argv);
+
+	if(argc > 1){
+		inputs.emplace(args_input);
+	}else{
+		emplace_stdin();
+	}
+	//check_inputs_done();
+
+	/* Looping over...
+	 * "Input"s?
+	 * "COMMAND"s?
+	 * lines?
+	 * "token"s?
+	 */
+	bool continue_processing = true;
+	int iteration_index = 0;
+	//while (true) {
+	//while(continue_processing) {
+	while(inputs.size()){
+		iteration_index++;
+		if(iteration_index > 10) break;
+		dout << std::endl << "Main loop " << iteration_index  << std::endl;
+		dout << "Input type: " << INPUT->name << std::endl;
+		/* 
+		 * On the first iteration, INPUT->interactive is false, so this won't
+		 * display anything.
+		 *
+		 */
 		displayPrompt();
 
+		/* 
+		 * On the first iteration, readline() = (){}, so this will have no
+		 * effect.
+		 *
+		 */
 		INPUT->readline();
 
+		/*
+		 * If it's the end of the Input, process the ending.
+		 *
+		 * Maybe this should go to the end of the loop ?
+		 * Why is this while(...) instead of if(...)?
+		 *
+		 */
 		//maybe its time to go to the next input
-		while (INPUT->done()) {
-			auto popped = inputs.top();
-			inputs.pop();
+		//while (INPUT->done()) {
+		//	dout << "while(INPUT->done())" << std::endl;
+		//	continue_processing = check_inputs_done();
+		//	if(!continue_processing) break;
+		//	check_inputs_done();
+			//auto popped = inputs.top();
+			//inputs.pop();
 			/*if there werent any args, drop into repl*/
-			if (dynamic_cast<ArgsInput*>(popped))
-				if (!done_anything)
-					emplace_stdin();
-			if (!inputs.size())
-				goto end;
+			
+			//if (dynamic_cast<ArgsInput*>(popped))
+			//	if (!done_anything)
+			//		emplace_stdin(); 
 
-			displayPrompt();
-			INPUT->readline();
-		}
+		//	if (!inputs.size())
+		//		goto end;
+			
+		//	displayPrompt();
+		//	INPUT->readline();
+		//}
 
+		//if(!continue_processing) break;
+
+
+
+		/*
+		 *
+		 */
 		if (INPUT->mode == COMMANDS) {
+			dout << "INPUT->mode == COMMANDS" << std::endl;
+			dout << "INPUT->name == " << INPUT->name << std::endl;
 			string token = INPUT->pop();
-			if (startsWith(token, "#") || token == "")
+			dout << "token: " << token << std::endl;
+			if (startsWith(token, "#") || token == ""){
+				dout << "COMMAND: empty line or comment" << std::endl;
 				continue;
-			else if (read_option(token))
+			}
+			else if (read_option(token)){
+				dout << "COMMAND: option" << std::endl;
 				continue;
-			else if (token == "help" || token == "halp" || token == "hilfe")
+			}
+			else if (token == "help" || token == "halp" || token == "hilfe"){
+				dout << "COMMAND: help" << std::endl;
 				help();
-			else if (token == "kb")
+			}
+			else if (token == "kb"){
+				dout << "COMMAND: kb" << std::endl;
 				cmd_kb();
-			else if (token == "query")
+			}
+			else if (token == "query"){
+				dout << "COMMAND: query" << std::endl;
 				cmd_query();
+			}
 			else if (token == "shouldbe")
 				set_mode(SHOULDBE);
 			else if (token == "thatsall")
@@ -870,12 +992,15 @@ int main ( int argc, char** argv)
 				continue;
 			}
 		}
+
+
 		else if (INPUT->mode == KB || INPUT->mode == QUERY || INPUT->mode == SHOULDBE) {
 			//dout << "kb/query/shouldbe" << endl;
+			dout << "INPUT->mode == KB || QUERY || SHOULDBE" << std::endl;
 			try_to_parse_the_line__if_it_works__add_it_to_qdb_text();
 			int fins = count_fins();
 			if (fins > 0) {
-
+				dout << "fin." << std::endl;
 				qdb kb,kb2;
 
 				std::stringstream ss(qdb_text);
@@ -943,6 +1068,7 @@ int main ( int argc, char** argv)
 			}
 		}
 		else if (INPUT->mode == RUN) {
+			dout << "INPUT->mode == RUN" << std::endl;
 			string fn = INPUT->pop_long();
 			if (fn == "-")
 				emplace_stdin();
@@ -951,7 +1077,9 @@ int main ( int argc, char** argv)
 		}
 		else {
 			assert(INPUT->mode == OLD);
+			dout << "INPUT->mode == OLD" << std::endl;
 			try_to_parse_the_line__if_it_works__add_it_to_qdb_text();
+
 			int fins = count_fins();
 			if (fins > 1) {
 				kbs.clear();
@@ -966,10 +1094,33 @@ int main ( int argc, char** argv)
 				set_mode(COMMANDS);
 			}
 		}
+	
+
+		//Remove the Input from the stack of Inputs
+		//auto popped = inputs.top();
+		//inputs.pop();
+
+		/*if there werent any args, drop into repl*/
+		//if (dynamic_cast<ArgsInput*>(popped))
+		//	if (!done_anything)
+		//		emplace_stdin(); 
+
+		if(INPUT->done()){
+			check_inputs_done();
+		}
+		dout << "Inputs size: " << inputs.size() << std::endl;
 	}
 
 
-	end:
+	//end:
+	if (args_input) {
+		delete args_input;
+	}
 	if (anProver)
 		delete anProver;
+	while(!inputs.empty()){
+		dout << "Input" << std::endl;
+		delete inputs.top();
+		inputs.pop();
+	}
 }
