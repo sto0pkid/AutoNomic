@@ -27,6 +27,11 @@
 #endif
 
 
+/*
+ * Globals
+ *
+ */
+
 // to hold a kb/query string
 string qdb_text;
 
@@ -34,11 +39,18 @@ string qdb_text;
 string format = "";
 string base = "";
 
+/*
+ * Could be local to the input processor?
+ */
 bool irc = false;
 
 int result_limit = 123;
+
+
 std::set<string> silence;
+
 bool in_silent_part = false;
+
 std::ostream& dout = std::cout;
 std::ostream& derr = std::cerr;
 std::istream& din = std::cin;
@@ -834,39 +846,154 @@ void passthru(string s)
 	m.close();
 }
 
-void check_inputs_done()
-{
+bool run_command(){
+	string token = INPUT->pop();
+	if (startsWith(token, "#") || token == ""){}
+	else if (read_option(token)){}
+	else if (token == "help" || token == "halp" || token == "hilfe"){
+		help();
+	}
+	else if (token == "kb"){
+		cmd_kb();
+	}
+	else if (token == "query"){
+		cmd_query();
+	}
+	else if (token == "shouldbe")
+		set_mode(SHOULDBE);
+	else if (token == "thatsall")
+		thatsall();
+	else if (token == "run")
+		run();
+	else if (token == "shouldbesteps") {
+		//test_result(std::stoi(read_arg()) == anProver->steps_);
+	}
+	else if (token == "shouldbeunifys") {
+		//test_result(std::stoi(read_arg()) == anProver->unifys_);
+	}
+	else if (token == "quit")
+		return false;
+		//break;
+	else if (token == "-")
+		emplace_stdin();
+	else {
+		INPUT->take_back();
+		//maybe its old-style input
+		if (try_to_parse_the_line__if_it_works__add_it_to_qdb_text())
+			set_mode(OLD);
+		else
+			dout << "[cli]that doesnt parse, try again" << std::endl;
+	}
+	return true;
 
-	dout << "check_inputs_done()" << std::endl;
-	auto popped = inputs.top();
-	inputs.pop();
-	/*if there werent any args, drop into repl*/
-	if (dynamic_cast<ArgsInput*>(popped))
-		if (!done_anything)
-			emplace_stdin(); 
+}
 
-	//if (!inputs.size())
-		//goto end;
-	//	return false;
-	//return true;
+void run_code(){
+	try_to_parse_the_line__if_it_works__add_it_to_qdb_text();
+	int fins = count_fins();
+	if (fins > 0) {
+		dout << "fin." << std::endl;
+		qdb kb,kb2;
 
+		std::stringstream ss(qdb_text);
+		auto pr = parse(kb, kb2, ss, INPUT->name);
+
+		if(pr == COMPLETE) {
+			if (INPUT->mode == KB) {
+				kbs.push_back(kb);
+				fresh_prover();
+			}
+			else if (INPUT->mode == QUERY) {
+				if (INPUT->do_query)
+					do_query(kb);
+
+				if (INPUT->do_cppout) {
+					cppout_results.clear();	
+				
+					std::string line;
+
+					passthru("sleep 1; rm cppout out.cpp out.o");
+					//passthru("sleep 1; astyle out.cpp; rm cppout out.o");
+
+					anProver->cppout(kb);
+					stringstream omg;
+					omg << "  || echo  \"test:cppout:make:" << KRED << "FAIL:" << KNRM;
+					string fff=omg.str();
+
+					dout << "Making cppout." << endl;
+					stringstream errss;
+					errss << "make -e -f Makefile2 cppout" << fff << INPUT->name << "\"";
+					passthru(errss.str());
+
+					dout << "Make done." << endl;
+					if (INPUT->do_test)
+					{
+
+					stringstream cmdss;
+			
+					dout << "Running cppout." << endl;	
+					cmdss << "./cppout" << fff << INPUT->name << "\"";
+					redi::ipstream p(cmdss.str());
+
+					while (getline(p.out(), line)) {
+						dout << line << endl;
+						if (startsWith(line, "RESULT ")) {
+							string result = line.substr(line.find(":") + 1);
+							qdb kb, kb2, cppout;
+							std::stringstream ss(result);
+							auto pr = parse(cppout, kb2, ss, "cppout output");
+							cppout_results.push_back(cppout);
+						}
+					}
+					p.close();
+					}
+				}
+				done_anything = true;
+			}
+			else if (INPUT->mode == SHOULDBE) {
+				shouldbe(kb);
+			}
+		}
+		else
+			dout << "error" << endl;
+		qdb_text = "";
+		set_mode(COMMANDS);
+	}
+}
+
+void run_file(){
+	string fn = INPUT->pop_long();
+	if (fn == "-")
+		emplace_stdin();
+	else
+		do_run(fn);
+
+}
+
+void run_old(){
+	try_to_parse_the_line__if_it_works__add_it_to_qdb_text();
+
+	int fins = count_fins();
+	if (fins > 1) {
+		kbs.clear();
+		qdb kb,kb2;
+		std::stringstream ss(qdb_text);
+		auto pr = parse(kb, kb2, ss, INPUT->name);
+		dout << "querying" << std::endl;
+		kbs.push_back(kb);
+		fresh_prover();
+		do_query(kb2);
+		qdb_text = "";
+		set_mode(COMMANDS);
+	}
 }
 
 
 int main ( int argc, char** argv)
 {
 	//Initialize the prover strings dictionary with built-in nodes.
-	dout << "AutoNomic. " << std::endl << std::endl;
-
 	dict.init();
 
-
-	dout << "Arg count: " << argc << std::endl;
-	dout << "Args:" << std::endl;
-	for(int i = 0; i < argc; i++){
-		dout << "\t" << argv[i] << std::endl;
-	}
-	dout << std::endl;
 
 	auto args_input = new ArgsInput(argc, argv);
 
@@ -875,23 +1002,22 @@ int main ( int argc, char** argv)
 	}else{
 		emplace_stdin();
 	}
-	//check_inputs_done();
 
 	/* Looping over...
 	 * "Input"s?
-	 * "COMMAND"s?
-	 * lines?
-	 * "token"s?
+	 * "COMMAND"s?  
+	 * lines?       in a StreamInput it's lines
+	 * "token"s?    in the ArgsInput it's tokens
+	 * 
+	 * In the ArgsInput it's Tokens
+	 * But in a StreamInput it's Lines
+	 * But those lines can be "typecast" as Commands
+	 *
 	 */
 	bool continue_processing = true;
 	int iteration_index = 0;
-	//while (true) {
-	//while(continue_processing) {
-	while(inputs.size()){
+	while(continue_processing) {
 		iteration_index++;
-		if(iteration_index > 10) break;
-		dout << std::endl << "Main loop " << iteration_index  << std::endl;
-		dout << "Input type: " << INPUT->name << std::endl;
 		/* 
 		 * On the first iteration, INPUT->interactive is false, so this won't
 		 * display anything.
@@ -906,220 +1032,54 @@ int main ( int argc, char** argv)
 		 */
 		INPUT->readline();
 
-		/*
-		 * If it's the end of the Input, process the ending.
-		 *
-		 * Maybe this should go to the end of the loop ?
-		 * Why is this while(...) instead of if(...)?
-		 *
-		 */
-		//maybe its time to go to the next input
-		//while (INPUT->done()) {
-		//	dout << "while(INPUT->done())" << std::endl;
-		//	continue_processing = check_inputs_done();
-		//	if(!continue_processing) break;
-		//	check_inputs_done();
-			//auto popped = inputs.top();
-			//inputs.pop();
-			/*if there werent any args, drop into repl*/
-			
-			//if (dynamic_cast<ArgsInput*>(popped))
-			//	if (!done_anything)
-			//		emplace_stdin(); 
 
-		//	if (!inputs.size())
-		//		goto end;
-			
-		//	displayPrompt();
-		//	INPUT->readline();
-		//}
-
-		//if(!continue_processing) break;
-
-
-
-		/*
-		 *
-		 */
-		if (INPUT->mode == COMMANDS) {
-			dout << "INPUT->mode == COMMANDS" << std::endl;
-			dout << "INPUT->name == " << INPUT->name << std::endl;
-			string token = INPUT->pop();
-			dout << "token: " << token << std::endl;
-			if (startsWith(token, "#") || token == ""){
-				dout << "COMMAND: empty line or comment" << std::endl;
-				continue;
-			}
-			else if (read_option(token)){
-				dout << "COMMAND: option" << std::endl;
-				continue;
-			}
-			else if (token == "help" || token == "halp" || token == "hilfe"){
-				dout << "COMMAND: help" << std::endl;
-				help();
-			}
-			else if (token == "kb"){
-				dout << "COMMAND: kb" << std::endl;
-				cmd_kb();
-			}
-			else if (token == "query"){
-				dout << "COMMAND: query" << std::endl;
-				cmd_query();
-			}
-			else if (token == "shouldbe")
-				set_mode(SHOULDBE);
-			else if (token == "thatsall")
-				thatsall();
-			else if (token == "run")
-				run();
-			else if (token == "shouldbesteps") {
-				//test_result(std::stoi(read_arg()) == anProver->steps_);
-			}
-			else if (token == "shouldbeunifys") {
-				//test_result(std::stoi(read_arg()) == anProver->unifys_);
-			}
-			else if (token == "quit")
+		switch(INPUT->mode) {
+			case OLD:
+				run_old();
 				break;
-			else if (token == "-")
-				emplace_stdin();
-			else {
-				INPUT->take_back();
-				//maybe its old-style input
-				if (try_to_parse_the_line__if_it_works__add_it_to_qdb_text())
-					set_mode(OLD);
-				else
-					dout << "[cli]that doesnt parse, try again" << std::endl;
-				continue;
-			}
+			case COMMANDS:
+				continue_processing = run_command();
+				break;
+			case KB:
+				run_code();
+				break;
+			case RUN:
+				run_file();
+				break;
+			case QUERY:
+				run_code();
+				break;
+			case SHOULDBE:
+				run_code();
+				break;
 		}
 
 
-		else if (INPUT->mode == KB || INPUT->mode == QUERY || INPUT->mode == SHOULDBE) {
-			//dout << "kb/query/shouldbe" << endl;
-			dout << "INPUT->mode == KB || QUERY || SHOULDBE" << std::endl;
-			try_to_parse_the_line__if_it_works__add_it_to_qdb_text();
-			int fins = count_fins();
-			if (fins > 0) {
-				dout << "fin." << std::endl;
-				qdb kb,kb2;
-
-				std::stringstream ss(qdb_text);
-				auto pr = parse(kb, kb2, ss, INPUT->name);
-
-				if(pr == COMPLETE) {
-					if (INPUT->mode == KB) {
-						kbs.push_back(kb);
-						fresh_prover();
-					}
-					else if (INPUT->mode == QUERY) {
-						if (INPUT->do_query)
-							do_query(kb);
-						if (INPUT->do_cppout) {
-							cppout_results.clear();	
-						
-							std::string line;
-		
-							passthru("sleep 1; rm cppout out.cpp out.o");
-							//passthru("sleep 1; astyle out.cpp; rm cppout out.o");
-
-							anProver->cppout(kb);
-							stringstream omg;
-							omg << "  || echo  \"test:cppout:make:" << KRED << "FAIL:" << KNRM;
-							string fff=omg.str();
-
-							dout << "Making cppout." << endl;
-							stringstream errss;
-							errss << "make -e -f Makefile2 cppout" << fff << INPUT->name << "\"";
-							passthru(errss.str());
-
-							dout << "Make done." << endl;
-							if (INPUT->do_test)
-							{
-
-							stringstream cmdss;
-					
-							dout << "Running cppout." << endl;	
-							cmdss << "./cppout" << fff << INPUT->name << "\"";
-							redi::ipstream p(cmdss.str());
-
-							while (getline(p.out(), line)) {
-								dout << line << endl;
-								if (startsWith(line, "RESULT ")) {
-									string result = line.substr(line.find(":") + 1);
-									qdb kb, kb2, cppout;
-									std::stringstream ss(result);
-									auto pr = parse(cppout, kb2, ss, "cppout output");
-									cppout_results.push_back(cppout);
-								}
-							}
-							p.close();
-							}
-						}
-						done_anything = true;
-					}
-					else if (INPUT->mode == SHOULDBE) {
-						shouldbe(kb);
-					}
-				}
-				else
-					dout << "error" << endl;
-				qdb_text = "";
-				set_mode(COMMANDS);
-			}
-		}
-		else if (INPUT->mode == RUN) {
-			dout << "INPUT->mode == RUN" << std::endl;
-			string fn = INPUT->pop_long();
-			if (fn == "-")
-				emplace_stdin();
-			else
-				do_run(fn);
-		}
-		else {
-			assert(INPUT->mode == OLD);
-			dout << "INPUT->mode == OLD" << std::endl;
-			try_to_parse_the_line__if_it_works__add_it_to_qdb_text();
-
-			int fins = count_fins();
-			if (fins > 1) {
-				kbs.clear();
-				qdb kb,kb2;
-				std::stringstream ss(qdb_text);
-				auto pr = parse(kb, kb2, ss, INPUT->name);
-				dout << "querying" << std::endl;
-				kbs.push_back(kb);
-				fresh_prover();
-				do_query(kb2);
-				qdb_text = "";
-				set_mode(COMMANDS);
-			}
-		}
-	
-
-		//Remove the Input from the stack of Inputs
-		//auto popped = inputs.top();
-		//inputs.pop();
-
-		/*if there werent any args, drop into repl*/
-		//if (dynamic_cast<ArgsInput*>(popped))
-		//	if (!done_anything)
-		//		emplace_stdin(); 
 
 		if(INPUT->done()){
-			check_inputs_done();
+			auto popped = inputs.top();
+			inputs.pop();
+
+			/*if there werent any args, drop into repl*/
+			if (dynamic_cast<ArgsInput*>(popped))
+				if (!done_anything)
+					emplace_stdin(); 
+
+			delete popped;
+
 		}
-		dout << "Inputs size: " << inputs.size() << std::endl;
+		if(!inputs.size()){
+			continue_processing = false;
+		}
 	}
 
 
-	//end:
 	if (args_input) {
 		delete args_input;
 	}
 	if (anProver)
 		delete anProver;
 	while(!inputs.empty()){
-		dout << "Input" << std::endl;
 		delete inputs.top();
 		inputs.pop();
 	}
