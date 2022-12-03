@@ -212,9 +212,6 @@ public:
 		figure_out_interactivity();
 	}
 
-	~StreamInput(){
-		dout << "StreamInput destructor." << std::endl;
-	}
 	bool done()
 	{
 		return stream.eof();
