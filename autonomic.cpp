@@ -211,6 +211,10 @@ public:
 		name = fn_;
 		figure_out_interactivity();
 	}
+
+	~StreamInput(){
+		dout << "StreamInput destructor." << std::endl;
+	}
 	bool done()
 	{
 		return stream.eof();
@@ -236,6 +240,12 @@ public:
 		 * got any crossplatform idea?
 		 */
 	}
+	/*
+	 * Return the next token from the Stream (starting from `pos`) and place its
+	 * start position on the internal stack `starts`.
+	 *
+	 *
+	 */
 	string pop_x(char x)
 	{
 
@@ -829,9 +839,12 @@ bool try_to_parse_the_line__if_it_works__add_it_to_qdb_text() //:)
  * 2) The COMMAND is "-"
  * 3) The RUN fn is "-"
  */
-void emplace_stdin()
+StreamInput* emplace_stdin()
 {
-	inputs.push(new StreamInput("stdin", std::cin));
+	auto new_stdin = new StreamInput("stdin", std::cin);
+	//inputs.push(new StreamInput("stdin", std::cin));
+	inputs.push(new_stdin);
+	return new_stdin;
 }
 
 
@@ -996,11 +1009,13 @@ int main ( int argc, char** argv)
 
 
 	auto args_input = new ArgsInput(argc, argv);
+	std::unique_ptr<ArgsInput> args_input_ptr(args_input);
+	std::unique_ptr<StreamInput> stream_input_ptr;
 
 	if(argc > 1){
 		inputs.emplace(args_input);
 	}else{
-		emplace_stdin();
+		stream_input_ptr = std::unique_ptr<StreamInput>(emplace_stdin());
 	}
 
 	/* Looping over...
@@ -1063,9 +1078,9 @@ int main ( int argc, char** argv)
 			/*if there werent any args, drop into repl*/
 			if (dynamic_cast<ArgsInput*>(popped))
 				if (!done_anything)
-					emplace_stdin(); 
+					stream_input_ptr = std::unique_ptr<StreamInput>(emplace_stdin()); 
 
-			delete popped;
+			//delete popped;
 
 		}
 		if(!inputs.size()){
@@ -1073,14 +1088,6 @@ int main ( int argc, char** argv)
 		}
 	}
 
-
-	if (args_input) {
-		delete args_input;
-	}
 	if (anProver)
 		delete anProver;
-	while(!inputs.empty()){
-		delete inputs.top();
-		inputs.pop();
-	}
 }
