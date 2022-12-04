@@ -1,6 +1,5 @@
 #ifndef __MISC_H__
 #define __MISC_H__
-//why do people do this ^?
 
 #include <map>
 #include <string>
@@ -8,13 +7,7 @@
 #include "strings.h"
 #include "rdf.h"
 
-//check these out
-//#include <boost/interprocess/containers/list.hpp>
-//#include <boost/interprocess/containers/map.hpp>
-//#include <boost/bimap.hpp>
 
-
-//what's up with the marpa stuff
 #ifdef with_marpa
 #define MARPA(x) x
 #else
@@ -52,6 +45,9 @@ extern bool in_silent_part;
 
 
 #define MSG(x) TRACE(dout << x << std::endl);
+
+
+
 
 extern std::ostream& dout;
 extern std::ostream& derr;
@@ -158,7 +154,6 @@ struct _setproc {
 	~_setproc();
 };
 
-//where does DEBUG get defined?
 #ifdef DEBUG
 #define setproc(x) _setproc __setproc(x)
 #else

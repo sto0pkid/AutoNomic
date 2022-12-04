@@ -736,19 +736,37 @@ void cmd_kb(){
 		string token = INPUT->pop();
 		if(dash_arg(token,"clear")){
 			clear_kb();
-			return;
 		}
-		/*else if(dash_arg(token,"set")){
+		/*
+		 * "set"
+		 * Clear the kb and the add the given triples.
+		 *
+		 */
+		else if(dash_arg(token,"set")){
 			clear_kb();
-		}*/
+			if(INPUT->end())
+				throw std::runtime_error("set what?");
+			else
+				add_kb(INPUT->pop_long());
+		}
+
+		/*
+		 * "add"
+		 * Don't clear the kb before adding the triples
+		 *
+		 */
 		//FIXME: this option doesn't work if you have "kb --add" in a file
 		else if(dash_arg(token,"add")){
-			//dont clear,
 			if (INPUT->end())
 				throw std::runtime_error("add what?");
 			else
 				add_kb(INPUT->pop_long());
-		}else{
+		}
+		/*
+		 * Default is "set"
+		 *
+		 */
+		else{
 			clear_kb();
 			add_kb(token);
 		}	
@@ -1015,33 +1033,41 @@ int main ( int argc, char** argv)
 		stream_input_ptr = std::unique_ptr<StreamInput>(emplace_stdin());
 	}
 
-	/* Looping over...
-	 * "Input"s?
-	 * "COMMAND"s?  
-	 * lines?       in a StreamInput it's lines
-	 * "token"s?    in the ArgsInput it's tokens
+
+	/*
+	 * It essentially iterates over "Lines". The stream of lines is sourced from
+	 * command line arguments, files, standard input, shell REPL, IRC, ...
+	 * The lines represent different things, ex.. the line could be:
+	 *   * a command, such as "kb", "query", "shouldbe", "run", etc...
+	 *   * a line of N3 in a knowledge-base definition
+	 *   * a line of N3 in a query definition
+	 *   * ...
+	 * These are indicated by different "modes", represented by enum Mode.
+	 *
+	 * Consider the following example where the lines of a typical test file
+	 * are written out, with the processing mode for each line indicated on the
+	 * right:
 	 * 
-	 * In the ArgsInput it's Tokens
-	 * But in a StreamInput it's Lines
-	 * But those lines can be "typecast" as Commands
+	 * Line                               Mode
+	 * ----------------------------------------------
+	 * kb                                 COMMANDS
+	 * socrates a man.                    KB
+	 * {?x a man} => {?x a mortal}.       KB
+	 * fin.                               KB
+	 * query.                             COMMANDS
+	 * ?who a mortal.                     QUERY
+	 * fin.                               QUERY
+	 * shouldbe.                          COMMANDS
+	 * socrates a mortal.                 SHOULDBE
+	 * fin.                               SHOULDBE
 	 *
 	 */
 	bool continue_processing = true;
 	int iteration_index = 0;
 	while(continue_processing) {
 		iteration_index++;
-		/* 
-		 * On the first iteration, INPUT->interactive is false, so this won't
-		 * display anything.
-		 *
-		 */
-		displayPrompt();
 
-		/* 
-		 * On the first iteration, readline() = (){}, so this will have no
-		 * effect.
-		 *
-		 */
+		displayPrompt();
 		INPUT->readline();
 
 
@@ -1076,8 +1102,6 @@ int main ( int argc, char** argv)
 			if (dynamic_cast<ArgsInput*>(popped))
 				if (!done_anything)
 					stream_input_ptr = std::unique_ptr<StreamInput>(emplace_stdin()); 
-
-			//delete popped;
 
 		}
 		if(!inputs.size()){

@@ -27,6 +27,11 @@ int _indent = 0;
 
 term::term() : p(0), s(0), o(0) {}
 
+/*
+ * Euler path check. 
+ *
+ *
+ */
 bool prover::euler_path(shared_ptr<proof> _p) {
 	setproc("euler_path");
 	auto& ep = _p;
@@ -920,6 +925,7 @@ prover::termids prover::askt(termid s, nodeid p, termid o, size_t stop_at) {
 
 	std::vector<termid> vars;
 	if (s->p < 0) vars.push_back(s);
+			return;
 	if (o->p < 0) vars.push_back(o);
 	//ISVAR
 	assert(vars.size() < 2);//i guess you could want to run a query with both s and o variables, and get the results in one array, but hmm
