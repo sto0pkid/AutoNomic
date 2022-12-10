@@ -1,0 +1,9 @@
+@prefix : <http://example.com/divergence_test>.
+
+:A :P :B.
+:B :P :C.
+:C :P :D.
+:D :P :C.
+:C :P :B.
+:B :P :A.
+{?Z :P ?Y. ?Y :P ?X} => {?X :P ?Z}.
