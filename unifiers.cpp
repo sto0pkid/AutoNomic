@@ -9,7 +9,9 @@ bool prover::unify(termid _s, const subs& ssub, termid _d, subs& dsub) {
 	termid v;
 	bool r, ns = false;
 	const term& d = *_d, &s = *_s;
+
 	TRACE(dout << "Trying to unify " << format(_s) << " sub: " << formats(ssub) << " with " << format(_d) << " sub: " << formats(dsub) << endl);
+
 	if (ISVAR(s)) {
 		v = evalvar(s, ssub);
 		r = v ? (ISVAR(d) ? unify_snovar_dvar(*v, ssub, d, dsub) : unify_sdnovar(*v, ssub, d, dsub)) : true;
@@ -37,6 +39,12 @@ bool prover::unify(termid _s, const subs& ssub, termid _d, subs& dsub) {
 	return r;
 }
 
+
+/*
+ * Special unification used for Euler path check
+ *
+ *
+ */
 bool prover::unify_ep(termid _s, const subs& ssub, const term& d, const subs& dsub) {
 	PROFILE(++unifs);
 	if (!_s) return false;
@@ -208,6 +216,7 @@ bool prover::unify_dnovar(termid _s, const term& d, subs& dsub) {
 	setproc("unify");
 	const term& s = *_s;
 	if (ISVAR(s)) return true;
+
 	if (!(s.p == d.p && !s.s == !d.s && !s.o == !d.o)) return false;
 	if (!s.s) return true;
 	if (!unify(s.s, d.s, dsub)) return false;

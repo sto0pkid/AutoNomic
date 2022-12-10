@@ -28,7 +28,8 @@ int _indent = 0;
 term::term() : p(0), s(0), o(0) {}
 
 /*
- * Euler path check. 
+ * Euler path check: has the same goal already been tried? If so, skip it
+ *
  *
  *
  */
@@ -801,6 +802,13 @@ int prover::do_query(const termid goal, subs * s)
 	return do_query(query, s);
 }
 
+
+
+/*
+ *  Main inferencing loop
+ *
+ *
+ */
 int prover::do_query(const termset& goal, subs * s) {
 	setproc("do_query");
 	shared_ptr<proof> p = make_shared<proof>(nullptr, kb.add(0, goal)), q;
@@ -828,6 +836,11 @@ int prover::do_query(const termset& goal, subs * s) {
 
 	for (auto x : gnd) pushev(x);
 	TRACE(dout << KMAG << "Evidence:" << endl;printe();/* << ejson()->toString()*/ dout << KNRM);
+	/*
+	 * ?
+	 * Shouldn't this only be with TIMER?
+	 *
+	 */
 	return duration/1000.;
 }
 
